@@ -1,5 +1,8 @@
 <?php
 
+use QUI\BackendSearch\Search;
+use QUI\BackendSearch\Builder;
+
 /**
  * Search for the desktop
  *
@@ -11,15 +14,14 @@
 QUI::$Ajax->registerFunction(
     'package_quiqqer_backendsearch_ajax_getEntry',
     function ($id, $provider) {
-        $Search  = QUI\Workspace\Search\Search::getInstance();
-        $Builder = QUI\Workspace\Search\Builder::getInstance();
+        $Search  = Search::getInstance();
+        $Builder = Builder::getInstance();
 
         if (empty($provider)) {
             return $Search->getEntry($id);
         }
 
-        $Provider = $Builder->getProvider($provider);
-
+        $Provider  = $Builder->getProvider($provider);
         $entryData = $Provider->getEntry($id);
 
         if (isset($entryData['searchdata'])

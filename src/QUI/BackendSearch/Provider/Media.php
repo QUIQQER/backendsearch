@@ -14,7 +14,6 @@ class Media implements ProviderInterface
      */
     public function buildCache()
     {
-
     }
 
     /**
@@ -138,7 +137,7 @@ class Media implements ProviderInterface
 
         return array(
             'searchdata' => json_encode(array(
-                'require' => 'package/quiqqer/backendsearch/bin/QUI/controls/workspace/search/provider/Media',
+                'require' => 'package/quiqqer/backendsearch/bin/controls/provider/Media',
                 'params'  => array(
                     'project' => $data[0],
                     'id'      => $data[1]

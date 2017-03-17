@@ -1,7 +1,7 @@
 /**
  * Select multiple filters for QUIQQER Backend Search
  *
- * @module quiqqer/backendsearch/controls/FilterSelect
+ * @module package/quiqqer/backendsearch/bin/controls/FilterSelect
  *
  * @require qui/controls/buttons/Select
  * @require Locale
@@ -9,7 +9,7 @@
  *
  * @event onLoaded [this] - fires when all filters are loaded and the FilterSelect is ready
  */
-define('quiqqer/backendsearch/controls/FilterSelect', [
+define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
 
     'qui/controls/buttons/Select',
     'Locale',
@@ -21,7 +21,7 @@ define('quiqqer/backendsearch/controls/FilterSelect', [
     return new Class({
 
         Extends: QUISelect,
-        Type   : 'quiqqer/backendsearch/controls/FilterSelect',
+        Type   : 'package/quiqqer/backendsearch/bin/controls/FilterSelect',
 
         Binds: [
             '$onCreate',
@@ -72,7 +72,7 @@ define('quiqqer/backendsearch/controls/FilterSelect', [
                     self.$DefaultGroups = result[0];
                 }
 
-                var filterGroups    = result[1];
+                var filterGroups = result[1];
 
                 for (var i = 0, len = filterGroups.length; i < len; i++) {
                     var Group = filterGroups[i];
@@ -186,9 +186,10 @@ define('quiqqer/backendsearch/controls/FilterSelect', [
                 QUIAjax.get('package_quiqqer_backendsearch_ajax_getSetting', function (result) {
                     resolve(JSON.decode(result));
                 }, {
-                    onError: reject,
-                    section: 'general',
-                    'var'  : 'defaultFilterGroups'
+                    onError  : reject,
+                    section  : 'general',
+                    'var'    : 'defaultFilterGroups',
+                    'package': 'quiqqer/backendsearch'
                 });
             });
         },
@@ -201,7 +202,8 @@ define('quiqqer/backendsearch/controls/FilterSelect', [
         $getFilterGroups: function () {
             return new Promise(function (resolve, reject) {
                 QUIAjax.get('package_quiqqer_backendsearch_ajax_getFilterGroups', resolve, {
-                    onError: reject
+                    onError  : reject,
+                    'package': 'quiqqer/backendsearch'
                 });
             });
         }

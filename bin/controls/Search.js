@@ -1,16 +1,16 @@
 /**
- * @module quiqqer/backendsearch/controls/Search
+ * @module package/quiqqer/backendsearch/bin/controls/Search
  *
  * @require qui/QUI
  * @require qui/controls/Control
  * @require Mustache
  * @require Ajax
  * @require Locale
- * @require text!quiqqer/backendsearch/controls/Search.html
- * @require text!quiqqer/backendsearch/controls/Search.ResultGroup.html
- * @require css!quiqqer/backendsearch/controls/Search.css
+ * @require text!package/quiqqer/backendsearch/bin/controls/Search.html
+ * @require text!package/quiqqer/backendsearch/bin/controls/Search.ResultGroup.html
+ * @require css!package/quiqqer/backendsearch/bin/controls/Search.css
  */
-define('quiqqer/backendsearch/controls/Search', [
+define('package/quiqqer/backendsearch/bin/controls/Search', [
 
     'qui/QUI',
     'qui/controls/Control',
@@ -20,15 +20,15 @@ define('quiqqer/backendsearch/controls/Search', [
     'qui/controls/buttons/Button',
     'qui/controls/loader/Loader',
 
-    'quiqqer/backendsearch/controls/FilterSelect',
+    'package/quiqqer/backendsearch/bin/controls/FilterSelect',
     'utils/Panels',
     'Mustache',
     'Ajax',
     'Locale',
 
-    'text!quiqqer/backendsearch/controls/Search.html',
-    'text!quiqqer/backendsearch/controls/Search.ResultGroup.html',
-    'css!quiqqer/backendsearch/controls/Search.css'
+    'text!package/quiqqer/backendsearch/bin/controls/Search.html',
+    'text!package/quiqqer/backendsearch/bin/controls/Search.ResultGroup.html',
+    'css!package/quiqqer/backendsearch/bin/controls/Search.css'
 
 ], function (QUI, QUIControl, QUIPanel, QUIPopup, QUISelect, QUIButton, QUILoader,
              FilterSelect, PanelUtils, Mustache, QUIAjax, QUILocale, template,
@@ -39,7 +39,7 @@ define('quiqqer/backendsearch/controls/Search', [
 
     return new Class({
 
-        Type   : 'quiqqer/backendsearch/controls/Search',
+        Type   : 'package/quiqqer/backendsearch/bin/controls/Search',
         Extends: QUIControl,
 
         Binds: [
@@ -80,7 +80,7 @@ define('quiqqer/backendsearch/controls/Search', [
             var Elm  = this.parent();
             var self = this;
 
-            Elm.addClass('qui-workspace-search-search');
+            Elm.addClass('qui-backendsearch-search');
             Elm.set('html', Mustache.render(template));
 
             Elm.setStyles({
@@ -88,8 +88,8 @@ define('quiqqer/backendsearch/controls/Search', [
             });
 
             this.$Header     = Elm.getElement('header');
-            this.$Result     = Elm.getElement('.qui-workspace-search-search-container-result');
-            this.$SearchIcon = Elm.getElement('.qui-workspace-search-search-container-input label .fa');
+            this.$Result     = Elm.getElement('.qui-backendsearch-search-container-result');
+            this.$SearchIcon = Elm.getElement('.qui-backendsearch-search-container-input label .fa');
             this.Loader      = new QUILoader();
 
             // input events
@@ -124,11 +124,11 @@ define('quiqqer/backendsearch/controls/Search', [
 
             // search btn
             new QUIButton({
-                'class'  : 'qui-workspace-search-search-container-btn',
+                'class'  : 'qui-backendsearch-search-container-btn',
                 textimage: 'fa fa-search',
                 text     : QUILocale.get(lg, 'controls.workspace.search.btn.text'),
                 events   : {
-                    onClick: function() {
+                    onClick: function () {
                         self.$Input.focus();
 
                         if (self.$Input.value.trim() == '') {
@@ -141,12 +141,12 @@ define('quiqqer/backendsearch/controls/Search', [
                 }
             }).inject(
                 Elm.getElement(
-                    '.qui-workspace-search-search-container-input label'
+                    '.qui-backendsearch-search-container-input label'
                 ),
                 'after'
             );
 
-            this.$Close = Elm.getElement('.qui-workspace-search-search-container-close');
+            this.$Close = Elm.getElement('.qui-backendsearch-search-container-close');
             this.$Close.addEvent('click', this.close);
 
             new Element('img', {
@@ -184,7 +184,7 @@ define('quiqqer/backendsearch/controls/Search', [
             // filter select
             this.$FilterSelect = new FilterSelect().inject(
                 this.$Elm.getElement(
-                    '.qui-workspace-search-search-container-filterselect'
+                    '.qui-backendsearch-search-container-filterselect'
                 )
             );
 
@@ -465,8 +465,9 @@ define('quiqqer/backendsearch/controls/Search', [
                     self.$SearchIcon.removeClass('fa-spin');
                     resolve(result);
                 }, {
-                    search: search,
-                    params: JSON.encode(params)
+                    search   : search,
+                    params   : JSON.encode(params),
+                    'package': 'quiqqer/backendsearch'
                 });
             });
         },
@@ -484,6 +485,7 @@ define('quiqqer/backendsearch/controls/Search', [
                     id       : id,
                     provider : provider,
                     showError: false,
+                    'package': 'quiqqer/backendsearch',
                     onError  : reject
                 });
             });
@@ -499,9 +501,10 @@ define('quiqqer/backendsearch/controls/Search', [
         $getSettings: function (section, setting) {
             return new Promise(function (resolve, reject) {
                 QUIAjax.get('package_quiqqer_backendsearch_ajax_getSetting', resolve, {
-                    onError: reject,
-                    section: section,
-                    'var'  : setting ? null : setting
+                    'package': 'quiqqer/backendsearch',
+                    onError  : reject,
+                    section  : section,
+                    'var'    : setting ? null : setting
                 });
             });
         },
@@ -514,7 +517,8 @@ define('quiqqer/backendsearch/controls/Search', [
         $getFilterGroups: function () {
             return new Promise(function (resolve, reject) {
                 QUIAjax.get('package_quiqqer_backendsearch_ajax_getFilterGroups', resolve, {
-                    onError: reject
+                    'package': 'quiqqer/backendsearch',
+                    onError  : reject
                 });
             });
         }

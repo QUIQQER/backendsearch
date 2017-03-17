@@ -107,7 +107,7 @@ class Builder
      */
     protected function getProviderClasses()
     {
-        $cache = 'workspace/search/providers';
+        $cache = 'quiqqer/backendsearch/providers';
 
         try {
             return QUI\Cache\Manager::get($cache);
@@ -251,7 +251,7 @@ class Builder
      */
     public function setup()
     {
-        QUI\Cache\Manager::clear('workspace/search/providers');
+        QUI\Cache\Manager::clear('quiqqer/backendsearch/providers');
 
         $this->buildCache();
     }

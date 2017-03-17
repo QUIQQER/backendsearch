@@ -250,7 +250,7 @@ class SettingsCategories implements ProviderInterface
                         'category' => false,
                         'xmlFile'  => $xmlFile
                     ),
-                    'require' => 'package/quiqqer/backendsearch/bin/QUI/controls/workspace/search/builder/Settings'
+                    'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                 )),
                 'icon'        => $item['icon'],
                 'search'      => $item['text']
@@ -264,7 +264,7 @@ class SettingsCategories implements ProviderInterface
                             'category' => $Category->getAttribute('name'),
                             'xmlFile'  => $xmlFile
                         ),
-                        'require' => 'package/quiqqer/backendsearch/bin/QUI/controls/workspace/search/builder/Settings'
+                        'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                     ),
                     'icon'        => $item['icon'],
                     'group'       => self::TYPE_SETTINGS_CONTENT,

@@ -24,7 +24,6 @@ class UsersAndGroups implements ProviderInterface
      */
     public function buildCache()
     {
-
     }
 
     /**
@@ -170,7 +169,7 @@ class UsersAndGroups implements ProviderInterface
 
         return array(
             'searchdata' => array(
-                'require' => 'package/quiqqer/backendsearch/bin/QUI/controls/workspace/search/provider/UsersAndGroups',
+                'require' => 'package/quiqqer/backendsearch/bin/controls/provider/UsersAndGroups',
                 'params'  => array(
                     'id'   => mb_substr($id, 1),
                     'type' => $type === 'u' ? 'user' : 'group'

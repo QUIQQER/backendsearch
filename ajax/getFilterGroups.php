@@ -1,6 +1,6 @@
 <?php
 
-use QUI\Workspace\Search\Builder;
+use QUI\BackendSearch\Builder;
 
 /**
  * Get all available provider search groups

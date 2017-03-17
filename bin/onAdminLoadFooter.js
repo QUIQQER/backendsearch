@@ -1,7 +1,6 @@
 require([
-    'quiqqer/backendsearch/controls/Input',
-    'Menu'
-], function (SearchInput, Menu) {
+    'package/quiqqer/backendsearch/bin/controls/Input'
+], function (SearchInput) {
     "use strict";
 
     // Search input
@@ -10,9 +9,13 @@ require([
             'float': 'right',
             margin : '5px 24px 0 10px'
         }
-    }).inject(Menu);
+    }).inject(
+        document.getElement('.qui-menu-container')
+    );
 
-    window.QUIQQER.backendSearch = {};
+    if (!("backendSearch" in window.QUIQQER)) {
+        window.QUIQQER.backendSearch = {};
+    }
 
     // search keyboard shortcut
     window.addEvent('keydown', function (event) {
@@ -27,7 +30,7 @@ require([
                 return;
             }
 
-            require(['quiqqer/backendsearch/controls/Search'], function (Search) {
+            require(['package/quiqqer/backendsearch/bin/controls/Search'], function (Search) {
                 new Search({
                     events: {
                         onClose: function (S) {

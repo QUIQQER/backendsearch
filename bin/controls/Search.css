@@ -1,4 +1,4 @@
-.qui-workspace-search-search {
+.qui-backendsearch-search {
     background: rgba(255, 255, 255, 0.95);
     height: 100%;
     left: 0;
@@ -8,13 +8,13 @@
     z-index: 100000;
 }
 
-.qui-workspace-search-search-container {
+.qui-backendsearch-search-container {
     margin: 0 auto;
     max-width: 1200px;
     width: 100%;
 }
 
-.qui-workspace-search-search-container-close {
+.qui-backendsearch-search-container-close {
     cursor: pointer;
     font-size: 40px;
     line-height: 100px;
@@ -28,13 +28,13 @@
 /** header
  ==================================================== */
 
-.qui-workspace-search-search-container-header img {
+.qui-backendsearch-search-container-header img {
     display: block;
     height: 50px;
     margin: 20vh auto 40px;
 }
 
-.qui-workspace-search-search-container-input {
+.qui-backendsearch-search-container-input {
     /*clear: both;*/
     display: block;
     margin: 0 auto;
@@ -43,11 +43,11 @@
     width: 100%;
 }
 
-.qui-workspace-search-search-container-input label {
+.qui-backendsearch-search-container-input label {
     float: left;
 }
 
-.qui-workspace-search-search-container-input input {
+.qui-backendsearch-search-container-input input {
     font-size: 20px;
     line-height: 50px;
     padding: 0 10px 0 50px;
@@ -55,7 +55,7 @@
     width: 100%;
 }
 
-.qui-workspace-search-search-container-input label .fa {
+.qui-backendsearch-search-container-input label .fa {
     font-size: 16px;
     line-height: 50px;
     opacity: 0.7;
@@ -64,14 +64,14 @@
     width: 50px;
 }
 
-.qui-workspace-search-search-container-filterselect {
+.qui-backendsearch-search-container-filterselect {
     float: left;
 }
 
 /** result
  ==================================================== */
 
-.qui-workspace-search-search-container-result {
+.qui-backendsearch-search-container-result {
     height: calc(100vh - 50vh);
     margin: 20px auto 0;
     max-width: 900px;
@@ -80,21 +80,21 @@
     width: 100%;
 }
 
-.qui-workspace-search-search-resultGroup-header {
+.qui-backendsearch-search-resultGroup-header {
     font-weight: bold;
 }
 
-.qui-workspace-search-search-resultGroup {
+.qui-backendsearch-search-resultGroup {
     float: left;
     width: 33.333%;
 }
 
-.qui-workspace-search-search-resultGroup ul {
+.qui-backendsearch-search-resultGroup ul {
     list-style-type: none;
     padding: 0;
 }
 
-.qui-workspace-search-search-resultGroup li {
+.qui-backendsearch-search-resultGroup li {
     cursor: pointer;
     float: left;
     line-height: 20px;
@@ -102,11 +102,11 @@
     width: 100%;
 }
 
-.qui-workspace-search-search-resultGroup li:hover {
+.qui-backendsearch-search-resultGroup li:hover {
     background: #dedede;
 }
 
-.qui-workspace-search-search-resultGroup-entry-icon {
+.qui-backendsearch-search-resultGroup-entry-icon {
     float: left;
     height: 20px;
     line-height: 20px;
@@ -114,7 +114,7 @@
     width: 30px;
 }
 
-.qui-workspace-search-search-resultGroup-entry-text {
+.qui-backendsearch-search-resultGroup-entry-text {
     float: left;
     width: calc(100% - 30px);
 }

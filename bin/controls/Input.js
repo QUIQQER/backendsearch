@@ -1,28 +1,32 @@
 /**
- * @module quiqqer/backendsearch/controls/Input
+ * @module package/quiqqer/backendsearch/bin/controls/Input
  *
  * @require qui/QUI
  * @require qui/controls/Control
  * @require Mustache
- * @require quiqqer/backendsearch/controls/Search
- * @require text!quiqqer/backendsearch/controls/Input.html
- * @require css!quiqqer/backendsearch/controls/Input.css
+ * @require package/quiqqer/backendsearch/bin/controls/Search
+ * @require text!package/quiqqer/backendsearch/bin/controls/Input.html
+ * @require css!package/quiqqer/backendsearch/bin/controls/Input.css
  */
-define('quiqqer/backendsearch/controls/Input', [
+define('package/quiqqer/backendsearch/bin/controls/Input', [
 
     'qui/QUI',
     'qui/controls/Control',
     'qui/controls/buttons/Button',
     'Mustache',
-    'quiqqer/backendsearch/controls/Search',
+    'package/quiqqer/backendsearch/bin/controls/Search',
 
     'Locale',
 
-    'text!quiqqer/backendsearch/controls/Input.html',
-    'css!quiqqer/backendsearch/controls/Input.css'
+    'text!package/quiqqer/backendsearch/bin/controls/Input.html',
+    'css!package/quiqqer/backendsearch/bin/controls/Input.css'
 
 ], function (QUI, QUIControl, QUIButton, Mustache, Search, QUILocale, template) {
     "use strict";
+
+    if (!("backendSearch" in window.QUIQQER)) {
+        window.QUIQQER.backendSearch = {};
+    }
 
     if (!("Search" in window.QUIQQER.backendSearch)) {
         window.QUIQQER.backendSearch.Search = new Search();
@@ -33,7 +37,7 @@ define('quiqqer/backendsearch/controls/Input', [
     return new Class({
 
         Extends: QUIControl,
-        Type   : 'quiqqer/backendsearch/controls/Input',
+        Type   : 'package/quiqqer/backendsearch/bin/controls/Input',
 
         Binds: [
             'create',
@@ -62,7 +66,7 @@ define('quiqqer/backendsearch/controls/Input', [
         create: function () {
             var Elm = this.parent();
 
-            Elm.addClass('qui-workspace-search-input');
+            Elm.addClass('qui-backendsearch-input');
             Elm.set('html', Mustache.render(template, {
                 placeholder: QUILocale.get(lg, 'controls.input.placeholder')
             }));

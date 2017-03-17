@@ -70,7 +70,7 @@
                             </description>
                         </input>
 
-                        <input conf="general.defaultFilterGroups" type="text" data-qui="controls/workspace/search/FilterSelect">
+                        <input conf="general.defaultFilterGroups" type="text" data-qui="package/quiqqer/backendsearch/bin/controls/FilterSelect">
                             <text>
                                 <locale group="quiqqer/backendsearch" var="quiqqer.settings.search.general.defaultFilterGroups"/>
                             </text>

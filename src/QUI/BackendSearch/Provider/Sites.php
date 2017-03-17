@@ -16,7 +16,6 @@ class Sites implements ProviderInterface
      */
     public function buildCache()
     {
-
     }
 
     /**
@@ -97,7 +96,7 @@ class Sites implements ProviderInterface
 
         return array(
             'searchdata' => json_encode(array(
-                'require' => 'package/quiqqer/backendsearch/bin/QUI/controls/workspace/search/provider/Sites',
+                'require' => 'package/quiqqer/backendsearch/bin/controls/provider/Sites',
                 'params'  => array(
                     'projectName' => $data[0],
                     'projectLang' => $data[1],
