@@ -1,0 +1,19 @@
+<quiqqer>
+    <package>
+        <title>
+            <locale group="quiqqer/backendsearch" var="package.title"/>
+        </title>
+
+        <description>
+            <locale group="quiqqer/backendsearch" var="package.description"/>
+        </description>
+
+        <provider>
+            <desktopSearch src="\QUI\BackendSearch\Provider\Sites" />
+            <desktopSearch src="\QUI\BackendSearch\Provider\Media" />
+            <desktopSearch src="\QUI\BackendSearch\Provider\SettingsCategories" />
+            <desktopSearch src="\QUI\BackendSearch\Provider\UsersAndGroups" />
+            <desktopSearch src="\QUI\BackendSearch\Provider\Projects" />
+        </provider>
+    </package>
+</quiqqer>

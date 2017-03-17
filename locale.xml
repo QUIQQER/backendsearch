@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<locales>
+    <groups name="quiqqer/backendsearch" datatype="js,php">
+
+        <!-- Package -->
+        <locale name="package.title">
+            <de><![CDATA[QUIQQER Backend-Suche]]></de>
+            <en><![CDATA[QUIQQER Backend Search]]></en>
+        </locale>
+        <locale name="package.description">
+            <de><![CDATA[Ermöglicht die Suche von Inhalten im QUIQQER Backend (Administration)]]></de>
+            <en><![CDATA[Enabled the search of content in the QUIQQER backend (administration)]]></en>
+        </locale>
+
+        <!-- Search Provider -->
+
+        <!-- Builder -->
+        <locale name="search.builder.group.menu.label">
+            <de><![CDATA[Menü: [type]]]></de>
+            <en><![CDATA[Menu: [type]]]></en>
+        </locale>
+        <locale name="search.builder.group.label.project">
+            <de><![CDATA[Projekte]]></de>
+            <en><![CDATA[Projects]]></en>
+        </locale>
+        <locale name="search.builder.filter.label.navigation">
+            <de><![CDATA[Navigation (Menüstruktur)]]></de>
+            <en><![CDATA[Navigation (menu structure)]]></en>
+        </locale>
+        <locale name="search.builder.filter.label.groups">
+            <de><![CDATA[Benutzer und Gruppen]]></de>
+            <en><![CDATA[Users and groups]]></en>
+        </locale>
+        <locale name="search.builder.filter.label.settings">
+            <de><![CDATA[Einstellungen]]></de>
+            <en><![CDATA[Settings]]></en>
+        </locale>
+
+        <!-- Provider: Sites -->
+        <locale name="search.provider.sites.filter.sites.label">
+            <de><![CDATA[Webseiten]]></de>
+            <en><![CDATA[Websites]]></en>
+        </locale>
+        <locale name="search.provider.sites.group.label">
+            <de><![CDATA[Webseite: [projectName] ([projectLang])]]></de>
+            <en><![CDATA[Website: [projectName] ([projectLang])]]></en>
+        </locale>
+
+        <!-- Provider: Projects -->
+        <locale name="search.provider.projects.group.label">
+            <de><![CDATA[Webseiten]]></de>
+            <en><![CDATA[Websites]]></en>
+        </locale>
+        <locale name="search.provider.projects.settings.group.label">
+            <de><![CDATA[Webseiten-Einstellungen: [project]]]></de>
+            <en><![CDATA[Website settings: [project]]]></en>
+        </locale>
+        <locale name="search.provider.projects.settings.description">
+            <de><![CDATA[Einstellungen -> Projekteinstellungen -> [project]]]></de>
+            <en><![CDATA[Settings -> Project settings -> [project]]]></en>
+        </locale>
+
+        <!-- Provider: Media -->
+        <locale name="search.provider.media.filter.folder.label">
+            <de><![CDATA[Ordner]]></de>
+            <en><![CDATA[Folders]]></en>
+        </locale>
+        <locale name="search.provider.media.filter.image.label">
+            <de><![CDATA[Bilder]]></de>
+            <en><![CDATA[Images]]></en>
+        </locale>
+        <locale name="search.provider.media.filter.file.label">
+            <de><![CDATA[Dateien]]></de>
+            <en><![CDATA[Files]]></en>
+        </locale>
+        <locale name="search.provider.media.group.label">
+            <de><![CDATA[Media: [projectName]]]></de>
+            <en><![CDATA[Media: [projectName]]]></en>
+        </locale>
+
+    </groups>
+
+    <groups name="quiqqer/backendsearch" datatype="php">
+
+        <locale name="quiqqer.settings.search">
+            <de><![CDATA[Suche]]></de>
+            <en><![CDATA[Search]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.settings.title">
+            <de><![CDATA[Allgemeine Einstellungen]]></de>
+            <en><![CDATA[General settings]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.settings.general.title">
+            <de><![CDATA[Suche]]></de>
+            <en><![CDATA[Suche]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.minCharacters">
+            <de><![CDATA[Suche ab min. X Zeichen]]></de>
+            <en><![CDATA[Start search at X characters]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.minCharacters.desc">
+            <de><![CDATA[Bestimmt, wieviele Buchstaben ins Sucheingabefeld der Vollbild-Suche eingegeben werden müssen, bevor der Suchvorgang automatisch gestartet wird.]]></de>
+            <en><![CDATA[Determines the minimum number of characters needed in the fullscreen search input before the search starts automatically.]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.maxResultsPerGroup">
+            <de><![CDATA[Maximal angezeigte Ergebnisse]]></de>
+            <en><![CDATA[Maximum number of shown results]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.maxResultsPerGroup.desc">
+            <de><![CDATA[Anzahl der Suchergebnisse, die maximal angezeigt werden.]]></de>
+            <en><![CDATA[Number of search results shown.]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.twoStepSearch">
+            <de><![CDATA[Gestaffelte Suche]]></de>
+            <en><![CDATA[Graded search]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.twoStepSearch.desc">
+            <de><![CDATA[Anzahl der Suchergebnisse bei der ersten Suchabfrage beschränken und im Anschluss restliche Ergebnisse laden (empfohlen bei größeren Systemen)]]></de>
+            <en><![CDATA[Restrict number of search restults on first search request and subsequently show remaining results (suggested for bigger systems)]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.defaultFilterGroups">
+            <de><![CDATA[Standard Filter-Gruppen]]></de>
+            <en><![CDATA[Default filter groups]]></en>
+        </locale>
+        <locale name="quiqqer.settings.search.general.defaultFilterGroups.desc">
+            <de><![CDATA[Vorausgewählte Filter-Gruppen, die beim Öffnen der QUIQQER Suche aktiv sind.]]></de>
+            <en><![CDATA[Pre-selected filter groups that are active when opening the QUIQQER Search.]]></en>
+        </locale>
+
+    </groups>
+
+    <groups name="quiqqer/backendsearch" datatype="js">
+
+        <!-- Control: Input -->
+        <locale name="controls.input.placeholder">
+            <de><![CDATA[QUIQQER durchsuchen...]]></de>
+            <en><![CDATA[Search QUIQQER...]]></en>
+        </locale>
+
+    </groups>
+</locales>
