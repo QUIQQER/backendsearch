@@ -3,15 +3,17 @@ require([
 ], function (SearchInput) {
     "use strict";
 
-    // Search input
-    new SearchInput({
-        styles: {
-            'float': 'right',
-            margin : '5px 24px 0 10px'
-        }
-    }).inject(
-        document.getElement('.qui-menu-container')
-    );
+    window.addEvent('quiqqerLoaded', function() {
+        // Search input
+        new SearchInput({
+            styles: {
+                'float': 'right',
+                margin : '5px 24px 0 10px'
+            }
+        }).inject(
+            document.getElement('.qui-menu-container')
+        );
+    });
 
     if (!("backendSearch" in window.QUIQQER)) {
         window.QUIQQER.backendSearch = {};
