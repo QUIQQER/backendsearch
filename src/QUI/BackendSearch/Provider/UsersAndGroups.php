@@ -94,6 +94,11 @@ class UsersAndGroups implements ProviderInterface
                 $error = true;
             }
 
+            $groupLabel = $Locale->get(
+                'quiqqer/backendsearch',
+                'search.builder.group.label.users'
+            );
+
             if (!$error) {
                 foreach ($result as $row) {
                     $results[] = array(
@@ -101,10 +106,7 @@ class UsersAndGroups implements ProviderInterface
                         'title'      => $row['username'],
                         'icon'       => 'fa fa-user',
                         'group'      => 'users',
-                        'groupLabel' => $Locale->get(
-                            'quiqqer/backendsearch',
-                            'search.builder.group.label.users'
-                        )
+                        'groupLabel' => $groupLabel
                     );
                 }
             }
@@ -141,16 +143,18 @@ class UsersAndGroups implements ProviderInterface
             return $results;
         }
 
+        $groupLabel = $Locale->get(
+            'quiqqer/backendsearch',
+            'search.builder.group.label.groups'
+        );
+
         foreach ($result as $row) {
             $results[] = array(
                 'id'         => 'g' . $row['id'],
                 'title'      => $row['name'],
                 'icon'       => 'fa fa-users',
                 'group'      => 'groups',
-                'groupLabel' => $Locale->get(
-                    'quiqqer/backendsearch',
-                    'search.builder.group.label.groups'
-                )
+                'groupLabel' => $groupLabel
             );
         }
 

@@ -78,6 +78,20 @@
             <en><![CDATA[Media: [projectName]]]></en>
         </locale>
 
+        <!-- Provider: UsersAndGroups -->
+        <locale name="search.builder.filter.label.groups">
+            <de><![CDATA[Benutzer und Gruppen]]></de>
+            <en><![CDATA[Users and Groups]]></en>
+        </locale>
+        <locale name="search.builder.group.label.users">
+            <de><![CDATA[Benutzer]]></de>
+            <en><![CDATA[Users]]></en>
+        </locale>
+        <locale name="search.builder.group.label.groups">
+            <de><![CDATA[Gruppen]]></de>
+            <en><![CDATA[Groups]]></en>
+        </locale>
+
     </groups>
 
     <groups name="quiqqer/backendsearch" datatype="php">
