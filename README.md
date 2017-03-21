@@ -22,7 +22,7 @@ Mitwirken
 ----------
 
 - Issue Tracker: https://dev.quiqqer.com/quiqqer/backendsearch/issues
-- Source Code: https://dev.quiqqer.com/quiqqer/backendsearch/tree/dev
+- Source Code: https://dev.quiqqer.com/quiqqer/backendsearch/tree/master
 
 
 Support
