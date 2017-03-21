@@ -21,8 +21,8 @@ Der Paketname ist: quiqqer/backendsearch
 Mitwirken
 ----------
 
-- Issue Tracker: 
-- Source Code: 
+- Issue Tracker: https://dev.quiqqer.com/quiqqer/backendsearch/issues
+- Source Code: https://dev.quiqqer.com/quiqqer/backendsearch/tree/dev
 
 
 Support
