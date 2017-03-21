@@ -38,3 +38,6 @@ Lizenz
 
 Entwickler
 --------
+
+- Patrick Müller (p.mueller@pcsg.de)
+- Henning Leutz (leutz@pcsg.de)
