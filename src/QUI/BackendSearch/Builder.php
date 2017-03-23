@@ -21,16 +21,16 @@ use QUI\Utils\DOM as DOMUtils;
  */
 class Builder
 {
-    const TYPE_APPS    = 'apps';
-    const TYPE_EXTRAS  = 'extras';
+    const TYPE_APPS = 'apps';
+    const TYPE_EXTRAS = 'extras';
     const TYPE_PROJECT = 'project';
     const TYPE_PROFILE = 'profile';
 
     const FILTER_NAVIGATION = 'navigation';
-    const FILTER_SETTINGS   = 'settings';
+    const FILTER_SETTINGS = 'settings';
 
-    const TYPE_APPS_ICON    = 'fa fa-diamond';
-    const TYPE_EXTRAS_ICON  = 'fa fa-cubes';
+    const TYPE_APPS_ICON = 'fa fa-diamond';
+    const TYPE_EXTRAS_ICON = 'fa fa-cubes';
     const TYPE_PROJECT_ICON = 'fa fa-home';
     const TYPE_PROFILE_ICON = 'fa fa-id-card-o';
 
@@ -620,8 +620,13 @@ class Builder
         $search = array();
         $html   = QUI::getUsers()->getProfileTemplate();
 
-        $Doc = new \DOMDocument();
-        $Doc->loadHTML($html);
+        try {
+            $Doc = new \DOMDocument();
+            $Doc->loadHTML($html);
+        } catch (\Exception $Exception) {
+            QUI\System\Log::writeException($Exception);
+            return $search;
+        }
 
         $Path = new \DOMXPath($Doc);
 
