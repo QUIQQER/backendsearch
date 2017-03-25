@@ -3,6 +3,7 @@
 /**
  * This file contains QUI\BackendSearch\Builder
  */
+
 namespace QUI\BackendSearch;
 
 use Composer\Cache;
@@ -486,7 +487,11 @@ class Builder
                     continue;
                 }
 
-                $this->addEntry($entry, $Locale->getCurrent());
+                try {
+                    $this->addEntry($entry, $Locale->getCurrent());
+                } catch (QUI\BackendSearch\Exception $Exception) {
+                    QUI\System\Log::writeException($Exception);
+                }
             }
         }
     }
