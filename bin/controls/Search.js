@@ -3,6 +3,12 @@
  *
  * @require qui/QUI
  * @require qui/controls/Control
+ * @require qui/controls/windows/Popup
+ * @require qui/controls/buttons/Select
+ * @require qui/controls/buttons/Button
+ * @require qui/controls/loader/Loader
+ * @require package/quiqqer/backendsearch/bin/controls/FilterSelect
+ * @require utils/Panels
  * @require Mustache
  * @require Ajax
  * @require Locale
@@ -71,6 +77,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$FilterSelect   = null;
             this.$extendedSearch = false;
             this.$Settings       = {};
+
+            this.$FilterSelectContainer = null;
+            this.$InputContainer        = null;
         },
 
         /**
@@ -87,10 +96,14 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 position: 'absolute'
             });
 
+            this.Loader = new QUILoader();
+
             this.$Header     = Elm.getElement('header');
             this.$Result     = Elm.getElement('.qui-backendsearch-search-container-result');
             this.$SearchIcon = Elm.getElement('.qui-backendsearch-search-container-input label .fa');
-            this.Loader      = new QUILoader();
+
+            this.$InputContainer        = Elm.getElement('.qui-backendsearch-search-container-input');
+            this.$FilterSelectContainer = Elm.getElement('.qui-backendsearch-search-container-filterselect');
 
             // input events
             var inputEsc = false;
@@ -98,7 +111,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$Input = Elm.getElement('input');
 
             this.$Input.addEvent('keydown', function (event) {
-                if (event.key == 'esc') {
+                if (event.key === 'esc') {
                     event.stop();
                     inputEsc = true;
                     return;
@@ -114,8 +127,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
 
                 // auto-search requires minimum characters
-                if ((this.$Input.value.length < this.$Settings.minCharacters) &&
-                    event.code != 13) {
+                if (this.$Input.value.length < this.$Settings.minCharacters &&
+                    event.code !== 13) {
                     return;
                 }
 
@@ -127,11 +140,15 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 'class'  : 'qui-backendsearch-search-container-btn',
                 textimage: 'fa fa-search',
                 text     : QUILocale.get(lg, 'controls.workspace.search.btn.text'),
+                styles   : {
+                    lineHeight: 50,
+                    width     : 100
+                },
                 events   : {
                     onClick: function () {
                         self.$Input.focus();
 
-                        if (self.$Input.value.trim() == '') {
+                        if (self.$Input.value.trim() === '') {
                             self.$Input.value = '';
                             return;
                         }
@@ -139,12 +156,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         self.search();
                     }
                 }
-            }).inject(
-                Elm.getElement(
-                    '.qui-backendsearch-search-container-input label'
-                ),
-                'after'
-            );
+            }).inject(this.$FilterSelectContainer, 'before');
 
             this.$Close = Elm.getElement('.qui-backendsearch-search-container-close');
             this.$Close.addEvent('click', this.close);
@@ -182,11 +194,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$Elm.inject(document.body);
 
             // filter select
-            this.$FilterSelect = new FilterSelect().inject(
-                this.$Elm.getElement(
-                    '.qui-backendsearch-search-container-filterselect'
-                )
-            );
+            this.$FilterSelect = new FilterSelect().inject(this.$FilterSelectContainer);
 
             this.Loader.show();
 
@@ -197,6 +205,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     self.$FilterSelect.addEvents({
                         onChange: self.search
                     });
+
+                    self.$FilterSelect.setAttribute(
+                        'menuWidth',
+                        self.$InputContainer.getSize().x
+                    );
 
                     moofx(self.$Elm).animate({
                         top: 0
@@ -304,7 +317,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
                 if ("require" in searchData) {
                     require([searchData.require], function (Cls) {
-                        if (typeOf(Cls) == 'class') {
+                        if (typeOf(Cls) === 'class') {
                             var params   = searchData.params || {};
                             var Instance = new Cls(params);
 
@@ -341,7 +354,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             var searchValue = this.$Input.value.trim();
 
-            if (searchValue == '') {
+            if (searchValue === '') {
                 this.$Input.value = '';
                 //this.$Input.focus();
 
@@ -352,14 +365,14 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             this.$Timer = (function () {
                 var Params = {
-                    filterGroups: this.$FilterSelect.getValue()
+                    filterGroups: self.$FilterSelect.getValue()
                 };
 
-                if (!this.$extendedSearch && twoStepSearch) {
+                if (!self.$extendedSearch && twoStepSearch) {
                     Params.limit = 5;
                 }
 
-                this.executeSearch(this.$Input.value, Params).then(function (result) {
+                self.executeSearch(self.$Input.value, Params).then(function (result) {
                     self.$renderResult(result);
 
                     if (!self.$extendedSearch && twoStepSearch && result.length >= 5) {
@@ -369,7 +382,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         self.$extendedSearch = false;
                     }
                 });
-            }).delay(this.getAttribute('delay'), this);
+            }).delay(this.getAttribute('delay'));
         },
 
         /**
@@ -378,8 +391,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * @param {Array} result
          */
         $renderResult: function (result) {
-            var self           = this;
             var group, groupHTML, Entry, label;
+
             var html           = '',
                 ResultsByGroup = {};
 
@@ -416,6 +429,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }
 
             this.$Result.set('html', html);
+
             this.$Result.getElements('li').addEvent('click', function (event) {
                 var Target = event.target;
 
@@ -434,7 +448,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * @param event
          */
         $onWindowKeyUp: function (event) {
-            if (event.key == 'esc') {
+            if (event.key === 'esc') {
                 this.close();
             }
         },
@@ -522,6 +536,5 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 });
             });
         }
-
     });
 });
