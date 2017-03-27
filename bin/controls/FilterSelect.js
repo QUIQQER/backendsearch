@@ -33,7 +33,8 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
             showIcons            : false,
             checkable            : true,
             placeholderIcon      : false,
-            placeholderSelectable: false
+            placeholderSelectable: false,
+            menuWidth            : 300
         },
 
         initialize: function (options) {
@@ -57,12 +58,24 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
 
             this.setAttribute(
                 'placeholderText',
-                QUILocale.get('quiqqer/quiqqer',
-                    'controls.workspace.search.filter.placeholder'
-                )
+                '<span class="fa fa-gear"></span>'
             );
 
+            this.setAttribute('title', QUILocale.get(
+                'quiqqer/quiqqer',
+                'controls.workspace.search.filter.placeholder'
+            ));
+
             this.$Elm = this.parent();
+            this.$Elm.setStyle('width', 50);
+
+            this.$Menu.addEvent('show', function () {
+                var pos  = self.$Elm.getPosition(),
+                    left = pos.x - self.getAttribute('menuWidth') + self.$Elm.getSize().y - 2;
+
+                self.setAttribute('menuLeft', left);
+                self.$Menu.$Container.setStyle('boxShadow', '0 2px 6px rgba(0, 0, 0, 0.3)');
+            });
 
             Promise.all([
                 this.$getDefaultFilters(),
