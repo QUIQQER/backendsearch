@@ -22,16 +22,16 @@ use QUI\Utils\DOM as DOMUtils;
  */
 class Builder
 {
-    const TYPE_APPS = 'apps';
-    const TYPE_EXTRAS = 'extras';
+    const TYPE_APPS    = 'apps';
+    const TYPE_EXTRAS  = 'extras';
     const TYPE_PROJECT = 'project';
     const TYPE_PROFILE = 'profile';
 
     const FILTER_NAVIGATION = 'navigation';
-    const FILTER_SETTINGS = 'settings';
+    const FILTER_SETTINGS   = 'settings';
 
-    const TYPE_APPS_ICON = 'fa fa-diamond';
-    const TYPE_EXTRAS_ICON = 'fa fa-cubes';
+    const TYPE_APPS_ICON    = 'fa fa-diamond';
+    const TYPE_EXTRAS_ICON  = 'fa fa-cubes';
     const TYPE_PROJECT_ICON = 'fa fa-home';
     const TYPE_PROFILE_ICON = 'fa fa-id-card-o';
 
@@ -371,7 +371,14 @@ class Builder
                     continue;
                 }
 
-                $this->addEntry($entry, $Locale->getCurrent());
+                try {
+                    $this->addEntry($entry, $Locale->getCurrent());
+                } catch (\Exception $Exception) {
+                    QUI\System\Log::addError(
+                        self::class . ' :: buildProfileCache() -> Could not add entry ' . $entry['name'] . ': '
+                        . $Exception->getMessage()
+                    );
+                }
             }
         }
 
