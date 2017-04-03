@@ -289,7 +289,14 @@ class Builder
 
         /* @var $Provider ProviderInterface */
         foreach ($provider as $Provider) {
-            $Provider->buildCache();
+            try {
+                $Provider->buildCache();
+            } catch (\Exception $Exception) {
+                QUI\System\Log::addError(
+                    self::class . ' :: buildCache() -> An error ocurred while building the search'
+                    . ' cache for provider ' . get_class($Provider)
+                );
+            }
         }
     }
 
@@ -339,7 +346,15 @@ class Builder
             foreach ($data as $key => $entry) {
                 // add special search terms to user profile entry
                 if ($entry['name'] == 'userProfile') {
-                    $entry['search'] .= ' ' . implode(' ', $this->getProfileSearchterms());
+                    $profileSearchTerms = $this->getProfileSearchterms();
+
+                    // Skip entry if no profile search terms could be found or
+                    // an error ocurred while getting them
+                    if (empty($profileSearchTerms)) {
+                        continue;
+                    }
+
+                    $entry['search'] .= ' ' . implode(' ', $profileSearchTerms);
                 }
 
                 $entry['group']       = self::TYPE_PROFILE;
@@ -489,8 +504,11 @@ class Builder
 
                 try {
                     $this->addEntry($entry, $Locale->getCurrent());
-                } catch (QUI\BackendSearch\Exception $Exception) {
-                    QUI\System\Log::writeException($Exception);
+                } catch (\Exception $Exception) {
+                    QUI\System\Log::addError(
+                        self::class . ' :: buildMenuCacheHelper() -> Could not add entry for menu group'
+                        . ' "' . $groupLabel . '" (' . $entry['name'] . '): ' . $Exception->getMessage()
+                    );
                 }
             }
         }
@@ -629,7 +647,11 @@ class Builder
             $Doc = new \DOMDocument();
             $Doc->loadHTML($html);
         } catch (\Exception $Exception) {
-            QUI\System\Log::writeException($Exception);
+            QUI\System\Log::addError(
+                self::class . ' :: getProfileSearchterms -> Could not parse user profile search terms: '
+                . $Exception->getMessage()
+            );
+
             return $search;
         }
 
