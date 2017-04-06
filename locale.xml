@@ -4,8 +4,8 @@
 
         <!-- Package -->
         <locale name="package.title">
-            <de><![CDATA[QUIQQER Backend-Suche]]></de>
-            <en><![CDATA[QUIQQER Backend Search]]></en>
+            <de><![CDATA[QUIQQER - Backend-Suche]]></de>
+            <en><![CDATA[QUIQQER - Backend Search]]></en>
         </locale>
         <locale name="package.description">
             <de><![CDATA[Ermöglicht die Suche von Inhalten im QUIQQER Backend (Administration)]]></de>
