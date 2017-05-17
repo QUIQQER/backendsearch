@@ -296,7 +296,7 @@ class SettingsCategories implements ProviderInterface
                                 continue;
                             }
 
-                            if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
+                            if ($SettingChild->nodeName == 'description' || $SettingChild->nodeName == 'description') {
                                 $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }
