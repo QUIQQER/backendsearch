@@ -8,6 +8,12 @@
             <locale group="quiqqer/backendsearch" var="package.description"/>
         </description>
 
+        <support>
+            <email>support@pcsg.de</email>
+            <issues>https://dev.quiqqer.com/quiqqer/backendsearch/issues</issues>
+            <source>https://dev.quiqqer.com/quiqqer/backendsearch</source>
+        </support>
+
         <provider>
             <desktopSearch src="\QUI\BackendSearch\Provider\Sites" />
             <desktopSearch src="\QUI\BackendSearch\Provider\Media" />
