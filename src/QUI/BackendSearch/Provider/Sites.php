@@ -48,7 +48,8 @@ class Sites implements ProviderInterface
                     'name'  => array(
                         'type'  => '%LIKE%',
                         'value' => $search
-                    )
+                    ),
+                    'id' => $search
                 ),
                 'limit' => isset($params['limit']) ? (int)$params['limit'] : null
             ));
@@ -72,7 +73,7 @@ class Sites implements ProviderInterface
 
                 $results[] = array(
                     'id'          => $projectName . '-' . $projectLang . '-' . $siteId,
-                    'title'       => $Site->getAttribute('title'),
+                    'title'       => $Site->getAttribute('title') . ' (#' . $Site->getId() . ')',
                     'description' => $Site->getUrlRewritten(),
                     'icon'        => 'fa fa-file-o',
                     'groupLabel'  => $groupLabel,

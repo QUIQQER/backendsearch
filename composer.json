@@ -4,6 +4,7 @@
   "description": "Search for QUIQQER backend content",
   "version": "dev-master",
   "license": "GPL-3.0+",
+  "homepage": "https://www.quiqqer.com",
   "authors": [
     {
       "name": "Patrick Müller",
@@ -14,7 +15,8 @@
   ],
   "support": {
     "email": "support@pcsg.de",
-    "url": "http://www.pcsg.de"
+    "url": "http://www.pcsg.de",
+    "source": "https://dev.quiqqer.com/quiqqer/backendsearch/tree/dev"
   },
   "require": {
     "quiqqer\/quiqqer": "*@dev"
