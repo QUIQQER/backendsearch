@@ -122,6 +122,8 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
 
             var Elm = this.create();
 
+            Elm.addClass('field-container-field');
+
             self.addEvents({
                 onLoaded: function () {
                     if (self.$Input.value.length) {

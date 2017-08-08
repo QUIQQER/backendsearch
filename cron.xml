@@ -2,10 +2,10 @@
 <crons>
     <cron exec="\QUI\BackendSearch\Cron::buildSearchCache">
         <title>
-            <locale group="quiqqer/quiqqer" var="cron.search.build.title" />
+            <locale group="quiqqer/backendsearch" var="cron.search.build.title" />
         </title>
         <description>
-            <locale group="quiqqer/quiqqer" var="cron.search.build.description" />
+            <locale group="quiqqer/backendsearch" var="cron.search.build.description" />
         </description>
     </cron>
 </crons>
