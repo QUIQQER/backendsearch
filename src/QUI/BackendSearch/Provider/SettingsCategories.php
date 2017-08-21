@@ -11,7 +11,7 @@ use QUI\Permissions\Permission;
 
 class SettingsCategories implements ProviderInterface
 {
-    const TYPE_SETTINGS         = 'settings';
+    const TYPE_SETTINGS = 'settings';
     const TYPE_SETTINGS_CONTENT = 'settings_content';
 
     /**
@@ -145,7 +145,7 @@ class SettingsCategories implements ProviderInterface
             $description = $title;
 
             if (!is_null($parentTitle)) {
-                $description = $parentTitle . ' -> ' . $description;    // @todo Trennzeichen ggf. ändern
+                $description = $parentTitle.' -> '.$description;    // @todo Trennzeichen ggf. ändern
             }
 
             $item['description'] = $description;
@@ -221,8 +221,12 @@ class SettingsCategories implements ProviderInterface
 
         foreach ($xmlFiles as $xmlFile) {
             if (!file_exists($xmlFile)) {
+                $xmlFile = CMS_DIR.$xmlFile;
+            }
+
+            if (!file_exists($xmlFile)) {
                 QUI\System\Log::addWarning(
-                    self::class . ' :: parseSearchStringFromSettingsXml -> XML file ' . $xmlFile . ' does not exist.'
+                    self::class.' :: parseSearchStringFromSettingsXml -> XML file '.$xmlFile.' does not exist.'
                 );
 
                 continue;
@@ -231,7 +235,7 @@ class SettingsCategories implements ProviderInterface
             $Dom        = XML::getDomFromXml($xmlFile);
             $Path       = new \DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
-            $descPrefix = $Locale->get('quiqqer/system', 'settings') . ' -> ' . $item['text'];
+            $descPrefix = $Locale->get('quiqqer/system', 'settings').' -> '.$item['text'];
 
             // add menu entry for settings
             $dataEntries[] = array(
@@ -282,8 +286,8 @@ class SettingsCategories implements ProviderInterface
 
                     if ($Child->nodeName == 'title' || $Child->nodeName == 'text') {
                         $nodeText             = DOMUtils::getTextFromNode($Child);
-                        $entry['title']       = $item['text'] . ' - ' . $nodeText;
-                        $entry['description'] = $descPrefix . ' -> ' . $nodeText;
+                        $entry['title']       = $item['text'].' - '.$nodeText;
+                        $entry['description'] = $descPrefix.' -> '.$nodeText;
                         $searchStringParts[]  = $nodeText;
                         continue;
                     }
