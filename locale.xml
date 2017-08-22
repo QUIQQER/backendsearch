@@ -11,6 +11,10 @@
             <de><![CDATA[Ermöglicht die Suche von Inhalten im QUIQQER Backend (Administration)]]></de>
             <en><![CDATA[Enabled the search of content in the QUIQQER backend (administration)]]></en>
         </locale>
+        <locale name="quiqqer.settings.search">
+            <de><![CDATA[Suche]]></de>
+            <en><![CDATA[Search]]></en>
+        </locale>
 
         <!-- Search Provider -->
 
@@ -106,10 +110,6 @@
 
     <groups name="quiqqer/backendsearch" datatype="php">
 
-        <locale name="quiqqer.settings.search">
-            <de><![CDATA[Suche]]></de>
-            <en><![CDATA[Search]]></en>
-        </locale>
         <locale name="quiqqer.settings.search.settings.title">
             <de><![CDATA[Allgemeine Einstellungen]]></de>
             <en><![CDATA[General settings]]></en>
