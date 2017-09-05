@@ -8,18 +8,22 @@
             <locale group="quiqqer/backendsearch" var="package.description"/>
         </description>
 
+        <image src="URL_OPT_DIR/quiqqer/backendsearch/bin/images/Logo.jpg"/>
+
         <support>
             <email>support@pcsg.de</email>
-            <issues>https://dev.quiqqer.com/quiqqer/backendsearch/issues</issues>
+            <forum>https://community.quiqqer.com</forum>
             <source>https://dev.quiqqer.com/quiqqer/backendsearch</source>
+            <issues>https://dev.quiqqer.com/quiqqer/backendsearch/issues</issues>
+            <wiki>https://dev.quiqqer.com/quiqqer/backendsearch/wikis/home</wiki>
         </support>
 
         <provider>
-            <desktopSearch src="\QUI\BackendSearch\Provider\Sites" />
-            <desktopSearch src="\QUI\BackendSearch\Provider\Media" />
-            <desktopSearch src="\QUI\BackendSearch\Provider\SettingsCategories" />
-            <desktopSearch src="\QUI\BackendSearch\Provider\UsersAndGroups" />
-            <desktopSearch src="\QUI\BackendSearch\Provider\Projects" />
+            <desktopSearch src="\QUI\BackendSearch\Provider\Sites"/>
+            <desktopSearch src="\QUI\BackendSearch\Provider\Media"/>
+            <desktopSearch src="\QUI\BackendSearch\Provider\SettingsCategories"/>
+            <desktopSearch src="\QUI\BackendSearch\Provider\UsersAndGroups"/>
+            <desktopSearch src="\QUI\BackendSearch\Provider\Projects"/>
         </provider>
     </package>
 </quiqqer>

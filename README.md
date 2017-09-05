@@ -1,3 +1,5 @@
+![QUIQQER Blog](bin/images/Readme.jpg)
+
 backendsearch
 ========
 
@@ -10,6 +12,7 @@ Paketname:
 
 Features (Funktionen)
 --------
+
 Searches all QUIQQER backend content and is extendable via search provider API
 
 Installation
@@ -35,9 +38,3 @@ senden Sie bitte eine E-Mail an support@pcsg.de.
 Lizenz
 -------
 
-
-Entwickler
---------
-
-- Patrick Müller (p.mueller@pcsg.de)
-- Henning Leutz (leutz@pcsg.de)
