@@ -25,5 +25,10 @@
             <desktopSearch src="\QUI\BackendSearch\Provider\UsersAndGroups"/>
             <desktopSearch src="\QUI\BackendSearch\Provider\Projects"/>
         </provider>
+
+        <copyright>
+            <name><![CDATA[PCSG - Computer & Internet Service OHG]]></name>
+            <license></license>
+        </copyright>
     </package>
 </quiqqer>
