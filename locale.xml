@@ -8,8 +8,12 @@
             <en><![CDATA[QUIQQER - Backend Search]]></en>
         </locale>
         <locale name="package.description">
-            <de><![CDATA[Ermöglicht die Suche von Inhalten im QUIQQER Backend (Administration)]]></de>
-            <en><![CDATA[Enabled the search of content in the QUIQQER backend (administration)]]></en>
+            <de><![CDATA[Mit der Backend-Suche durchsuchen Sie alle Inhalte in der Administration von QUIQQER.
+            Zum Beispiel: Navigation, Seiten, Benutzer, Media Inhalte so wie die verschiedenen Module.
+            Das Modul stellt eine Entwickler API mit der die Suchergebnisse frei erweitert werden können.]]></de>
+            <en><![CDATA[The backend-search searches through all contents of QUIQQERs Administration.
+            for example: navigation, sites, users, media contents as well as the diffrent modules.
+            The module provides a developer API which can be used to extend search results]]></en>
         </locale>
         <locale name="quiqqer.settings.search">
             <de><![CDATA[Suche]]></de>

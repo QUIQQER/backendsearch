@@ -18,6 +18,11 @@
             <wiki>https://dev.quiqqer.com/quiqqer/backendsearch/wikis/home</wiki>
         </support>
 
+        <copyright>
+            <name><![CDATA[PCSG - Computer & Internet Service OHG]]></name>
+            <license><![CDATA[GPL-3.0+]]></license>
+        </copyright>
+
         <provider>
             <desktopSearch src="\QUI\BackendSearch\Provider\Sites"/>
             <desktopSearch src="\QUI\BackendSearch\Provider\Media"/>
@@ -26,9 +31,5 @@
             <desktopSearch src="\QUI\BackendSearch\Provider\Projects"/>
         </provider>
 
-        <copyright>
-            <name><![CDATA[PCSG - Computer & Internet Service OHG]]></name>
-            <license></license>
-        </copyright>
     </package>
 </quiqqer>
