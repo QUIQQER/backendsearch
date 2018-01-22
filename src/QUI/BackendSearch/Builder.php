@@ -533,13 +533,14 @@ class Builder
         $needles = array('title', 'search', 'group', 'filterGroup', 'searchdata');
 
         foreach ($needles as $needle) {
-            if (!isset($params[$needle]) || empty($params[$needle])) {
+            if (empty($params[$needle])) {
                 throw new QUI\BackendSearch\Exception(array(
                     'quiqqer/backendsearch',
                     'exception.builder.addEntry.missing_params',
                     array(
                         'params' => json_encode(array_keys($params)),
-                        'needle' => json_encode($needle)
+                        'needle' => json_encode($needle),
+                        'lang'   => $lang
                     )
                 ),
                     404

@@ -116,8 +116,8 @@
 
         <!-- Class: Builder -->
         <locale name="exception.builder.addEntry.missing_params">
-            <de><![CDATA[Die benötigten Daten-Felder, um den Suche-Cache zu schreiben, sind nicht gegeben oder leer. Gegeben: [params] | Benötigt: [needle]]]></de>
-            <en><![CDATA[Required data fields to write search cache are missing or empty. Given: [params] | Required: [needle]]]></en>
+            <de><![CDATA[Die benötigten Daten-Felder, um den Suche-Cache zu schreiben, sind nicht gegeben oder leer (Sprache: [lang]). Gegeben: [params] | Benötigt: [needle]]]></de>
+            <en><![CDATA[Required data fields to write search cache are missing or empty (Language: [lang]). Given: [params] | Required: [needle]]]></en>
         </locale>
         
         <locale name="quiqqer.settings.search.settings.title">

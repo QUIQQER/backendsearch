@@ -48,6 +48,10 @@ class SettingsCategories implements ProviderInterface
             $data = $this->parseSettingsMenuData($filter, $Locale);
 
             foreach ($data as $key => $entry) {
+                if (empty($entry['title'])) {
+                    continue;
+                }
+
                 if (!isset($entry['group'])) {
                     $entry['group'] = self::TYPE_SETTINGS;
                 }
