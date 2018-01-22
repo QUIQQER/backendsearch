@@ -292,9 +292,9 @@ class Builder
             try {
                 $Provider->buildCache();
             } catch (\Exception $Exception) {
-                QUI\System\Log::addError(
+                QUI\System\Log::addWarning(
                     self::class . ' :: buildCache() -> An error ocurred while building the search'
-                    . ' cache for provider ' . get_class($Provider)
+                    . ' cache for provider ' . get_class($Provider) . ' :: ' . $Exception->getMessage()
                 );
             }
         }
@@ -513,7 +513,7 @@ class Builder
                     $this->addEntry($entry, $Locale->getCurrent());
                 } catch (\Exception $Exception) {
                     QUI\System\Log::addError(
-                        self::class . ' :: buildMenuCacheHelper() -> Could not add entry for menu group'
+                        self::class . ' :: buildMenuCacheHelper("' . $type . '") -> Could not add entry for menu group'
                         . ' "' . $groupLabel . '" (' . $entry['name'] . '): ' . $Exception->getMessage()
                     );
                 }
@@ -534,13 +534,15 @@ class Builder
 
         foreach ($needles as $needle) {
             if (!isset($params[$needle]) || empty($params[$needle])) {
-                throw new QUI\BackendSearch\Exception(
-                    'Missing params',   #locale
-                    404,
+                throw new QUI\BackendSearch\Exception(array(
+                    'quiqqer/backendsearch',
+                    'exception.builder.addEntry.missing_params',
                     array(
-                        'params' => $params,
-                        'needle' => $needle
+                        'params' => json_encode(array_keys($params)),
+                        'needle' => json_encode($needle)
                     )
+                ),
+                    404
                 );
             }
         }
@@ -597,8 +599,17 @@ class Builder
 
             // locale w. search string
             if (isset($item['locale']) && is_array($item['locale'])) {
-                $search = $Locale->get($item['locale'][0], $item['locale'][1]);
-                $title  = $search;
+                $localeGroup = $item['locale'][0];
+                $localeVar   = $item['locale'][1];
+
+                if ($Locale->exists($localeGroup, $localeVar)) {
+                    $search = $Locale->get($item['locale'][0], $item['locale'][1]);
+                    $title  = $search;
+                }
+            }
+
+            if (empty($title)) {
+                continue;
             }
 
             $description = $title;
