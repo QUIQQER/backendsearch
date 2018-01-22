@@ -3,6 +3,7 @@
 /**
  * This file contains QUI\BackendSearch\Search
  */
+
 namespace QUI\BackendSearch;
 
 use QUI;
@@ -42,10 +43,7 @@ class Search
     public function search($string, $params = array())
     {
         $DesktopSearch = Builder::getInstance();
-        $groupFilter   = false;
-
-//        $DesktopSearch->setup();
-//        return array();
+        $string        = trim($string);
 
         $sql   = "SELECT * FROM " . $DesktopSearch->getTable();
         $where = array(
