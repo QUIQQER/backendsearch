@@ -548,6 +548,11 @@ class Builder
             }
         }
 
+        // ID is automatically set via auto_increment
+        if (isset($params['id'])) {
+            unset($params['id']);
+        }
+
         if (!isset($params['description'])) {
             $params['description'] = '';
         }
