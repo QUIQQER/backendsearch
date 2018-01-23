@@ -3,6 +3,7 @@
 /**
  * This file contains QUI\BackendSearch\Search
  */
+
 namespace QUI\BackendSearch;
 
 use QUI;
@@ -30,6 +31,8 @@ class Events
      *
      * @param Package $Package
      * @return void
+     *
+     * @throws QUI\Exception
      */
     public static function onPackageSetup(Package $Package)
     {
@@ -37,6 +40,21 @@ class Events
             return;
         }
 
-        Builder::getInstance()->setup();
+        $Conf    = $Package->getConfig();
+        $created = $Conf->get('setup', 'cron_created');
+
+        if (!empty($created)) {
+            return;
+        }
+
+        $CronManager = new QUI\Cron\Manager();
+        $cronTitle   = QUI::getLocale()->get('quiqqer/backendsearch', 'cron.search.build.title');
+
+        if (!$CronManager->isCronSetUp($cronTitle)) {
+            $CronManager->add($cronTitle, '0', '0', '*', '*', '*');
+        }
+
+        $Conf->set('setup', 'cron_created', 1);
+        $Conf->save();
     }
 }
