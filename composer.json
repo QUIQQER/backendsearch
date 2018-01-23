@@ -1,7 +1,7 @@
 {
   "name": "quiqqer/backendsearch",
   "type": "quiqqer-module",
-  "description": "The backend-search searches through all contents of QUIQQERs Administration. For example: navigation, sites, users, media contents as well as the diffrent modules.The module provides a developer API which can be used to extend search results",
+  "description": "With the QUIQEQR Backend Search module you are able to search contents of the QUIQQER Backend (Administration). You can search sites, users, media content, settings etc. The Backend Search can be extended by other QUIQQER modules to allow searching for custom content.",
   "version": "dev-dev",
   "license": "GPL-3.0+",
   "homepage": "https://www.quiqqer.com",
