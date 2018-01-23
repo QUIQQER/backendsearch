@@ -149,6 +149,18 @@ class Search
             $result = array_merge($result, $providerResult);
         }
 
+        // filter duplicates
+        $ids = array();
+
+        $result = array_filter($result, function($data) use (&$ids) {
+            if (isset($ids[$data['id']])) {
+                return false;
+            }
+
+            $ids[$data['id']] = true;
+            return true;
+        });
+
         return $result;
 
 //        $groups = array();
