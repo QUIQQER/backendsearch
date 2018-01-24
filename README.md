@@ -2,7 +2,7 @@
 
 QUIQQER Backend Search
 ========
-With the QUIQEQR Backend Search module you are able to search contents of the QUIQQER Backend (Administration). You can search sites, users, media content, settings etc. The Backend Search can be extended by other QUIQQER modules to allow searching for custom content.
+With the QUIQQER Backend Search module you are able to search contents of the QUIQQER Backend (Administration). You can search sites, users, media content, settings etc. The Backend Search can be extended by other QUIQQER modules to allow searching for custom content.
 
 Package Name:
 
