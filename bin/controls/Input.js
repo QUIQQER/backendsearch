@@ -53,7 +53,8 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
         initialize: function (options) {
             this.parent(options);
 
-            this.$Input = null;
+            this.$Input     = null;
+            this.$SearchBtn = null;
 
             this.addEvents({
                 onInject: this.$onInject
@@ -64,7 +65,6 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
          * event : on create
          */
         create: function () {
-            var self = this;
             var Elm  = this.parent();
 
             Elm.addClass('qui-backendsearch-input');
@@ -82,16 +82,10 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
                 this.$Input.value = window.QUIQQER.backendSearch.Search.getValue();
             }.bind(this));
 
-            new QUIButton({
+            this.$SearchBtn = new QUIButton({
                 icon  : 'fa fa-search',
                 events: {
-                    onClick: function (Btn) {
-                        Btn.setAttribute('icon', 'fa fa-spinner fa-spin');
-
-                        self.openSearch().then(function() {
-                            Btn.setAttribute('icon', 'fa fa-search');
-                        });
-                    }
+                    onClick: this.openSearch
                 }
             }).inject(Elm);
 
@@ -115,9 +109,13 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
          * @return {Promise}
          */
         openSearch: function () {
+            this.$SearchBtn.setAttribute('icon', 'fa fa-spinner fa-spin');
+
             return window.QUIQQER.backendSearch.Search.open().then(function () {
                 window.QUIQQER.backendSearch.Search.setValue(this.$Input.value);
                 window.QUIQQER.backendSearch.Search.search();
+
+                this.$SearchBtn.setAttribute('icon', 'fa fa-search');
             }.bind(this));
         }
     });
