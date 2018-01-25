@@ -2,7 +2,7 @@
   "name": "quiqqer/backendsearch",
   "type": "quiqqer-module",
   "description": "With the QUIQEQR Backend Search module you are able to search contents of the QUIQQER Backend (Administration). You can search sites, users, media content, settings etc. The Backend Search can be extended by other QUIQQER modules to allow searching for custom content.",
-  "version": "dev-master",
+  "version": "1.0.0",
   "license": "GPL-3.0+",
   "homepage": "https://www.quiqqer.com",
   "authors": [
@@ -19,7 +19,7 @@
     "source": "https://dev.quiqqer.com/quiqqer/backendsearch/tree/dev"
   },
   "require": {
-    "quiqqer\/quiqqer": "*@dev"
+    "quiqqer\/quiqqer": ">=1.1|dev-master|dev-dev"
   },
   "autoload": {
     "psr-4": {
