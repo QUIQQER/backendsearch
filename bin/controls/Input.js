@@ -64,7 +64,8 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
          * event : on create
          */
         create: function () {
-            var Elm = this.parent();
+            var self = this;
+            var Elm  = this.parent();
 
             Elm.addClass('qui-backendsearch-input');
             Elm.set('html', Mustache.render(template, {
@@ -84,7 +85,13 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
             new QUIButton({
                 icon  : 'fa fa-search',
                 events: {
-                    onClick: this.openSearch
+                    onClick: function (Btn) {
+                        Btn.setAttribute('icon', 'fa fa-spinner fa-spin');
+
+                        self.openSearch().then(function() {
+                            Btn.setAttribute('icon', 'fa fa-search');
+                        });
+                    }
                 }
             }).inject(Elm);
 
@@ -104,9 +111,11 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
 
         /**
          * Opent the desktop search
+         *
+         * @return {Promise}
          */
         openSearch: function () {
-            window.QUIQQER.backendSearch.Search.open().then(function () {
+            return window.QUIQQER.backendSearch.Search.open().then(function () {
                 window.QUIQQER.backendSearch.Search.setValue(this.$Input.value);
                 window.QUIQQER.backendSearch.Search.search();
             }.bind(this));
