@@ -152,7 +152,7 @@ class Search
         // filter duplicates
         $ids = array();
 
-        $result = array_filter($result, function($data) use (&$ids) {
+        $result = array_filter($result, function ($data) use (&$ids) {
             if (isset($ids[$data['id']])) {
                 return false;
             }
@@ -160,6 +160,8 @@ class Search
             $ids[$data['id']] = true;
             return true;
         });
+
+        $result = array_values($result);
 
         return $result;
 
