@@ -10,7 +10,7 @@
 QUI::$Ajax->registerFunction(
     'package_quiqqer_backendsearch_ajax_getSetting',
     function ($section, $var = null) {
-        $Conf = QUI::getPackage('quiqqer/backendsearch')->getConfig();
+        $Conf = QUI::getConfig('etc/search.ini');
 
         if (empty($var)) {
             $var = null;
