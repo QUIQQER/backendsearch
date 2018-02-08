@@ -1,5 +1,5 @@
 .qui-backendsearch-search {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.97);
     height: 100%;
     left: 0;
     position: absolute;
@@ -28,11 +28,19 @@
 /** header
  ==================================================== */
 
+.qui-backendsearch-search-container-header {
+    /*margin-top: 30vh; todo michael */
+    margin-top: 10vh;
+    transition: 0.3s all;
+}
+
 .qui-backendsearch-search-container-header img {
     display: block;
     height: 50px;
-    margin: 10vh auto 40px;
+    margin: 0 auto 40px;
 }
+
+/*.qui-backendsearch-search-container-header img {*/
 
 .qui-backendsearch-search-container-input {
     display: block;
@@ -109,11 +117,24 @@
     margin: 40px auto 0;
     display: flex;
     flex-wrap: wrap;
-    border-bottom: 1px solid #eee;
     padding-bottom: 20px;
 
     flex: 0 0 auto;
     width: 100%;
+}
+
+.result-header-title,
+.qui-backendsearch-search-resultGroup-title {
+    width: 100%;
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.qui-backendsearch-search-resultGroup-title {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 0;
 }
 
 .result-header-entry.qui-button {
@@ -128,20 +149,19 @@
 }
 
 .result-header-entry.qui-button.highlight {
-    background: #fdfacf;
-    color: #333;
+    background: #0069B4;
+    color: #fff;
 }
 
 .result-header-entry.qui-button.highlight:hover {
-    background: #fdf8b8;
-    color: #333
+    background: #0058a3;
+    color: #fff;
 }
 
 /* results */
 .qui-backendsearch-search-resultGroup-wrapper {
     overflow: auto;
     max-height: 100%;
-    padding-top: 20px;
 }
 
 .qui-backendsearch-search-container-result {
@@ -156,20 +176,26 @@
 
 .qui-backendsearch-search-resultGroup-header {
     font-weight: bold;
-    background: rgba(0,0,0,0.05);
+    background: rgba(0, 0, 0, 0.05);
     padding: 5px;
+    transition: .2s all ease-in-out;
+    color: #555;
 }
 
 .qui-backendsearch-search-resultGroup {
     float: left;
     margin-bottom: 20px;
-    /*width: 33.333%;*/
     width: 100%;
     transition: .2s background-color ease-in-out;
 }
 
 section.qui-backendsearch-search-resultGroup.highlight {
-    background: #fdfacf;
+    background: none;
+}
+
+.qui-backendsearch-search-resultGroup.highlight .qui-backendsearch-search-resultGroup-header {
+    background: #0069B4;
+    color: #fff
 }
 
 .qui-backendsearch-search-resultGroup ul {
@@ -185,10 +211,7 @@ section.qui-backendsearch-search-resultGroup.highlight {
     cursor: pointer;
     float: left;
     line-height: 20px;
-    padding: 5px 0;
-    width: 100%;
-
-    width: auto;
+    width: 33%;
     padding: 5px 3px;
 }
 
@@ -208,3 +231,21 @@ section.qui-backendsearch-search-resultGroup.highlight {
     float: left;
     width: calc(100% - 30px);
 }
+
+/* todo css grid wenn möglich */
+/*
+.qui-backendsearch-search-container {
+    grid-template-rows: min-content auto;
+    display: grid;
+    height: 100vh;
+}
+
+.qui-backendsearch-search-container-result {
+    height: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.result-header {
+    margin-top: 0;
+}*/

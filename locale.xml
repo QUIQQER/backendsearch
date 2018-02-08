@@ -108,6 +108,16 @@
             <en><![CDATA[Builds the QUIQQER Search table inlcuding all installed search providers]]></en>
         </locale>
 
+        <!-- popup texts -->
+        <locale name="search.popup.title.group">
+            <de><![CDATA[Ergebnissgruppen]]></de>
+            <en><![CDATA[Result groups]]></en>
+        </locale>
+        <locale name="search.popup.title.entries">
+            <de><![CDATA[Ergebnisse]]></de>
+            <en><![CDATA[Results]]></en>
+        </locale>
+
     </groups>
 
     <groups name="quiqqer/backendsearch" datatype="php">

@@ -82,6 +82,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             this.$FilterSelectContainer = null;
             this.$InputContainer = null;
+
+//            this.firstSearchExecuted = false; //todo michael
         },
 
         /**
@@ -344,6 +346,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * Excecute the search with a delay
          */
         search: function () {
+
             if (!this.$open) {
                 this.open();
             }
@@ -363,6 +366,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 this.$Input.value = '';
                 //this.$Input.focus();
 
+                self.Loader.hide();
                 return;
             }
 
@@ -378,6 +382,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
 
                 self.executeSearch(self.$Input.value, Params).then(function (result) {
+
                     self.$renderResult(result);
 
                     if (!self.$extendedSearch && twoStepSearch && result.length >= 5) {
@@ -397,6 +402,19 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          */
         $renderResult: function (result) {
             var group, groupHTML, Entry, label;
+
+            if (result.length === 0) {
+                // no search results
+                this.$Result.set('html', '');
+                this.Loader.hide();
+                return;
+            }
+
+            // todo michael
+            /*if (!this.firstSearchExecuted) {
+                this.$Header.setStyle('margin-top', '5vh');
+                this.firstSearchExecuted = true;
+            }*/
 
             var html           = '',
                 ResultsByGroup = {};
@@ -422,7 +440,10 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }
 
             var ResultHeader = new Element('div', {
-                'class': 'result-header'
+                'class': 'result-header',
+                html   : '<header class="result-header-title">' +
+                QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') +
+                '</header>'
             });
 
             for (group in ResultsByGroup) {
@@ -442,6 +463,13 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             html += ResultHeader.outerHTML;
 
+            new Element('header', {
+                'class': 'qui-backendsearch-search-resultGroup-title',
+                html   : 'Ergebnisse'
+            }).inject(ResultHeader);
+
+            html += '<header class="qui-backendsearch-search-resultGroup-title">';
+            html += QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') + '</header>';
             html += '<div class="qui-backendsearch-search-resultGroup-wrapper">';
 
             for (group in ResultsByGroup) {
