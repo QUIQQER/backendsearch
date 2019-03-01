@@ -47,6 +47,15 @@ class Events
             return;
         }
 
+        if (!QUI::getDataBase()->table()->exist('cron')) {
+            try {
+                $CronPackage = QUI::getPackage('quiqqer/cron');
+                $CronPackage->setup();
+            } catch (QUI\Exception $Exception) {
+                QUI\System\Log::writeDebugException($Exception);
+            }
+        }
+
         $CronManager = new QUI\Cron\Manager();
         $cronTitle   = QUI::getLocale()->get('quiqqer/backendsearch', 'cron.search.build.title');
 
