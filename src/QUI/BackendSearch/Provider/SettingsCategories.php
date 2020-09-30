@@ -11,7 +11,7 @@ use QUI\Permissions\Permission;
 
 class SettingsCategories implements ProviderInterface
 {
-    const TYPE_SETTINGS = 'settings';
+    const TYPE_SETTINGS         = 'settings';
     const TYPE_SETTINGS_CONTENT = 'settings_content';
 
     /**
@@ -40,9 +40,9 @@ class SettingsCategories implements ProviderInterface
             $groupLabel = $Locale->get(
                 'quiqqer/backendsearch',
                 'search.builder.group.menu.label',
-                array(
+                [
                     'type' => $Locale->get('quiqqer/system', 'settings')
-                )
+                ]
             );
 
             $data = $this->parseSettingsMenuData($filter, $Locale);
@@ -89,7 +89,7 @@ class SettingsCategories implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = array())
+    public function search($search, $params = [])
     {
     }
 
@@ -111,17 +111,17 @@ class SettingsCategories implements ProviderInterface
      */
     public function getFilterGroups()
     {
-        $filterGroups = array();
+        $filterGroups = [];
 
         // can only search settings if user has access to settings
         if (Permission::hasPermission('quiqqer.menu.settings')) {
-            $filterGroups[] = array(
+            $filterGroups[] = [
                 'group' => self::TYPE_SETTINGS_CONTENT,
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.builder.filter.label.settings'
-                )
-            );
+                ]
+            ];
         }
 
         return $filterGroups;
@@ -137,11 +137,11 @@ class SettingsCategories implements ProviderInterface
      */
     protected function parseSettingsMenuData($items, $Locale, $parentTitle = null)
     {
-        $data         = array();
-        $searchFields = array('require', 'exec', 'onClick', 'type', 'category');
+        $data         = [];
+        $searchFields = ['require', 'exec', 'onClick', 'type', 'category'];
 
         if (!is_array($items)) {
-            return array();
+            return [];
         }
 
         foreach ($items as $item) {
@@ -179,7 +179,7 @@ class SettingsCategories implements ProviderInterface
                 $icon = $item['icon'];
             }
 
-            $searchData = array();
+            $searchData = [];
 
             foreach ($searchFields as $field) {
                 if (isset($item[$field])) {
@@ -187,12 +187,12 @@ class SettingsCategories implements ProviderInterface
                 }
             }
 
-            $data[] = array(
+            $data[] = [
                 'title'      => $title,
                 'icon'       => $icon,
                 'search'     => $search,
                 'searchdata' => json_encode($searchData)
-            );
+            ];
 
             if (isset($item['items'])
                 && !empty($item['items'])
@@ -218,10 +218,10 @@ class SettingsCategories implements ProviderInterface
         if (is_array($xmlFile)) {
             $xmlFiles = $xmlFile;
         } else {
-            $xmlFiles = array($xmlFile);
+            $xmlFiles = [$xmlFile];
         }
 
-        $dataEntries = array();
+        $dataEntries = [];
 
         foreach ($xmlFiles as $xmlFile) {
             if (!file_exists($xmlFile)) {
@@ -242,45 +242,45 @@ class SettingsCategories implements ProviderInterface
             $descPrefix = $Locale->get('quiqqer/system', 'settings').' -> '.$item['text'];
 
             // add menu entry for settings
-            $dataEntries[] = array(
+            $dataEntries[] = [
                 'title'       => $item['text'],
                 'description' => $item['description'],
                 'group'       => self::TYPE_SETTINGS,
                 'groupLabel'  => $Locale->get(
                     'quiqqer/backendsearch',
                     'search.builder.group.menu.label',
-                    array(
+                    [
                         'type' => $Locale->get('quiqqer/system', 'settings')
-                    )
+                    ]
                 ),
-                'searchdata'  => json_encode(array(
-                    'params'  => array(
+                'searchdata'  => json_encode([
+                    'params'  => [
                         'category' => false,
                         'xmlFile'  => $xmlFile
-                    ),
+                    ],
                     'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
-                )),
-                'icon'        => $item['icon'],
+                ]),
+                'icon'        => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
                 'search'      => $item['text']
-            );
+            ];
 
             /** @var \DOMElement $Category */
             foreach ($categories as $Category) {
-                $entry = array(
-                    'searchdata'  => array(
-                        'params'  => array(
+                $entry = [
+                    'searchdata'  => [
+                        'params'  => [
                             'category' => $Category->getAttribute('name'),
                             'xmlFile'  => $xmlFile
-                        ),
+                        ],
                         'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
-                    ),
+                    ],
                     'icon'        => $item['icon'],
                     'group'       => self::TYPE_SETTINGS_CONTENT,
                     'filterGroup' => self::TYPE_SETTINGS_CONTENT,
                     'groupLabel'  => $Locale->get('quiqqer/system', 'settings')
-                );
+                ];
 
-                $searchStringParts = array();
+                $searchStringParts = [];
 
                 /** @var \DOMNode $Child */
                 foreach ($Category->childNodes as $Child) {
