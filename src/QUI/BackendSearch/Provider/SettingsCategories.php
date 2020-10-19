@@ -274,7 +274,7 @@ class SettingsCategories implements ProviderInterface
                         ],
                         'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                     ],
-                    'icon'        => $item['icon'],
+                    'icon'        => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
                     'group'       => self::TYPE_SETTINGS_CONTENT,
                     'filterGroup' => self::TYPE_SETTINGS_CONTENT,
                     'groupLabel'  => $Locale->get('quiqqer/system', 'settings')
