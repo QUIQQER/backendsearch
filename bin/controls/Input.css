@@ -1,6 +1,7 @@
 .qui-backendsearch-input {
     float: left;
     max-width: 300px;
+    min-width: 140px;
     position: relative;
     width: calc(100% - 900px);
 }
@@ -26,4 +27,5 @@
     position: absolute;
     text-align: center;
     width: 30px;
+    z-index: 1;
 }
