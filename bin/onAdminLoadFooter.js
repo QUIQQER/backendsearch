@@ -3,12 +3,12 @@ require([
 ], function (SearchInput) {
     "use strict";
 
-    window.addEvent('quiqqerLoaded', function() {
+    window.addEvent('quiqqerLoaded', function () {
         // Search input
         new SearchInput({
             styles: {
                 'float': 'right',
-                margin : '5px 24px 0 10px'
+                margin : '2px 10px 4px 10px'
             }
         }).inject(
             document.getElement('.qui-menu-container')
@@ -25,7 +25,7 @@ require([
             return;
         }
 
-        if (event.key == 'f') {
+        if (event.key === 'f') {
             event.stop();
 
             if (window.QUIQQER.backendSearch.searchWindowOpen) {
