@@ -368,7 +368,6 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
 
                 self.executeSearch(self.$Input.value, Params).then(function (result) {
-                    console.log(result);
                     self.$renderResult(result);
 
                     if (!self.$extendedSearch && twoStepSearch && result.length >= 5) {
