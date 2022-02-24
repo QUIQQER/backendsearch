@@ -1,12 +1,6 @@
 /**
  * @module package/quiqqer/backendsearch/bin/controls/Input
- *
- * @require qui/QUI
- * @require qui/controls/Control
- * @require Mustache
- * @require package/quiqqer/backendsearch/bin/controls/Search
- * @require text!package/quiqqer/backendsearch/bin/controls/Input.html
- * @require css!package/quiqqer/backendsearch/bin/controls/Input.css
+ * @author www.pcsg.de (Henning Leutz)
  */
 define('package/quiqqer/backendsearch/bin/controls/Input', [
 
@@ -53,7 +47,7 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
         initialize: function (options) {
             this.parent(options);
 
-            this.$Input     = null;
+            this.$Input = null;
             this.$SearchBtn = null;
 
             this.addEvents({
@@ -65,7 +59,7 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
          * event : on create
          */
         create: function () {
-            var Elm  = this.parent();
+            var Elm = this.parent();
 
             Elm.addClass('qui-backendsearch-input');
             Elm.set('html', Mustache.render(template, {

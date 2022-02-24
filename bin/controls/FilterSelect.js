@@ -2,10 +2,7 @@
  * Select multiple filters for QUIQQER Backend Search
  *
  * @module package/quiqqer/backendsearch/bin/controls/FilterSelect
- *
- * @require qui/controls/buttons/Select
- * @require Locale
- * @require Ajax
+ * @author www.pcsg.de (Henning Leutz)
  *
  * @event onLoaded [this] - fires when all filters are loaded and the FilterSelect is ready
  */
@@ -40,7 +37,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
         initialize: function (options) {
             this.parent(options);
 
-            this.$Groups        = {};
+            this.$Groups = {};
             this.$DefaultGroups = {};
 
             this.addEvents({
@@ -117,7 +114,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
         $onImport: function () {
             var self = this;
 
-            this.$Input      = this.getElm();
+            this.$Input = this.getElm();
             this.$Input.type = 'hidden';
 
             var Elm = this.create();
@@ -148,10 +145,10 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
                 },
                 onChange: function () {
                     var FilterGroups = {};
-                    var values       = self.getValue();
+                    var values = self.getValue();
 
                     for (var i = 0, len = values.length; i < len; i++) {
-                        var Group                 = self.$Groups[values[i]];
+                        var Group = self.$Groups[values[i]];
                         FilterGroups[Group.group] = Group;
                     }
 
