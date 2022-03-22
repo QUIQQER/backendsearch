@@ -4,11 +4,9 @@
  */
 define('package/quiqqer/backendsearch/bin/controls/Search', [
 
-    'qui/QUI',
     'qui/controls/Control',
     'qui/controls/desktop/Panel',
     'qui/controls/windows/Popup',
-    'qui/controls/buttons/Select',
     'qui/controls/buttons/Button',
     'qui/controls/loader/Loader',
 
@@ -22,13 +20,13 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
     'text!package/quiqqer/backendsearch/bin/controls/Search.ResultGroup.html',
     'css!package/quiqqer/backendsearch/bin/controls/Search.css'
 
-], function (QUI, QUIControl, QUIPanel, QUIPopup, QUISelect, QUIButton, QUILoader,
+], function (QUIControl, QUIPanel, QUIPopup, QUIButton, QUILoader,
              FilterSelect, PanelUtils, Mustache, QUIAjax, QUILocale, template,
              templateResultGroup
 ) {
     "use strict";
 
-    const lg = 'quiqqer/quiqqer';
+    const lg = 'quiqqer/backendsearch';
 
     return new Class({
 
@@ -54,20 +52,23 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         initialize: function (options) {
             this.parent(options);
 
-            this.$Elm = null;
-            this.$Input = null;
-            this.$Header = null;
-            this.$Close = null;
-            this.$Result = null;
+            this.$Elm       = null;
+            this.$Input     = null;
+            this.$Header    = null;
+            this.$Close     = null;
+            this.$Result    = null;
+            this.$BtnSearch = null;
 
-            this.$open = false;
-            this.$value = false;
-            this.$FilterSelect = null;
+            this.$open           = false;
+            this.$value          = false;
+            this.$FilterSelect   = null;
             this.$extendedSearch = false;
-            this.$Settings = {};
+            this.$Settings       = {};
+
+            this.$execSearchOnNextFilterClose = false;
 
             this.$FilterSelectContainer = null;
-            this.$InputContainer = null;
+            this.$InputContainer        = null;
 
 //            this.firstSearchExecuted = false; //todo michael
         },
@@ -76,7 +77,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * event : on create
          */
         create: function () {
-            var Elm = this.parent();
+            var Elm  = this.parent();
             var self = this;
 
             Elm.addClass('qui-backendsearch-search');
@@ -88,11 +89,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             this.Loader = new QUILoader();
 
-            this.$Header = Elm.getElement('header');
-            this.$Result = Elm.getElement('.qui-backendsearch-search-container-result');
+            this.$Header     = Elm.getElement('header');
+            this.$Result     = Elm.getElement('.qui-backendsearch-search-container-result');
             this.$SearchIcon = Elm.getElement('.qui-backendsearch-search-container-input label .fa');
 
-            this.$InputContainer = Elm.getElement('.qui-backendsearch-search-container-input');
+            this.$InputContainer        = Elm.getElement('.qui-backendsearch-search-container-input');
             this.$FilterSelectContainer = Elm.getElement('.qui-backendsearch-search-container-filterselect');
 
             // input events
@@ -126,10 +127,10 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }.bind(this));
 
             // search btn
-            new QUIButton({
+            this.$BtnSearch = new QUIButton({
                 'class'  : 'qui-backendsearch-search-container-btn',
                 textimage: 'fa fa-search',
-                text     : QUILocale.get(lg, 'controls.workspace.search.btn.text'),
+                text     : QUILocale.get(lg, 'controls.Search.btn.submit.text'),
                 styles   : {
                     lineHeight: 50,
                     width     : 100
@@ -193,7 +194,20 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     self.$Settings = Settings;
 
                     self.$FilterSelect.addEvents({
-                        onChange: self.search
+                        onChange: () => {
+                            self.$execSearchOnNextFilterClose = true;
+                        }
+                    });
+
+                    self.$FilterSelect.$Menu.addEvents({
+                        onHide: () => {
+                            if (!self.$execSearchOnNextFilterClose) {
+                                return;
+                            }
+
+                            self.$execSearchOnNextFilterClose = false;
+                            self.search();
+                        }
                     });
 
                     self.$FilterSelect.setAttribute(
@@ -271,8 +285,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     callback: function () {
                         this.$Elm.destroy();
 
-                        this.$Elm = null;
-                        this.$open = false;
+                        this.$Elm   = null;
+                        this.$open  = false;
                         this.$value = this.$Input.value;
 
                         window.removeEvent('keyup', this.$onWindowKeyUp);
@@ -308,7 +322,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 if ("require" in searchData) {
                     require([searchData.require], function (Cls) {
                         if (typeOf(Cls) === 'class') {
-                            var params = searchData.params || {};
+                            var params   = searchData.params || {};
                             var Instance = new Cls(params);
 
                             if (instanceOf(Instance, QUIPanel)) {
@@ -337,8 +351,22 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 this.open();
             }
 
+            var searchValue = this.$Input.value.trim();
+
+            if (searchValue === '') {
+                this.$Input.value = '';
+                return;
+            }
+
             this.Loader.inject(this.$Result);
-            this.Loader.show();
+            this.Loader.show(
+                QUILocale.get(lg, 'controls.Search.loader.searching')
+            );
+
+            // Disable form elements
+            this.$Input.disabled = true;
+            this.$BtnSearch.disable();
+            this.$FilterSelect.disable();
 
             var self = this;
 
@@ -346,19 +374,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 clearInterval(this.$Timer);
             }
 
-            var searchValue = this.$Input.value.trim();
-
-            if (searchValue === '') {
-                this.$Input.value = '';
-                //this.$Input.focus();
-
-                self.Loader.hide();
-                return;
-            }
-
             var twoStepSearch = parseInt(this.$Settings.twoStepSearch);
 
-            this.$Timer = (function () {
+            this.$Timer = (() => {
                 var Params = {
                     filterGroups: self.$FilterSelect.getValue()
                 };
@@ -367,7 +385,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     Params.limit = 5;
                 }
 
-                self.executeSearch(self.$Input.value, Params).then(function (result) {
+                self.executeSearch(self.$Input.value, Params).then((result) => {
                     self.$renderResult(result);
 
                     if (!self.$extendedSearch && twoStepSearch && result.length >= 5) {
@@ -376,6 +394,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     } else {
                         self.$extendedSearch = false;
                     }
+
+                    // Enable form elements
+                    this.$Input.disabled = false;
+                    this.$BtnSearch.enable();
+                    this.$FilterSelect.enable();
                 });
             }).delay(this.getAttribute('delay'));
         },
@@ -446,8 +469,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             var ResultHeader = new Element('div', {
                 'class': 'result-header',
                 html   : '<header class="result-header-title">' +
-                         QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') +
-                         '</header>'
+                    QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') +
+                    '</header>'
             });
 
             for (group in ResultsByGroup) {
