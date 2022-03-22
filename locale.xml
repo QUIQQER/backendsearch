@@ -110,7 +110,7 @@
 
         <!-- popup texts -->
         <locale name="search.popup.title.group">
-            <de><![CDATA[Ergebnissgruppen]]></de>
+            <de><![CDATA[Ergebnisgruppen]]></de>
             <en><![CDATA[Result groups]]></en>
         </locale>
         <locale name="search.popup.title.entries">
@@ -174,9 +174,17 @@
     <groups name="quiqqer/backendsearch" datatype="js">
 
         <!-- Control: Input -->
+        <locale name="controls.Search.btn.submit.text">
+            <de><![CDATA[Suchen]]></de>
+            <en><![CDATA[Search]]></en>
+        </locale>
         <locale name="controls.input.placeholder">
             <de><![CDATA[QUIQQER durchsuchen...]]></de>
             <en><![CDATA[Search QUIQQER...]]></en>
+        </locale>
+        <locale name="controls.Search.loader.searching">
+            <de><![CDATA[Durchsuche QUIQQER...]]></de>
+            <en><![CDATA[Searching QUIQQER...]]></en>
         </locale>
 
     </groups>
