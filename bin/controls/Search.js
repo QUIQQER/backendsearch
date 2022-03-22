@@ -112,14 +112,17 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             });
 
             this.$Input.addEvent('keyup', function (event) {
+                if (event.code !== 13) {
+                    return;
+                }
+
                 if (inputEsc && this.$Input.value !== '') {
                     event.stop();
                     this.$Input.value = '';
                 }
 
                 // auto-search requires minimum characters
-                if (this.$Input.value.length < this.$Settings.minCharacters &&
-                    event.code !== 13) {
+                if (this.$Input.value.length < this.$Settings.minCharacters) {
                     return;
                 }
 
