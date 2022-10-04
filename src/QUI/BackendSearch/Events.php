@@ -54,6 +54,8 @@ class Events
                 QUI\System\Log::addError($Exception->getMessage(), [
                     'trace' => $Exception->getTraceAsString()
                 ]);
+
+                return;
             }
         }
 
