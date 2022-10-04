@@ -8,7 +8,6 @@ namespace QUI\BackendSearch;
 
 use QUI;
 use QUI\Package\Package;
-use QUI\BackendSearch\Builder;
 
 /**
  * Class Events
@@ -52,7 +51,9 @@ class Events
                 $CronPackage = QUI::getPackage('quiqqer/cron');
                 $CronPackage->setup();
             } catch (QUI\Exception $Exception) {
-                QUI\System\Log::writeDebugException($Exception);
+                QUI\System\Log::addError($Exception->getMessage(), [
+                    'trace' => $Exception->getTraceAsString()
+                ]);
             }
         }
 
