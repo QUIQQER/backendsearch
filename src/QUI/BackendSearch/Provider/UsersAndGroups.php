@@ -33,18 +33,19 @@ class UsersAndGroups implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = array())
+    public function search($search, $params = [])
     {
-        if (isset($params['filterGroups'])
+        if (
+            isset($params['filterGroups'])
             && is_array($params['filterGroups'])
             && !in_array(self::FILTER_USERS_GROUPS, $params['filterGroups'])
         ) {
-            return array();
+            return [];
         }
 
-        $results = array();
-        $PDO     = QUI::getDataBase()->getPDO();
-        $Locale  = QUI::getLocale();
+        $results = [];
+        $PDO = QUI::getDataBase()->getPDO();
+        $Locale = QUI::getLocale();
 
         // users
         if (Permission::hasPermission('quiqqer.admin.users.edit')) {
@@ -53,7 +54,7 @@ class UsersAndGroups implements ProviderInterface
             $sql = "SELECT users.id, users.username FROM ";
             $sql .= " `" . $Users->table() . "`, `" . $Users->tableAddress() . "` address";
 
-            $where = array();
+            $where = [];
 
             // users table
             $where[] = "users.`id` LIKE :search";
@@ -101,13 +102,13 @@ class UsersAndGroups implements ProviderInterface
 
             if (!$error) {
                 foreach ($result as $row) {
-                    $results[] = array(
-                        'id'         => 'u' . $row['id'],
-                        'title'      => $row['username'],
-                        'icon'       => 'fa fa-user',
-                        'group'      => 'users',
+                    $results[] = [
+                        'id' => 'u' . $row['id'],
+                        'title' => $row['username'],
+                        'icon' => 'fa fa-user',
+                        'group' => 'users',
                         'groupLabel' => $groupLabel
-                    );
+                    ];
                 }
             }
         }
@@ -118,23 +119,23 @@ class UsersAndGroups implements ProviderInterface
         }
 
         try {
-            $result = QUI::getDataBase()->fetch(array(
-                'select'   => array(
+            $result = QUI::getDataBase()->fetch([
+                'select' => [
                     'id',
                     'name'
-                ),
-                'from'     => QUI::getGroups()->table(),
-                'where_or' => array(
-                    'id'   => array(
-                        'type'  => '%LIKE%',
+                ],
+                'from' => QUI::getGroups()->table(),
+                'where_or' => [
+                    'id' => [
+                        'type' => '%LIKE%',
                         'value' => $search
-                    ),
-                    'name' => array(
-                        'type'  => '%LIKE%',
+                    ],
+                    'name' => [
+                        'type' => '%LIKE%',
                         'value' => $search
-                    )
-                )
-            ));
+                    ]
+                ]
+            ]);
         } catch (\Exception $Exception) {
             QUI\System\Log::addError(
                 self::class . ' :: search (groups) -> ' . $Exception->getMessage()
@@ -149,13 +150,13 @@ class UsersAndGroups implements ProviderInterface
         );
 
         foreach ($result as $row) {
-            $results[] = array(
-                'id'         => 'g' . $row['id'],
-                'title'      => $row['name'],
-                'icon'       => 'fa fa-users',
-                'group'      => 'groups',
+            $results[] = [
+                'id' => 'g' . $row['id'],
+                'title' => $row['name'],
+                'icon' => 'fa fa-users',
+                'group' => 'groups',
                 'groupLabel' => $groupLabel
-            );
+            ];
         }
 
         return $results;
@@ -171,15 +172,15 @@ class UsersAndGroups implements ProviderInterface
     {
         $type = mb_strtolower(mb_substr($id, 0, 1));
 
-        return array(
-            'searchdata' => array(
+        return [
+            'searchdata' => [
                 'require' => 'package/quiqqer/backendsearch/bin/controls/provider/UsersAndGroups',
-                'params'  => array(
-                    'id'   => mb_substr($id, 1),
+                'params' => [
+                    'id' => mb_substr($id, 1),
                     'type' => $type === 'u' ? 'user' : 'group'
-                )
-            )
-        );
+                ]
+            ]
+        ];
     }
 
     /**
@@ -190,19 +191,20 @@ class UsersAndGroups implements ProviderInterface
      */
     public function getFilterGroups()
     {
-        $filterGroups = array();
+        $filterGroups = [];
 
         // add filters depending on permissions to edit users and/or groups
-        if (Permission::hasPermission('quiqqer.admin.users.edit')
+        if (
+            Permission::hasPermission('quiqqer.admin.users.edit')
             || Permission::hasPermission('quiqqer.admin.groups.edit')
         ) {
-            $filterGroups[] = array(
+            $filterGroups[] = [
                 'group' => self::FILTER_USERS_GROUPS,
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.builder.filter.label.groups'
-                )
-            );
+                ]
+            ];
         }
 
         return $filterGroups;

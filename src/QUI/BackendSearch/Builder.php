@@ -6,12 +6,9 @@
 
 namespace QUI\BackendSearch;
 
-use Composer\Cache;
 use QUI;
 use QUI\Cache\Manager as CacheManager;
 use QUI\Permissions\Permission;
-use QUI\Utils\XML\Settings as SettingsXML;
-use QUI\Utils\Text\XML;
 use QUI\Utils\DOM as DOMUtils;
 
 /**
@@ -22,16 +19,16 @@ use QUI\Utils\DOM as DOMUtils;
  */
 class Builder
 {
-    const TYPE_APPS    = 'apps';
-    const TYPE_EXTRAS  = 'extras';
+    const TYPE_APPS = 'apps';
+    const TYPE_EXTRAS = 'extras';
     const TYPE_PROJECT = 'project';
     const TYPE_PROFILE = 'profile';
 
     const FILTER_NAVIGATION = 'navigation';
-    const FILTER_SETTINGS   = 'settings';
+    const FILTER_SETTINGS = 'settings';
 
-    const TYPE_APPS_ICON    = 'fa fa-diamond';
-    const TYPE_EXTRAS_ICON  = 'fa fa-cubes';
+    const TYPE_APPS_ICON = 'fa fa-diamond';
+    const TYPE_EXTRAS_ICON = 'fa fa-cubes';
     const TYPE_PROJECT_ICON = 'fa fa-home';
     const TYPE_PROFILE_ICON = 'fa fa-id-card-o';
 
@@ -90,8 +87,8 @@ class Builder
             return $this->locales;
         }
 
-        $available     = QUI\Translator::getAvailableLanguages();
-        $this->locales = array();
+        $available = QUI\Translator::getAvailableLanguages();
+        $this->locales = [];
 
         foreach ($available as $lang) {
             $this->locales[$lang] = new QUI\Locale();
@@ -116,7 +113,7 @@ class Builder
         }
 
         $packages = QUI::getPackageManager()->getInstalled();
-        $provider = array();
+        $provider = [];
 
         foreach ($packages as $package) {
             try {
@@ -157,15 +154,15 @@ class Builder
         }
 
         $providers = $this->getProvider();
-        $groups    = array(
-            array(
+        $groups = [
+            [
                 'group' => self::FILTER_NAVIGATION,
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.builder.filter.label.' . self::FILTER_NAVIGATION
-                )
-            )
-        );
+                ]
+            ]
+        ];
 
         /** @var ProviderInterface $Provider */
         foreach ($providers as $Provider) {
@@ -195,7 +192,7 @@ class Builder
      */
     public function getProvider($provider = false)
     {
-        $result = array();
+        $result = [];
 
         foreach ($this->getProviderClasses() as $cls) {
             if (!class_exists($cls)) {
@@ -216,9 +213,9 @@ class Builder
                 QUI\System\Log::writeException(
                     $Exception,
                     QUI\System\Log::LEVEL_ERROR,
-                    array(
+                    [
                         'method' => 'QUI\Workspace\Search::getProviderInstances'
-                    )
+                    ]
                 );
             }
         }
@@ -321,12 +318,12 @@ class Builder
      */
     public function buildProfileCache()
     {
-        QUI::getDataBase()->delete($this->getTable(), array(
+        QUI::getDataBase()->delete($this->getTable(), [
             'group' => self::TYPE_PROFILE
-        ));
+        ]);
 
-        $locales          = $this->getLocales();
-        $QUILocale        = QUI::getLocale();
+        $locales = $this->getLocales();
+        $QUILocale = QUI::getLocale();
         $quiLocaleCurrent = $QUILocale->getCurrent();
 
         /** @var QUI\Locale $Locale */
@@ -341,7 +338,7 @@ class Builder
             });
 
             $groupLabel = $Locale->get('quiqqer/system', 'profile');
-            $data       = $this->parseMenuData($filter, $Locale);
+            $data = $this->parseMenuData($filter, $Locale);
 
             foreach ($data as $key => $entry) {
                 // add special search terms to user profile entry
@@ -357,8 +354,8 @@ class Builder
                     $entry['search'] .= ' ' . implode(' ', $profileSearchTerms);
                 }
 
-                $entry['group']       = self::TYPE_PROFILE;
-                $entry['groupLabel']  = $groupLabel;
+                $entry['group'] = self::TYPE_PROFILE;
+                $entry['groupLabel'] = $groupLabel;
                 $entry['filterGroup'] = self::FILTER_NAVIGATION;
 
                 if (!isset($entry['icon'])) {
@@ -394,10 +391,10 @@ class Builder
      */
     public function getWhereConstraint($filters)
     {
-        $where = array(
-            'navApps'   => '`group` != \'' . self::TYPE_APPS . '\'',
+        $where = [
+            'navApps' => '`group` != \'' . self::TYPE_APPS . '\'',
             'navExtras' => '`group` != \'' . self::TYPE_EXTRAS . '\'',
-        );
+        ];
 
         foreach ($filters as $filter) {
             switch ($filter) {
@@ -423,9 +420,9 @@ class Builder
      */
     protected function buildMenuCacheHelper($type)
     {
-        QUI::getDataBase()->delete($this->getTable(), array(
+        QUI::getDataBase()->delete($this->getTable(), [
             'group' => $type
-        ));
+        ]);
 
         $menu = $this->getMenuData();
 
@@ -465,16 +462,16 @@ class Builder
             $groupLabel = $Locale->get(
                 'quiqqer/backendsearch',
                 'search.builder.group.menu.label',
-                array(
+                [
                     'type' => $typeLabel
-                )
+                ]
             );
 
             $data = $this->parseMenuData($filter, $Locale);
 
             foreach ($data as $key => $entry) {
-                $entry['group']       = $type;
-                $entry['groupLabel']  = $groupLabel;
+                $entry['group'] = $type;
+                $entry['groupLabel'] = $groupLabel;
                 $entry['filterGroup'] = self::FILTER_NAVIGATION;
 
                 switch ($type) {
@@ -530,19 +527,20 @@ class Builder
      */
     public function addEntry($params, $lang)
     {
-        $needles = array('title', 'search', 'group', 'filterGroup', 'searchdata');
+        $needles = ['title', 'search', 'group', 'filterGroup', 'searchdata'];
 
         foreach ($needles as $needle) {
             if (empty($params[$needle])) {
-                throw new QUI\BackendSearch\Exception(array(
-                    'quiqqer/backendsearch',
-                    'exception.builder.addEntry.missing_params',
-                    array(
-                        'params' => json_encode(array_keys($params)),
-                        'needle' => json_encode($needle),
-                        'lang'   => $lang
-                    )
-                ),
+                throw new QUI\BackendSearch\Exception(
+                    [
+                        'quiqqer/backendsearch',
+                        'exception.builder.addEntry.missing_params',
+                        [
+                            'params' => json_encode(array_keys($params)),
+                            'needle' => json_encode($needle),
+                            'lang' => $lang
+                        ]
+                    ],
                     404
                 );
             }
@@ -565,15 +563,11 @@ class Builder
             unset($params['name']);
         }
 
-        if (isset($params['groupLabel'])
-            && is_array($params['groupLabel'])
-        ) {
+        if (isset($params['groupLabel']) && is_array($params['groupLabel'])) {
             $params['groupLabel'] = json_encode($params['groupLabel']);
         }
 
-        if (isset($params['searchdata'])
-            && is_array($params['searchdata'])
-        ) {
+        if (isset($params['searchdata']) && is_array($params['searchdata'])) {
             $params['searchdata'] = json_encode($params['searchdata']);
         }
 
@@ -592,25 +586,25 @@ class Builder
      */
     protected function parseMenuData($items, $Locale, $parentTitle = null)
     {
-        $data         = array();
-        $searchFields = array('require', 'exec', 'onClick', 'type');
+        $data = [];
+        $searchFields = ['require', 'exec', 'onClick', 'type'];
 
         if (!is_array($items)) {
-            return array();
+            return [];
         }
 
         foreach ($items as $item) {
-            $title  = $item['text'];
+            $title = $item['text'];
             $search = $item['text'];
 
             // locale w. search string
             if (isset($item['locale']) && is_array($item['locale'])) {
                 $localeGroup = $item['locale'][0];
-                $localeVar   = $item['locale'][1];
+                $localeVar = $item['locale'][1];
 
                 if ($Locale->exists($localeGroup, $localeVar)) {
                     $search = $Locale->get($item['locale'][0], $item['locale'][1]);
-                    $title  = $search;
+                    $title = $search;
                 }
             }
 
@@ -630,7 +624,7 @@ class Builder
                 $icon = $item['icon'];
             }
 
-            $searchData = array();
+            $searchData = [];
 
             foreach ($searchFields as $field) {
                 if (isset($item[$field])) {
@@ -638,16 +632,17 @@ class Builder
                 }
             }
 
-            $data[] = array(
-                'name'        => $item['name'],
-                'title'       => $title,
+            $data[] = [
+                'name' => $item['name'],
+                'title' => $title,
                 'description' => $description,
-                'icon'        => $icon,
-                'search'      => $search,
-                'searchdata'  => json_encode($searchData)
-            );
+                'icon' => $icon,
+                'search' => $search,
+                'searchdata' => json_encode($searchData)
+            ];
 
-            if (isset($item['items'])
+            if (
+                isset($item['items'])
                 && !empty($item['items'])
             ) {
                 $data = array_merge($data, $this->parseMenuData($item['items'], $Locale, $description));
@@ -664,8 +659,8 @@ class Builder
      */
     protected function getProfileSearchterms()
     {
-        $search = array();
-        $html   = QUI::getUsers()->getProfileTemplate();
+        $search = [];
+        $html = QUI::getUsers()->getProfileTemplate();
 
         try {
             $Doc = new \DOMDocument();

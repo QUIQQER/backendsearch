@@ -1,7 +1,5 @@
 <?php
 
-use QUI\BackendSearch\Search;
-
 /**
  * Search for the desktop
  *
@@ -10,6 +8,9 @@ use QUI\BackendSearch\Search;
  *
  * @return array
  */
+
+use QUI\BackendSearch\Search;
+
 QUI::$Ajax->registerFunction(
     'package_quiqqer_backendsearch_ajax_search',
     function ($search, $params) {
@@ -18,5 +19,5 @@ QUI::$Ajax->registerFunction(
             json_decode($params, true)
         );
     },
-    array('search', 'params')
+    ['search', 'params']
 );

@@ -3,9 +3,8 @@
 /**
  * This file contains QUI\BackendSearch\Search
  */
-namespace QUI\BackendSearch;
 
-use QUI;
+namespace QUI\BackendSearch;
 
 /**
  * Class Cron
