@@ -6,6 +6,9 @@
 
 namespace QUI\BackendSearch;
 
+use DOMDocument;
+use DOMNode;
+use DOMXPath;
 use QUI;
 use QUI\Cache\Manager as CacheManager;
 use QUI\Permissions\Permission;
@@ -33,9 +36,9 @@ class Builder
     const TYPE_PROFILE_ICON = 'fa fa-id-card-o';
 
     /**
-     * @var null
+     * @var Builder|null
      */
-    protected static $Instance = null;
+    protected static ?Builder $Instance = null;
 
     /**
      * @var null
@@ -52,14 +55,14 @@ class Builder
     /**
      * @var string
      */
-    protected $table = 'quiqqerBackendSearch';
+    protected string $table = 'quiqqerBackendSearch';
 
     /**
      * Return the global instance
      *
      * @return Builder
      */
-    public static function getInstance()
+    public static function getInstance(): ?Builder
     {
         if (is_null(self::$Instance)) {
             self::$Instance = new self();
@@ -73,7 +76,7 @@ class Builder
      *
      * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         return QUI::getDBTableName($this->table);
     }
@@ -81,7 +84,7 @@ class Builder
     /**
      * Returns all available locales
      */
-    public function getLocales()
+    public function getLocales(): ?array
     {
         if (!is_null($this->locales)) {
             return $this->locales;
@@ -103,7 +106,7 @@ class Builder
      *
      * @return array
      */
-    protected function getProviderClasses()
+    protected function getProviderClasses(): array
     {
         $cache = 'quiqqer/backendsearch/providers';
 
@@ -143,7 +146,7 @@ class Builder
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         $cacheName = 'quiqqer/desktopsearch/filtergroups';
 
@@ -581,10 +584,10 @@ class Builder
      *
      * @param array $items
      * @param QUI\Locale $Locale
-     * @param string $parentTitle (optional) - title of parent menu node
+     * @param string|null $parentTitle (optional) - title of parent menu node
      * @return array
      */
-    protected function parseMenuData($items, $Locale, $parentTitle = null)
+    protected function parseMenuData(array $items, QUI\Locale $Locale, string $parentTitle = null): array
     {
         $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type'];
@@ -641,10 +644,7 @@ class Builder
                 'searchdata' => json_encode($searchData)
             ];
 
-            if (
-                isset($item['items'])
-                && !empty($item['items'])
-            ) {
+            if (!empty($item['items'])) {
                 $data = array_merge($data, $this->parseMenuData($item['items'], $Locale, $description));
             }
         }
@@ -657,16 +657,16 @@ class Builder
      *
      * @return array - list of search terms
      */
-    protected function getProfileSearchterms()
+    protected function getProfileSearchterms(): array
     {
         $search = [];
         $html = QUI::getUsers()->getProfileTemplate();
 
         try {
-            $Doc = new \DOMDocument();
+            $Doc = new DOMDocument();
             $Doc->loadHTML($html);
         } catch (\Exception $Exception) {
-            QUI\System\Log::addError(
+            QUI\System\Log::addNotice(
                 self::class . ' :: getProfileSearchterms -> Could not parse user profile search terms: '
                 . $Exception->getMessage()
             );
@@ -674,7 +674,7 @@ class Builder
             return $search;
         }
 
-        $Path = new \DOMXPath($Doc);
+        $Path = new DOMXPath($Doc);
 
         // table headers
         $titles = $Path->query('//table/thead/tr/th');
@@ -686,7 +686,7 @@ class Builder
         // labels
         $labels = $Path->query('//label/span');
 
-        /** @var \DOMNode $Label */
+        /** @var DOMNode $Label */
         foreach ($labels as $Label) {
             $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Label)));
         }
