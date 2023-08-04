@@ -25,60 +25,60 @@ class Sites implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = array())
+    public function search($search, $params = [])
     {
         if (!in_array('sites', $params['filterGroups'])) {
-            return array();
+            return [];
         }
 
         $projects = QUI::getProjectManager()->getProjectList();
-        $results  = array();
+        $results = [];
 
         /** @var QUI\Projects\Project $Project */
         foreach ($projects as $Project) {
-            $siteIds = $Project->getSitesIds(array(
-                'where'    => array(
+            $siteIds = $Project->getSitesIds([
+                'where' => [
                     'active' => -1
-                ),
-                'where_or' => array(
-                    'title' => array(
-                        'type'  => '%LIKE%',
+                ],
+                'where_or' => [
+                    'title' => [
+                        'type' => '%LIKE%',
                         'value' => $search
-                    ),
-                    'name'  => array(
-                        'type'  => '%LIKE%',
+                    ],
+                    'name' => [
+                        'type' => '%LIKE%',
                         'value' => $search
-                    ),
+                    ],
                     'id' => $search
-                ),
+                ],
                 'limit' => isset($params['limit']) ? (int)$params['limit'] : null
-            ));
+            ]);
 
             $projectName = $Project->getName();
             $projectLang = $Project->getLang();
-            $groupLabel  = QUI::getLocale()->get(
+            $groupLabel = QUI::getLocale()->get(
                 'quiqqer/backendsearch',
                 'search.provider.sites.group.label',
-                array(
+                [
                     'projectName' => $projectName,
                     'projectLang' => $projectLang
-                )
+                ]
             );
 
             $group = 'project-' . $projectName . '-' . $projectLang;
 
             foreach ($siteIds as $row) {
                 $siteId = $row['id'];
-                $Site   = $Project->get($siteId);
+                $Site = $Project->get($siteId);
 
-                $results[] = array(
-                    'id'          => $projectName . '-' . $projectLang . '-' . $siteId,
-                    'title'       => $Site->getAttribute('title') . ' (#' . $Site->getId() . ')',
+                $results[] = [
+                    'id' => $projectName . '-' . $projectLang . '-' . $siteId,
+                    'title' => $Site->getAttribute('title') . ' (#' . $Site->getId() . ')',
                     'description' => $Site->getUrlRewritten(),
-                    'icon'        => 'fa fa-file-o',
-                    'groupLabel'  => $groupLabel,
-                    'group'       => $group
-                );
+                    'icon' => 'fa fa-file-o',
+                    'groupLabel' => $groupLabel,
+                    'group' => $group
+                ];
             }
         }
 
@@ -95,16 +95,16 @@ class Sites implements ProviderInterface
     {
         $data = explode('-', $id);
 
-        return array(
-            'searchdata' => json_encode(array(
+        return [
+            'searchdata' => json_encode([
                 'require' => 'package/quiqqer/backendsearch/bin/controls/provider/Sites',
-                'params'  => array(
+                'params' => [
                     'projectName' => $data[0],
                     'projectLang' => $data[1],
-                    'siteId'      => $data[2]
-                )
-            ))
-        );
+                    'siteId' => $data[2]
+                ]
+            ])
+        ];
     }
 
     /**
@@ -115,14 +115,14 @@ class Sites implements ProviderInterface
      */
     public function getFilterGroups()
     {
-        return array(
-            array(
+        return [
+            [
                 'group' => self::FILTER_SITES,
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.provider.sites.filter.sites.label'
-                )
-            )
-        );
+                ]
+            ]
+        ];
     }
 }

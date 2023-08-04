@@ -16,14 +16,14 @@ use QUI;
 class Search
 {
     /**
-     * @var null
+     * @var null|Search
      */
-    protected static $Instance = null;
+    protected static ?Search $Instance = null;
 
     /**
      * @return Search
      */
-    public static function getInstance()
+    public static function getInstance(): ?Search
     {
         if (is_null(self::$Instance)) {
             self::$Instance = new self();
@@ -40,58 +40,51 @@ class Search
      *
      * @return array
      */
-    public function search($string, $params = array())
+    public function search(string $string, array $params = [])
     {
         $DesktopSearch = Builder::getInstance();
-        $string        = trim($string);
+        $string = trim($string);
 
-        $sql   = "SELECT * FROM " . $DesktopSearch->getTable();
-        $where = array(
+        $sql = "SELECT * FROM " . $DesktopSearch->getTable();
+        $where = [
             '`search` LIKE :search',
             '`lang` = \'' . QUI::getUserBySession()->getLang() . '\''
-        );
-        $binds = array(
-            'search' => array(
+        ];
+        $binds = [
+            'search' => [
                 'value' => '%' . $string . '%',
-                'type'  => \PDO::PARAM_STR
-            )
-        );
+                'type' => \PDO::PARAM_STR
+            ]
+        ];
 
         $where = array_merge($where, $DesktopSearch->getWhereConstraint($params['filterGroups']));
 
-        if (isset($params['group'])
-            && !empty($params['group'])
-        ) {
-            $where[]        = '`group` = :group';
-            $binds['group'] = array(
+        if (!empty($params['group'])) {
+            $where[] = '`group` = :group';
+            $binds['group'] = [
                 'value' => $params['group'],
-                'type'  => \PDO::PARAM_STR
-            );
+                'type' => \PDO::PARAM_STR
+            ];
 
             $groupFilter = true;
         }
 
-        if (isset($params['filterGroups'])
-            && !empty($params['filterGroups'])
-            && is_array($params['filterGroups'])
-        ) {
+        if (!empty($params['filterGroups']) && is_array($params['filterGroups'])) {
             $where[] = '`filterGroup` IN (\'' . implode("','", $params['filterGroups']) . '\')';
         }
 
         $sql .= " WHERE " . implode(' AND ', $where);
 
-        if (isset($params['limit'])
-            && !empty($params['limit'])
-        ) {
+        if (!empty($params['limit'])) {
             $sql .= " LIMIT " . (int)$params['limit'] * 3;
         } else {
-            $limit           = (int)QUI::getConfig('etc/search.ini.php')->get('general', 'maxResultsPerGroup');
+            $limit = (int)QUI::getConfig('etc/search.ini.php')->get('general', 'maxResultsPerGroup');
             $params['limit'] = $limit;  // set limit parameter for provider search
 
             $sql .= " LIMIT " . $limit;
         }
 
-        $PDO  = QUI::getDataBase()->getPDO();
+        $PDO = QUI::getDataBase()->getPDO();
         $Stmt = $PDO->prepare($sql);
 
         foreach ($binds as $var => $bind) {
@@ -106,7 +99,7 @@ class Search
                 self::class . ' :: search -> ' . $Exception->getMessage()
             );
 
-            return array();
+            return [];
         }
 
         // get group counts
@@ -142,7 +135,7 @@ class Search
             }
 
             foreach ($providerResult as $key => $product) {
-                $product['provider']  = get_class($Provider);
+                $product['provider'] = get_class($Provider);
                 $providerResult[$key] = $product;
             }
 
@@ -150,7 +143,7 @@ class Search
         }
 
         // filter duplicates
-        $ids = array();
+        $ids = [];
 
         $result = array_filter($result, function ($data) use (&$ids) {
             if (isset($ids[$data['id']])) {
@@ -161,9 +154,7 @@ class Search
             return true;
         });
 
-        $result = array_values($result);
-
-        return $result;
+        return array_values($result);
 
 //        $groups = array();
 //
@@ -216,16 +207,16 @@ class Search
      * @param string $id
      * @return array
      */
-    public function getEntry($id)
+    public function getEntry($id): array
     {
-        $result = QUI::getDataBase()->fetch(array(
-            'from'  => Builder::getInstance()->getTable(),
-            'where' => array(
+        $result = QUI::getDataBase()->fetch([
+            'from' => Builder::getInstance()->getTable(),
+            'where' => [
                 'id' => $id
-            ),
+            ],
             'limit' => 1
-        ));
+        ]);
 
-        return isset($result[0]) ? $result[0] : array();
+        return $result[0] ?? [];
     }
 }

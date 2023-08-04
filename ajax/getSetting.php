@@ -7,6 +7,7 @@
  * @param string $var (optional) - settings var; if omitted get whole section
  * @return mixed - settings value
  */
+
 QUI::$Ajax->registerFunction(
     'package_quiqqer_backendsearch_ajax_getSetting',
     function ($section, $var = null) {
@@ -18,5 +19,5 @@ QUI::$Ajax->registerFunction(
 
         return $Conf->get($section, $var);
     },
-    array('section', 'var')
+    ['section', 'var']
 );

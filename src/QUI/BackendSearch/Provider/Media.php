@@ -23,26 +23,27 @@ class Media implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = array())
+    public function search($search, $params = [])
     {
         $filter = array_flip($params['filterGroups']);
 
         $projects = QUI::getProjectManager()->getProjectList();
-        $results  = array();
+        $results = [];
 
         // if no groups are selected, return empty result list
-        if (!isset($filter['file'])
+        if (
+            !isset($filter['file'])
             && !isset($filter['image'])
             && !isset($filter['folder'])
         ) {
             return $results;
         }
 
-        $where = array(
+        $where = [
             '(`title` LIKE :search OR `mime_type` LIKE :search)'
-        );
+        ];
 
-        $whereOr = array();
+        $whereOr = [];
 
         if (isset($filter['file'])) {
             $whereOr[] = '`type` = \'file\'';
@@ -93,9 +94,9 @@ class Media implements ProviderInterface
                 $groupLabel = QUI::getLocale()->get(
                     'quiqqer/backendsearch',
                     'search.provider.media.group.label',
-                    array(
+                    [
                         'projectName' => $projectName
-                    )
+                    ]
                 );
 
                 switch ($row['type']) {
@@ -111,14 +112,14 @@ class Media implements ProviderInterface
                         $icon = 'fa fa-picture-o';
                 }
 
-                $results[] = array(
-                    'id'          => $projectName . '-' . $row['id'],
-                    'title'       => $row['title'],
+                $results[] = [
+                    'id' => $projectName . '-' . $row['id'],
+                    'title' => $row['title'],
                     'description' => $row['file'],
-                    'icon'        => $icon,
-                    'groupLabel'  => $groupLabel,
-                    'group'       => $projectName . '-media'
-                );
+                    'icon' => $icon,
+                    'groupLabel' => $groupLabel,
+                    'group' => $projectName . '-media'
+                ];
             }
         }
 
@@ -135,15 +136,15 @@ class Media implements ProviderInterface
     {
         $data = explode('-', $id);
 
-        return array(
-            'searchdata' => json_encode(array(
+        return [
+            'searchdata' => json_encode([
                 'require' => 'package/quiqqer/backendsearch/bin/controls/provider/Media',
-                'params'  => array(
+                'params' => [
                     'project' => $data[0],
-                    'id'      => $data[1]
-                )
-            ))
-        );
+                    'id' => $data[1]
+                ]
+            ])
+        ];
     }
 
     /**
@@ -152,30 +153,30 @@ class Media implements ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
-        return array(
-            array(
+        return [
+            [
                 'group' => 'folder',
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.provider.media.filter.folder.label'
-                )
-            ),
-            array(
+                ]
+            ],
+            [
                 'group' => 'image',
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.provider.media.filter.image.label'
-                )
-            ),
-            array(
+                ]
+            ],
+            [
                 'group' => 'file',
-                'label' => array(
+                'label' => [
                     'quiqqer/backendsearch',
                     'search.provider.media.filter.file.label'
-                )
-            )
-        );
+                ]
+            ]
+        ];
     }
 }

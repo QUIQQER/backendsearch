@@ -3,6 +3,7 @@
 /**
  * This file contains QUI\BackendSearch\ProviderInterface
  */
+
 namespace QUI\BackendSearch;
 
 /**
@@ -28,7 +29,7 @@ interface ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = array());
+    public function search($search, $params = []);
 
     /**
      * Return a search entry
