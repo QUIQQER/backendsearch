@@ -531,15 +531,16 @@ class Builder
 
         foreach ($needles as $needle) {
             if (empty($params[$needle])) {
-                throw new QUI\BackendSearch\Exception([
-                    'quiqqer/backendsearch',
-                    'exception.builder.addEntry.missing_params',
+                throw new QUI\BackendSearch\Exception(
                     [
-                        'params' => json_encode(array_keys($params)),
-                        'needle' => json_encode($needle),
-                        'lang' => $lang
-                    ]
-                ],
+                        'quiqqer/backendsearch',
+                        'exception.builder.addEntry.missing_params',
+                        [
+                            'params' => json_encode(array_keys($params)),
+                            'needle' => json_encode($needle),
+                            'lang' => $lang
+                        ]
+                    ],
                     404
                 );
             }
@@ -562,17 +563,11 @@ class Builder
             unset($params['name']);
         }
 
-        if (
-            isset($params['groupLabel'])
-            && is_array($params['groupLabel'])
-        ) {
+        if (isset($params['groupLabel']) && is_array($params['groupLabel'])) {
             $params['groupLabel'] = json_encode($params['groupLabel']);
         }
 
-        if (
-            isset($params['searchdata'])
-            && is_array($params['searchdata'])
-        ) {
+        if (isset($params['searchdata']) && is_array($params['searchdata'])) {
             $params['searchdata'] = json_encode($params['searchdata']);
         }
 
