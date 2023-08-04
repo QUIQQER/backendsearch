@@ -3,14 +3,14 @@
 namespace QUI\BackendSearch\Provider;
 
 use QUI;
-use QUI\BackendSearch\ProviderInterface;
 use QUI\BackendSearch\Builder;
-use QUI\Utils\Text\XML;
+use QUI\BackendSearch\ProviderInterface;
 use QUI\Utils\DOM as DOMUtils;
+use QUI\Utils\Text\XML;
 
 class Projects implements ProviderInterface
 {
-    const GROUP_WEBSITES         = 'websites';
+    const GROUP_WEBSITES = 'websites';
     const GROUP_PROJECT_SETTINGS = 'project_settings';
 
     /**
@@ -21,32 +21,32 @@ class Projects implements ProviderInterface
     public function buildCache()
     {
         $projects = QUI::getProjectManager()->getProjectList();
-        $Builder  = Builder::getInstance();
-        $locales  = $Builder->getLocales();
+        $Builder = Builder::getInstance();
+        $locales = $Builder->getLocales();
 
         /** @var QUI\Projects\Project $Project */
         foreach ($projects as $Project) {
             $projectName = $Project->getName();
             $projectLang = $Project->getLang();
 
-            $entry = array(
-                'id'          => $projectName,
-                'title'       => $projectName . ' (' . $projectLang . ')',
-                'icon'        => 'fa fa-globe',
-                'groupLabel'  => QUI::getLocale()->get(
+            $entry = [
+                'id' => $projectName,
+                'title' => $projectName . ' (' . $projectLang . ')',
+                'icon' => 'fa fa-globe',
+                'groupLabel' => QUI::getLocale()->get(
                     'quiqqer/backendsearch',
                     'search.provider.projects.group.label'
                 ),
-                'group'       => self::GROUP_WEBSITES,
+                'group' => self::GROUP_WEBSITES,
                 'filterGroup' => Sites::FILTER_SITES,
-                'search'      => $projectName,
-                'searchdata'  => array(
+                'search' => $projectName,
+                'searchdata' => [
                     'require' => 'controls/projects/project/Settings',
-                    'params'  => array(
+                    'params' => [
                         'project' => $projectName
-                    )
-                )
-            );
+                    ]
+                ]
+            ];
 
             /** @var QUI\Locale $Locale */
             foreach ($locales as $Locale) {
@@ -68,7 +68,7 @@ class Projects implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = array())
+    public function search($search, $params = [])
     {
     }
 
@@ -90,7 +90,7 @@ class Projects implements ProviderInterface
      */
     public function getFilterGroups()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -102,44 +102,44 @@ class Projects implements ProviderInterface
      */
     protected function getProjectSettingsSearchTerms($Project, $Locale)
     {
-        $dataEntries = array();
+        $dataEntries = [];
         $projectName = $Project->getName();
         $description = $Locale->get(
             'quiqqer/backendsearch',
             'search.provider.projects.settings.description',
-            array(
+            [
                 'project' => $projectName
-            )
+            ]
         );
 
-        $group      = 'settings-' . $projectName;
+        $group = 'settings-' . $projectName;
         $groupLabel = $Locale->get(
             'quiqqer/backendsearch',
             'search.provider.projects.settings.group.label',
-            array(
+            [
                 'project' => $projectName
-            )
+            ]
         );
 
         // parse standard project settings templates (HARDCODED)
-        $templateFiles = array(
+        $templateFiles = [
             SYS_DIR . 'template/project/settings.html',
             SYS_DIR . 'template/project/settingsAdmin.html',
             SYS_DIR . 'template/project/settingsMedia.html'
-        );
+        ];
 
         // prepare Engine object for parsing
         $Engine = QUI::getTemplateManager()->getEngine(true);
-        $Engine->assign(array(
-            'QUI'     => new \QUI(),
+        $Engine->assign([
+            'QUI' => new \QUI(),
             'Project' => $Project
-        ));
+        ]);
 
         $Doc = new \DOMDocument();
 
         foreach ($templateFiles as $template) {
-            $html   = $Engine->fetch($template);
-            $search = array(); // search terms
+            $html = $Engine->fetch($template);
+            $search = []; // search terms
 
             $Doc->loadHTML($html);
             $Path = new \DOMXPath($Doc);
@@ -163,40 +163,40 @@ class Projects implements ProviderInterface
 
             switch ($templateName) {
                 case 'settings':
-                    $text     = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.settings');
-                    $icon     = 'fa fa-gear';
+                    $text = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.settings');
+                    $icon = 'fa fa-gear';
                     $category = 'settings';
                     break;
 
                 case 'settingsAdmin':
-                    $text     = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.adminSettings');
-                    $icon     = 'fa fa-gear';
+                    $text = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.adminSettings');
+                    $icon = 'fa fa-gear';
                     $category = 'adminSettings';
                     break;
 
                 case 'settingsMedia':
-                    $text     = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.media');
-                    $icon     = 'fa fa-picture-o';
+                    $text = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.media');
+                    $icon = 'fa fa-picture-o';
                     $category = 'mediaSettings';
                     break;
             }
 
-            $entry = array(
-                'title'       => $text,
+            $entry = [
+                'title' => $text,
                 'description' => $description,
-                'searchdata'  => array(
+                'searchdata' => [
                     'require' => 'controls/projects/project/Settings',
-                    'params'  => array(
-                        'project'  => $projectName,
+                    'params' => [
+                        'project' => $projectName,
                         'category' => $category
-                    )
-                ),
-                'search'      => implode(' ', $search),
-                'icon'        => $icon,
-                'group'       => $group,
+                    ]
+                ],
+                'search' => implode(' ', $search),
+                'icon' => $icon,
+                'group' => $group,
                 'filterGroup' => SettingsCategories::TYPE_SETTINGS_CONTENT,
-                'groupLabel'  => $groupLabel
-            );
+                'groupLabel' => $groupLabel
+            ];
 
             $dataEntries[] = $entry;
         }
@@ -213,8 +213,8 @@ class Projects implements ProviderInterface
                 continue;
             }
 
-            $Dom        = XML::getDomFromXml($xmlFile);
-            $Path       = new \DOMXPath($Dom);
+            $Dom = XML::getDomFromXml($xmlFile);
+            $Path = new \DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
 
             /** @var \DOMElement $Category */
@@ -225,21 +225,21 @@ class Projects implements ProviderInterface
                     $category = $Category->getAttribute('name');
                 }
 
-                $entry = array(
-                    'searchdata'  => array(
+                $entry = [
+                    'searchdata' => [
                         'require' => 'controls/projects/project/Settings',
-                        'params'  => array(
-                            'project'  => $projectName,
+                        'params' => [
+                            'project' => $projectName,
                             'category' => $category
-                        )
-                    ),
-                    'icon'        => '',
-                    'group'       => $group,
+                        ]
+                    ],
+                    'icon' => '',
+                    'group' => $group,
                     'filterGroup' => SettingsCategories::TYPE_SETTINGS_CONTENT,
-                    'groupLabel'  => $groupLabel
-                );
+                    'groupLabel' => $groupLabel
+                ];
 
-                $searchStringParts = array();
+                $searchStringParts = [];
 
                 /** @var \DOMNode $Child */
                 foreach ($Category->childNodes as $Child) {
@@ -248,10 +248,10 @@ class Projects implements ProviderInterface
                     }
 
                     if ($Child->nodeName == 'title' || $Child->nodeName == 'text') {
-                        $nodeText             = DOMUtils::getTextFromNode($Child);
-                        $entry['title']       = $nodeText;
+                        $nodeText = DOMUtils::getTextFromNode($Child);
+                        $entry['title'] = $nodeText;
                         $entry['description'] = $description;
-                        $searchStringParts[]  = $nodeText;
+                        $searchStringParts[] = $nodeText;
                         continue;
                     }
 
@@ -286,7 +286,7 @@ class Projects implements ProviderInterface
                 }
 
                 $entry['search'] = implode(' ', $searchStringParts);
-                $dataEntries[]   = $entry;
+                $dataEntries[] = $entry;
             }
         }
 

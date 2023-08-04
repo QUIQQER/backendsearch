@@ -3,15 +3,15 @@
 namespace QUI\BackendSearch\Provider;
 
 use QUI;
-use QUI\BackendSearch\ProviderInterface;
 use QUI\BackendSearch\Builder;
+use QUI\BackendSearch\ProviderInterface;
+use QUI\Permissions\Permission;
 use QUI\Utils\DOM as DOMUtils;
 use QUI\Utils\Text\XML;
-use QUI\Permissions\Permission;
 
 class SettingsCategories implements ProviderInterface
 {
-    const TYPE_SETTINGS         = 'settings';
+    const TYPE_SETTINGS = 'settings';
     const TYPE_SETTINGS_CONTENT = 'settings_content';
 
     /**
@@ -21,9 +21,9 @@ class SettingsCategories implements ProviderInterface
      */
     public function buildCache()
     {
-        $Builder          = Builder::getInstance();
-        $locales          = $Builder->getLocales();
-        $QUILocale        = QUI::getLocale();
+        $Builder = Builder::getInstance();
+        $locales = $Builder->getLocales();
+        $QUILocale = QUI::getLocale();
         $quiLocaleCurrent = $QUILocale->getCurrent();
 
         /** @var QUI\Locale $Locale */
@@ -137,7 +137,7 @@ class SettingsCategories implements ProviderInterface
      */
     protected function parseSettingsMenuData($items, $Locale, $parentTitle = null)
     {
-        $data         = [];
+        $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type', 'category'];
 
         if (!is_array($items)) {
@@ -145,16 +145,17 @@ class SettingsCategories implements ProviderInterface
         }
 
         foreach ($items as $item) {
-            $title       = $item['text'];
+            $title = $item['text'];
             $description = $title;
 
             if (!is_null($parentTitle)) {
-                $description = $parentTitle.' -> '.$description;    // @todo Trennzeichen ggf. ändern
+                $description = $parentTitle . ' -> ' . $description;    // @todo Trennzeichen ggf. ändern
             }
 
             $item['description'] = $description;
 
-            if (isset($item['qui-xml-file'])
+            if (
+                isset($item['qui-xml-file'])
                 && !empty($item['qui-xml-file'])
             ) {
                 $data = array_merge(
@@ -170,7 +171,7 @@ class SettingsCategories implements ProviderInterface
             // locale w. search string
             if (isset($item['locale']) && is_array($item['locale'])) {
                 $search = $Locale->get($item['locale'][0], $item['locale'][1]);
-                $title  = $search;
+                $title = $search;
             }
 
             $icon = '';
@@ -188,13 +189,14 @@ class SettingsCategories implements ProviderInterface
             }
 
             $data[] = [
-                'title'      => $title,
-                'icon'       => $icon,
-                'search'     => $search,
+                'title' => $title,
+                'icon' => $icon,
+                'search' => $search,
                 'searchdata' => json_encode($searchData)
             ];
 
-            if (isset($item['items'])
+            if (
+                isset($item['items'])
                 && !empty($item['items'])
             ) {
                 $data = array_merge($data, $this->parseSettingsMenuData($item['items'], $Locale, $description));
@@ -225,59 +227,59 @@ class SettingsCategories implements ProviderInterface
 
         foreach ($xmlFiles as $xmlFile) {
             if (!file_exists($xmlFile)) {
-                $xmlFile = CMS_DIR.$xmlFile;
+                $xmlFile = CMS_DIR . $xmlFile;
             }
 
             if (!file_exists($xmlFile)) {
                 QUI\System\Log::addWarning(
-                    self::class.' :: parseSearchStringFromSettingsXml -> XML file '.$xmlFile.' does not exist.'
+                    self::class . ' :: parseSearchStringFromSettingsXml -> XML file ' . $xmlFile . ' does not exist.'
                 );
 
                 continue;
             }
 
-            $Dom        = XML::getDomFromXml($xmlFile);
-            $Path       = new \DOMXPath($Dom);
+            $Dom = XML::getDomFromXml($xmlFile);
+            $Path = new \DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
-            $descPrefix = $Locale->get('quiqqer/system', 'settings').' -> '.$item['text'];
+            $descPrefix = $Locale->get('quiqqer/system', 'settings') . ' -> ' . $item['text'];
 
             // add menu entry for settings
             $dataEntries[] = [
-                'title'       => $item['text'],
+                'title' => $item['text'],
                 'description' => $item['description'],
-                'group'       => self::TYPE_SETTINGS,
-                'groupLabel'  => $Locale->get(
+                'group' => self::TYPE_SETTINGS,
+                'groupLabel' => $Locale->get(
                     'quiqqer/backendsearch',
                     'search.builder.group.menu.label',
                     [
                         'type' => $Locale->get('quiqqer/system', 'settings')
                     ]
                 ),
-                'searchdata'  => json_encode([
-                    'params'  => [
+                'searchdata' => json_encode([
+                    'params' => [
                         'category' => false,
-                        'xmlFile'  => $xmlFile
+                        'xmlFile' => $xmlFile
                     ],
                     'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                 ]),
-                'icon'        => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
-                'search'      => $item['text']
+                'icon' => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
+                'search' => $item['text']
             ];
 
             /** @var \DOMElement $Category */
             foreach ($categories as $Category) {
                 $entry = [
-                    'searchdata'  => [
-                        'params'  => [
+                    'searchdata' => [
+                        'params' => [
                             'category' => $Category->getAttribute('name'),
-                            'xmlFile'  => $xmlFile
+                            'xmlFile' => $xmlFile
                         ],
                         'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                     ],
-                    'icon'        => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
-                    'group'       => self::TYPE_SETTINGS_CONTENT,
+                    'icon' => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
+                    'group' => self::TYPE_SETTINGS_CONTENT,
                     'filterGroup' => self::TYPE_SETTINGS_CONTENT,
-                    'groupLabel'  => $Locale->get('quiqqer/system', 'settings')
+                    'groupLabel' => $Locale->get('quiqqer/system', 'settings')
                 ];
 
                 $searchStringParts = [];
@@ -289,10 +291,10 @@ class SettingsCategories implements ProviderInterface
                     }
 
                     if ($Child->nodeName == 'title' || $Child->nodeName == 'text') {
-                        $nodeText             = DOMUtils::getTextFromNode($Child);
-                        $entry['title']       = $item['text'].' - '.$nodeText;
-                        $entry['description'] = $descPrefix.' -> '.$nodeText;
-                        $searchStringParts[]  = $nodeText;
+                        $nodeText = DOMUtils::getTextFromNode($Child);
+                        $entry['title'] = $item['text'] . ' - ' . $nodeText;
+                        $entry['description'] = $descPrefix . ' -> ' . $nodeText;
+                        $searchStringParts[] = $nodeText;
                         continue;
                     }
 
@@ -321,9 +323,9 @@ class SettingsCategories implements ProviderInterface
                     }
                 }
 
-                $entry['search']     = implode(' ', $searchStringParts);
+                $entry['search'] = implode(' ', $searchStringParts);
                 $entry['searchdata'] = json_encode($entry['searchdata']);
-                $dataEntries[]       = $entry;
+                $dataEntries[] = $entry;
             }
         }
 

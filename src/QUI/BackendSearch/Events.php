@@ -39,7 +39,7 @@ class Events
             return;
         }
 
-        $Conf    = $Package->getConfig();
+        $Conf = $Package->getConfig();
         $created = $Conf->get('setup', 'cron_created');
 
         if (!empty($created)) {
@@ -60,7 +60,7 @@ class Events
         }
 
         $CronManager = new QUI\Cron\Manager();
-        $cronTitle   = QUI::getLocale()->get('quiqqer/backendsearch', 'cron.search.build.title');
+        $cronTitle = QUI::getLocale()->get('quiqqer/backendsearch', 'cron.search.build.title');
 
         if (!$CronManager->isCronSetUp($cronTitle)) {
             $CronManager->add($cronTitle, '0', '0', '*', '*', '*');
