@@ -2,6 +2,9 @@
 
 namespace QUI\BackendSearch\Provider;
 
+use DOMDocument;
+use DOMNode;
+use DOMXPath;
 use QUI;
 use QUI\BackendSearch\Builder;
 use QUI\BackendSearch\ProviderInterface;
@@ -131,18 +134,18 @@ class Projects implements ProviderInterface
         // prepare Engine object for parsing
         $Engine = QUI::getTemplateManager()->getEngine(true);
         $Engine->assign([
-            'QUI' => new \QUI(),
+            'QUI' => new QUI(),
             'Project' => $Project
         ]);
 
-        $Doc = new \DOMDocument();
+        $Doc = new DOMDocument();
 
         foreach ($templateFiles as $template) {
             $html = $Engine->fetch($template);
             $search = []; // search terms
 
             $Doc->loadHTML($html);
-            $Path = new \DOMXPath($Doc);
+            $Path = new DOMXPath($Doc);
 
             // table headers
             $titles = $Path->query('//table/thead/tr/th');
@@ -154,12 +157,15 @@ class Projects implements ProviderInterface
             // labels
             $labels = $Path->query('//label');
 
-            /** @var \DOMNode $Label */
+            /** @var DOMNode $Label */
             foreach ($labels as $Label) {
                 $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Label)));
             }
 
             $templateName = basename($template, '.html');
+            $text = '';
+            $category = '';
+            $icon = '';
 
             switch ($templateName) {
                 case 'settings':
@@ -214,7 +220,7 @@ class Projects implements ProviderInterface
             }
 
             $Dom = XML::getDomFromXml($xmlFile);
-            $Path = new \DOMXPath($Dom);
+            $Path = new DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
 
             /** @var \DOMElement $Category */
@@ -241,7 +247,7 @@ class Projects implements ProviderInterface
 
                 $searchStringParts = [];
 
-                /** @var \DOMNode $Child */
+                /** @var DOMNode $Child */
                 foreach ($Category->childNodes as $Child) {
                     if ($Child->nodeName == '#text') {
                         continue;
@@ -261,7 +267,7 @@ class Projects implements ProviderInterface
                     }
 
                     if ($Child->nodeName == 'settings') {
-                        /** @var \DOMNode $SettingChild */
+                        /** @var DOMNode $SettingChild */
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
                                 $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
