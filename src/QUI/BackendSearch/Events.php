@@ -19,7 +19,7 @@ class Events
      *
      * @return void
      */
-    public static function onAdminLoadFooter()
+    public static function onAdminLoadFooter(): void
     {
         $jsFile = URL_OPT_DIR . 'quiqqer/backendsearch/bin/onAdminLoadFooter.js';
         echo '<script src="' . $jsFile . '"></script>';
@@ -33,7 +33,7 @@ class Events
      *
      * @throws QUI\Exception
      */
-    public static function onPackageSetup(Package $Package)
+    public static function onPackageSetup(Package $Package): void
     {
         if ($Package->getName() !== 'quiqqer/backendsearch') {
             return;

@@ -4,6 +4,7 @@ namespace QUI\BackendSearch\Provider;
 
 use QUI;
 use QUI\BackendSearch\ProviderInterface;
+use QUI\Database\Exception;
 
 class Sites implements ProviderInterface
 {
@@ -12,7 +13,7 @@ class Sites implements ProviderInterface
     /**
      * Build the cache
      *
-     * @return mixed
+     * @return void
      */
     public function buildCache(): void
     {
@@ -24,6 +25,9 @@ class Sites implements ProviderInterface
      * @param string $search
      * @param array $params
      * @return mixed
+     *
+     * @throws Exception
+     * @throws QUI\Exception
      */
     public function search(string $search, array $params = []): array
     {
@@ -34,7 +38,6 @@ class Sites implements ProviderInterface
         $projects = QUI::getProjectManager()->getProjectList();
         $results = [];
 
-        /** @var QUI\Projects\Project $Project */
         foreach ($projects as $Project) {
             $siteIds = $Project->getSitesIds([
                 'where' => [
@@ -113,7 +116,7 @@ class Sites implements ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         return [
             [

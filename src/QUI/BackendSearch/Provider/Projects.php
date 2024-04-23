@@ -3,6 +3,7 @@
 namespace QUI\BackendSearch\Provider;
 
 use DOMDocument;
+use DOMElement;
 use DOMNode;
 use DOMXPath;
 use QUI;
@@ -226,7 +227,7 @@ class Projects implements ProviderInterface
             $Path = new DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
 
-            /** @var \DOMElement $Category */
+            /** @var DOMElement $Category */
             foreach ($categories as $Category) {
                 $category = false;
 
@@ -269,7 +270,7 @@ class Projects implements ProviderInterface
                         continue;
                     }
 
-                    if ($Child->nodeName == 'settings') {
+                    if ($Child->nodeName === 'settings') {
                         /** @var DOMNode $SettingChild */
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
@@ -277,7 +278,7 @@ class Projects implements ProviderInterface
                                 continue;
                             }
 
-                            if ($SettingChild->nodeName == 'description' || $SettingChild->nodeName == 'description') {
+                            if ($SettingChild->nodeName == 'description') {
                                 $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }

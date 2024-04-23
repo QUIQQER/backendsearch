@@ -3,6 +3,7 @@
 namespace QUI\BackendSearch\Provider;
 
 use Exception;
+use PDO;
 use QUI;
 use QUI\BackendSearch\ProviderInterface;
 
@@ -77,7 +78,7 @@ class Media implements ProviderInterface
 
             try {
                 $Stmt->execute();
-                $result = $Stmt->fetchAll(\PDO::FETCH_ASSOC);
+                $result = $Stmt->fetchAll(PDO::FETCH_ASSOC);
             } catch (Exception $Exception) {
                 QUI\System\Log::addError(
                     self::class . ' :: search -> ' . $Exception->getMessage()
@@ -97,18 +98,11 @@ class Media implements ProviderInterface
                     ]
                 );
 
-                switch ($row['type']) {
-                    case 'file':
-                        $icon = 'fa fa-file-text-o';
-                        break;
-
-                    case 'folder':
-                        $icon = 'fa fa-folder-o';
-                        break;
-
-                    default:
-                        $icon = 'fa fa-picture-o';
-                }
+                $icon = match ($row['type']) {
+                    'file' => 'fa fa-file-text-o',
+                    'folder' => 'fa fa-folder-o',
+                    default => 'fa fa-picture-o',
+                };
 
                 $results[] = [
                     'id' => $projectName . '-' . $row['id'],

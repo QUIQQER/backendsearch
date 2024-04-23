@@ -2,6 +2,8 @@
 
 namespace QUI\BackendSearch\Provider;
 
+use Exception;
+use PDO;
 use QUI;
 use QUI\BackendSearch\ProviderInterface;
 use QUI\Permissions\Permission;
@@ -82,13 +84,13 @@ class UsersAndGroups implements ProviderInterface
             $Stmt = $PDO->prepare($sql);
 
             // bind
-            $Stmt->bindValue(':search', '%' . $search . '%', \PDO::PARAM_STR);
+            $Stmt->bindValue(':search', '%' . $search . '%');
             $error = false;
 
             try {
                 $Stmt->execute();
-                $result = $Stmt->fetchAll(\PDO::FETCH_ASSOC);
-            } catch (\Exception $Exception) {
+                $result = $Stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (Exception $Exception) {
                 QUI\System\Log::addError(
                     self::class . ' :: search (users) -> ' . $Exception->getMessage()
                 );
@@ -137,7 +139,7 @@ class UsersAndGroups implements ProviderInterface
                     ]
                 ]
             ]);
-        } catch (\Exception $Exception) {
+        } catch (Exception $Exception) {
             QUI\System\Log::addError(
                 self::class . ' :: search (groups) -> ' . $Exception->getMessage()
             );
