@@ -18,7 +18,7 @@
         "source": "https:\/\/dev.quiqqer.com\/quiqqer\/backendsearch\/tree\/dev"
     },
     "require": {
-        "quiqqer\/quiqqer": "*@dev"
+        "quiqqer\/quiqqer": "^2"
     },
     "autoload": {
         "psr-4": {
