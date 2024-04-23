@@ -26,7 +26,8 @@ QUI::$Ajax->registerFunction(
         $entryData = $Provider->getEntry($id);
 
         if (
-            isset($entryData['searchdata'])
+            $entryData
+            && isset($entryData['searchdata'])
             && is_array($entryData['searchdata'])
         ) {
             $entryData['searchdata'] = json_encode($entryData['searchdata']);

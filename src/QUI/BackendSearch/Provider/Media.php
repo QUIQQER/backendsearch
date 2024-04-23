@@ -2,6 +2,7 @@
 
 namespace QUI\BackendSearch\Provider;
 
+use Exception;
 use QUI;
 use QUI\BackendSearch\ProviderInterface;
 
@@ -9,10 +10,8 @@ class Media implements ProviderInterface
 {
     /**
      * Build the cache
-     *
-     * @return mixed
      */
-    public function buildCache()
+    public function buildCache(): void
     {
     }
 
@@ -23,7 +22,7 @@ class Media implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = [])
+    public function search(string $search, array $params = []): array
     {
         $filter = array_flip($params['filterGroups']);
 
@@ -61,7 +60,6 @@ class Media implements ProviderInterface
 
         $PDO = QUI::getDataBase()->getPDO();
 
-        /* @var $Project QUI\Projects\Project */
         foreach ($projects as $Project) {
             $Media = $Project->getMedia();
 
@@ -75,12 +73,12 @@ class Media implements ProviderInterface
             $Stmt = $PDO->prepare($sql);
 
             // bind
-            $Stmt->bindValue(':search', '%' . $search . '%', \PDO::PARAM_STR);
+            $Stmt->bindValue(':search', '%' . $search . '%');
 
             try {
                 $Stmt->execute();
                 $result = $Stmt->fetchAll(\PDO::FETCH_ASSOC);
-            } catch (\Exception $Exception) {
+            } catch (Exception $Exception) {
                 QUI\System\Log::addError(
                     self::class . ' :: search -> ' . $Exception->getMessage()
                 );
@@ -130,9 +128,9 @@ class Media implements ProviderInterface
      * Return a search entry
      *
      * @param integer $id
-     * @return mixed
+     * @return array
      */
-    public function getEntry($id)
+    public function getEntry(int $id): array
     {
         $data = explode('-', $id);
 

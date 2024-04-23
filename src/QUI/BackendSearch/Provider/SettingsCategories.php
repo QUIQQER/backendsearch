@@ -19,7 +19,7 @@ class SettingsCategories implements ProviderInterface
      *
      * @return void
      */
-    public function buildCache()
+    public function buildCache(): void
     {
         $Builder = Builder::getInstance();
         $locales = $Builder->getLocales();
@@ -89,8 +89,9 @@ class SettingsCategories implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = [])
+    public function search(string $search, array $params = []): array
     {
+        return [];
     }
 
     /**
@@ -99,8 +100,9 @@ class SettingsCategories implements ProviderInterface
      * @param integer $id
      * @return mixed
      */
-    public function getEntry($id)
+    public function getEntry(int $id): mixed
     {
+        return null;
     }
 
     /**
@@ -109,7 +111,7 @@ class SettingsCategories implements ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         $filterGroups = [];
 
@@ -135,7 +137,7 @@ class SettingsCategories implements ProviderInterface
      * @param string $parentTitle (optional) - title of parent menu node
      * @return array
      */
-    protected function parseSettingsMenuData($items, $Locale, $parentTitle = null)
+    protected function parseSettingsMenuData($items, $Locale, $parentTitle = null): array
     {
         $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type', 'category'];

@@ -8,6 +8,7 @@ use DOMXPath;
 use QUI;
 use QUI\BackendSearch\Builder;
 use QUI\BackendSearch\ProviderInterface;
+use QUI\Exception;
 use QUI\Utils\DOM as DOMUtils;
 use QUI\Utils\Text\XML;
 
@@ -20,14 +21,14 @@ class Projects implements ProviderInterface
      * Build the cache
      *
      * @return void
+     * @throws Exception
      */
-    public function buildCache()
+    public function buildCache(): void
     {
         $projects = QUI::getProjectManager()->getProjectList();
         $Builder = Builder::getInstance();
         $locales = $Builder->getLocales();
 
-        /** @var QUI\Projects\Project $Project */
         foreach ($projects as $Project) {
             $projectName = $Project->getName();
             $projectLang = $Project->getLang();
@@ -71,8 +72,9 @@ class Projects implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = [])
+    public function search(string $search, array $params = []): array
     {
+        return [];
     }
 
     /**
@@ -81,8 +83,9 @@ class Projects implements ProviderInterface
      * @param integer $id
      * @return mixed
      */
-    public function getEntry($id)
+    public function getEntry(int $id): mixed
     {
+        return null;
     }
 
     /**
@@ -91,7 +94,7 @@ class Projects implements ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         return [];
     }
@@ -103,7 +106,7 @@ class Projects implements ProviderInterface
      * @param QUI\Locale $Locale
      * @return array - search strings
      */
-    protected function getProjectSettingsSearchTerms($Project, $Locale)
+    protected function getProjectSettingsSearchTerms(QUI\Projects\Project $Project, QUI\Locale $Locale): array
     {
         $dataEntries = [];
         $projectName = $Project->getName();

@@ -20,9 +20,9 @@ class UsersAndGroups implements ProviderInterface
     /**
      * Build the cache
      *
-     * @return mixed
+     * @return void
      */
-    public function buildCache()
+    public function buildCache(): void
     {
     }
 
@@ -31,9 +31,9 @@ class UsersAndGroups implements ProviderInterface
      *
      * @param string $search
      * @param array $params
-     * @return mixed
+     * @return array
      */
-    public function search($search, $params = [])
+    public function search(string $search, array $params = []): array
     {
         if (
             isset($params['filterGroups'])
@@ -51,12 +51,13 @@ class UsersAndGroups implements ProviderInterface
         if (Permission::hasPermission('quiqqer.admin.users.edit')) {
             $Users = QUI::getUsers();
 
-            $sql = "SELECT users.id, users.username FROM ";
+            $sql = "SELECT users.id, users.uuid, users.username FROM ";
             $sql .= " `" . $Users->table() . "`, `" . $Users->tableAddress() . "` address";
 
             $where = [];
 
             // users table
+            $where[] = "users.`uuid` LIKE :search";
             $where[] = "users.`id` LIKE :search";
             $where[] = "users.`username` LIKE :search";
             $where[] = "users.`firstname` LIKE :search";
@@ -166,9 +167,9 @@ class UsersAndGroups implements ProviderInterface
      * Return a search entry
      *
      * @param integer $id
-     * @return mixed
+     * @return array
      */
-    public function getEntry($id)
+    public function getEntry(int $id): array
     {
         $type = mb_strtolower(mb_substr($id, 0, 1));
 
@@ -189,7 +190,7 @@ class UsersAndGroups implements ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         $filterGroups = [];
 

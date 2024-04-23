@@ -14,7 +14,7 @@ class Sites implements ProviderInterface
      *
      * @return mixed
      */
-    public function buildCache()
+    public function buildCache(): void
     {
     }
 
@@ -25,7 +25,7 @@ class Sites implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = [])
+    public function search(string $search, array $params = []): array
     {
         if (!in_array('sites', $params['filterGroups'])) {
             return [];
@@ -91,7 +91,7 @@ class Sites implements ProviderInterface
      * @param integer $id
      * @return mixed
      */
-    public function getEntry($id)
+    public function getEntry(int $id): array
     {
         $data = explode('-', $id);
 
