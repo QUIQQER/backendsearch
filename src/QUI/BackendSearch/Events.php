@@ -40,7 +40,7 @@ class Events
         }
 
         $Conf = $Package->getConfig();
-        $created = $Conf->get('setup', 'cron_created');
+        $created = $Conf?->get('setup', 'cron_created');
 
         if (!empty($created)) {
             return;
@@ -66,7 +66,7 @@ class Events
             $CronManager->add($cronTitle, '0', '0', '*', '*', '*');
         }
 
-        $Conf->set('setup', 'cron_created', 1);
-        $Conf->save();
+        $Conf?->set('setup', 'cron_created', 1);
+        $Conf?->save();
     }
 }
