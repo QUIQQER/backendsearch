@@ -2,9 +2,14 @@
 
 namespace QUI\BackendSearch\Provider;
 
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+use DOMXPath;
 use QUI;
 use QUI\BackendSearch\Builder;
 use QUI\BackendSearch\ProviderInterface;
+use QUI\Exception;
 use QUI\Utils\DOM as DOMUtils;
 use QUI\Utils\Text\XML;
 
@@ -17,14 +22,14 @@ class Projects implements ProviderInterface
      * Build the cache
      *
      * @return void
+     * @throws Exception
      */
-    public function buildCache()
+    public function buildCache(): void
     {
         $projects = QUI::getProjectManager()->getProjectList();
         $Builder = Builder::getInstance();
         $locales = $Builder->getLocales();
 
-        /** @var QUI\Projects\Project $Project */
         foreach ($projects as $Project) {
             $projectName = $Project->getName();
             $projectLang = $Project->getLang();
@@ -68,8 +73,9 @@ class Projects implements ProviderInterface
      * @param array $params
      * @return mixed
      */
-    public function search($search, $params = [])
+    public function search(string $search, array $params = []): array
     {
+        return [];
     }
 
     /**
@@ -78,8 +84,9 @@ class Projects implements ProviderInterface
      * @param integer $id
      * @return mixed
      */
-    public function getEntry($id)
+    public function getEntry(int $id): mixed
     {
+        return null;
     }
 
     /**
@@ -88,7 +95,7 @@ class Projects implements ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         return [];
     }
@@ -100,7 +107,7 @@ class Projects implements ProviderInterface
      * @param QUI\Locale $Locale
      * @return array - search strings
      */
-    protected function getProjectSettingsSearchTerms($Project, $Locale)
+    protected function getProjectSettingsSearchTerms(QUI\Projects\Project $Project, QUI\Locale $Locale): array
     {
         $dataEntries = [];
         $projectName = $Project->getName();
@@ -131,18 +138,18 @@ class Projects implements ProviderInterface
         // prepare Engine object for parsing
         $Engine = QUI::getTemplateManager()->getEngine(true);
         $Engine->assign([
-            'QUI' => new \QUI(),
+            'QUI' => new QUI(),
             'Project' => $Project
         ]);
 
-        $Doc = new \DOMDocument();
+        $Doc = new DOMDocument();
 
         foreach ($templateFiles as $template) {
             $html = $Engine->fetch($template);
             $search = []; // search terms
 
             $Doc->loadHTML($html);
-            $Path = new \DOMXPath($Doc);
+            $Path = new DOMXPath($Doc);
 
             // table headers
             $titles = $Path->query('//table/thead/tr/th');
@@ -154,12 +161,15 @@ class Projects implements ProviderInterface
             // labels
             $labels = $Path->query('//label');
 
-            /** @var \DOMNode $Label */
+            /** @var DOMNode $Label */
             foreach ($labels as $Label) {
                 $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Label)));
             }
 
             $templateName = basename($template, '.html');
+            $text = '';
+            $category = '';
+            $icon = '';
 
             switch ($templateName) {
                 case 'settings':
@@ -214,10 +224,10 @@ class Projects implements ProviderInterface
             }
 
             $Dom = XML::getDomFromXml($xmlFile);
-            $Path = new \DOMXPath($Dom);
+            $Path = new DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
 
-            /** @var \DOMElement $Category */
+            /** @var DOMElement $Category */
             foreach ($categories as $Category) {
                 $category = false;
 
@@ -241,7 +251,7 @@ class Projects implements ProviderInterface
 
                 $searchStringParts = [];
 
-                /** @var \DOMNode $Child */
+                /** @var DOMNode $Child */
                 foreach ($Category->childNodes as $Child) {
                     if ($Child->nodeName == '#text') {
                         continue;
@@ -260,15 +270,15 @@ class Projects implements ProviderInterface
                         continue;
                     }
 
-                    if ($Child->nodeName == 'settings') {
-                        /** @var \DOMNode $SettingChild */
+                    if ($Child->nodeName === 'settings') {
+                        /** @var DOMNode $SettingChild */
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
                                 $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }
 
-                            if ($SettingChild->nodeName == 'description' || $SettingChild->nodeName == 'description') {
+                            if ($SettingChild->nodeName == 'description') {
                                 $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }

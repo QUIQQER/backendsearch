@@ -19,7 +19,7 @@ class Events
      *
      * @return void
      */
-    public static function onAdminLoadFooter()
+    public static function onAdminLoadFooter(): void
     {
         $jsFile = URL_OPT_DIR . 'quiqqer/backendsearch/bin/onAdminLoadFooter.js';
         echo '<script src="' . $jsFile . '"></script>';
@@ -33,14 +33,14 @@ class Events
      *
      * @throws QUI\Exception
      */
-    public static function onPackageSetup(Package $Package)
+    public static function onPackageSetup(Package $Package): void
     {
         if ($Package->getName() !== 'quiqqer/backendsearch') {
             return;
         }
 
         $Conf = $Package->getConfig();
-        $created = $Conf->get('setup', 'cron_created');
+        $created = $Conf?->get('setup', 'cron_created');
 
         if (!empty($created)) {
             return;
@@ -66,7 +66,7 @@ class Events
             $CronManager->add($cronTitle, '0', '0', '*', '*', '*');
         }
 
-        $Conf->set('setup', 'cron_created', 1);
-        $Conf->save();
+        $Conf?->set('setup', 'cron_created', 1);
+        $Conf?->save();
     }
 }

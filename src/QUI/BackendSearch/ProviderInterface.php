@@ -20,24 +20,24 @@ interface ProviderInterface
      *
      * @return void
      */
-    public function buildCache();
+    public function buildCache(): void;
 
     /**
      * Execute a search
      *
      * @param string $search
      * @param array $params
-     * @return mixed
+     * @return array
      */
-    public function search($search, $params = []);
+    public function search(string $search, array $params = []): array;
 
     /**
      * Return a search entry
      *
      * @param integer $id
-     * @return mixed
+     * @return ?array
      */
-    public function getEntry($id);
+    public function getEntry(int $id): mixed;
 
     /**
      * Get all available search groups of this provider.
@@ -45,5 +45,5 @@ interface ProviderInterface
      *
      * @return array
      */
-    public function getFilterGroups();
+    public function getFilterGroups(): array;
 }

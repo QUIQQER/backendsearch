@@ -6,8 +6,12 @@
 
 namespace QUI\BackendSearch;
 
+use DOMDocument;
+use DOMNode;
+use DOMXPath;
 use QUI;
 use QUI\Cache\Manager as CacheManager;
+use QUI\Database\Exception;
 use QUI\Permissions\Permission;
 use QUI\Utils\DOM as DOMUtils;
 
@@ -33,33 +37,33 @@ class Builder
     const TYPE_PROFILE_ICON = 'fa fa-id-card-o';
 
     /**
-     * @var null
+     * @var Builder|null
      */
-    protected static $Instance = null;
+    protected static ?Builder $Instance = null;
 
     /**
-     * @var null
+     * @var array|null
      */
-    protected $menu = null;
+    protected ?array $menu = null;
 
     /**
      * list of locales
      *
-     * @var null
+     * @var array|null
      */
-    protected $locales = null;
+    protected ?array $locales = null;
 
     /**
      * @var string
      */
-    protected $table = 'quiqqerBackendSearch';
+    protected string $table = 'quiqqerBackendSearch';
 
     /**
      * Return the global instance
      *
      * @return Builder
      */
-    public static function getInstance()
+    public static function getInstance(): Builder
     {
         if (is_null(self::$Instance)) {
             self::$Instance = new self();
@@ -73,7 +77,7 @@ class Builder
      *
      * @return string
      */
-    public function getTable()
+    public function getTable(): string
     {
         return QUI::getDBTableName($this->table);
     }
@@ -81,7 +85,7 @@ class Builder
     /**
      * Returns all available locales
      */
-    public function getLocales()
+    public function getLocales(): ?array
     {
         if (!is_null($this->locales)) {
             return $this->locales;
@@ -103,13 +107,13 @@ class Builder
      *
      * @return array
      */
-    protected function getProviderClasses()
+    protected function getProviderClasses(): array
     {
         $cache = 'quiqqer/backendsearch/providers';
 
         try {
             return QUI\Cache\Manager::get($cache);
-        } catch (QUI\Cache\Exception $Exception) {
+        } catch (QUI\Cache\Exception) {
         }
 
         $packages = QUI::getPackageManager()->getInstalled();
@@ -142,14 +146,15 @@ class Builder
      * Get all groups the search results can be grouped by
      *
      * @return array
+     * @throws \QUI\BackendSearch\Exception
      */
-    public function getFilterGroups()
+    public function getFilterGroups(): array
     {
         $cacheName = 'quiqqer/desktopsearch/filtergroups';
 
         try {
             return json_decode(CacheManager::get($cacheName), true);
-        } catch (\Exception $Exception) {
+        } catch (\Exception) {
             // nothing, retrieve filter groups freshly
         }
 
@@ -185,12 +190,12 @@ class Builder
     /**
      * Return the available provider instances
      *
-     * @param string|bool $provider - optional, Return a specific provider
+     * @param bool|string $provider - optional, Return a specific provider
      * @return array|ProviderInterface
      *
      * @throws QUI\BackendSearch\Exception
      */
-    public function getProvider($provider = false)
+    public function getProvider(bool|string $provider = false): ProviderInterface|array
     {
         $result = [];
 
@@ -232,7 +237,7 @@ class Builder
      *
      * @return array
      */
-    public function getMenuData()
+    public function getMenuData(): array
     {
         if (is_null($this->menu)) {
             $Menu = new QUI\Workspace\Menu();
@@ -247,7 +252,7 @@ class Builder
     /**
      * Executed at the QUIQQER Setup
      */
-    public function setup()
+    public function setup(): void
     {
         QUI\Cache\Manager::clear('quiqqer/backendsearch/providers');
 
@@ -257,7 +262,7 @@ class Builder
     /**
      * Build the complete search cache and clears the cache
      */
-    public function buildCache()
+    public function buildCache(): void
     {
         QUI::getDataBase()->table()->truncate($this->getTable());
 
@@ -300,7 +305,7 @@ class Builder
     /**
      * Build the cache for the apps search
      */
-    public function buildAppsCache()
+    public function buildAppsCache(): void
     {
         $this->buildMenuCacheHelper(self::TYPE_APPS);
     }
@@ -308,7 +313,7 @@ class Builder
     /**
      * Build the cache for the extras search
      */
-    public function buildExtrasCache()
+    public function buildExtrasCache(): void
     {
         $this->buildMenuCacheHelper(self::TYPE_EXTRAS);
     }
@@ -316,7 +321,7 @@ class Builder
     /**
      * Build the cache for the profile search
      */
-    public function buildProfileCache()
+    public function buildProfileCache(): void
     {
         QUI::getDataBase()->delete($this->getTable(), [
             'group' => self::TYPE_PROFILE
@@ -340,13 +345,13 @@ class Builder
             $groupLabel = $Locale->get('quiqqer/system', 'profile');
             $data = $this->parseMenuData($filter, $Locale);
 
-            foreach ($data as $key => $entry) {
+            foreach ($data as $entry) {
                 // add special search terms to user profile entry
                 if ($entry['name'] == 'userProfile') {
                     $profileSearchTerms = $this->getProfileSearchterms();
 
                     // Skip entry if no profile search terms could be found or
-                    // an error ocurred while getting them
+                    // an error occurred while getting them
                     if (empty($profileSearchTerms)) {
                         continue;
                     }
@@ -389,7 +394,7 @@ class Builder
      * @param array $filters - the filters that are considered
      * @return array
      */
-    public function getWhereConstraint($filters)
+    public function getWhereConstraint(array $filters): array
     {
         $where = [
             'navApps' => '`group` != \'' . self::TYPE_APPS . '\'',
@@ -397,16 +402,14 @@ class Builder
         ];
 
         foreach ($filters as $filter) {
-            switch ($filter) {
-                case self::FILTER_NAVIGATION:
-                    if (Permission::hasPermission('quiqqer.menu.apps')) {
-                        unset($where['navApps']);
-                    }
+            if ($filter == self::FILTER_NAVIGATION) {
+                if (Permission::hasPermission('quiqqer.menu.apps')) {
+                    unset($where['navApps']);
+                }
 
-                    if (Permission::hasPermission('quiqqer.menu.extras')) {
-                        unset($where['navExtras']);
-                    }
-                    break;
+                if (Permission::hasPermission('quiqqer.menu.extras')) {
+                    unset($where['navExtras']);
+                }
             }
         }
 
@@ -417,8 +420,9 @@ class Builder
      * Helper to build a section / search group via menu items
      *
      * @param string $type
+     * @throws Exception
      */
-    protected function buildMenuCacheHelper($type)
+    protected function buildMenuCacheHelper(string $type): void
     {
         QUI::getDataBase()->delete($this->getTable(), [
             'group' => $type
@@ -469,7 +473,7 @@ class Builder
 
             $data = $this->parseMenuData($filter, $Locale);
 
-            foreach ($data as $key => $entry) {
+            foreach ($data as $entry) {
                 $entry['group'] = $type;
                 $entry['groupLabel'] = $groupLabel;
                 $entry['filterGroup'] = self::FILTER_NAVIGATION;
@@ -525,7 +529,7 @@ class Builder
      * @param string $lang
      * @throws QUI\Exception
      */
-    public function addEntry($params, $lang)
+    public function addEntry(array $params, string $lang): void
     {
         $needles = ['title', 'search', 'group', 'filterGroup', 'searchdata'];
 
@@ -581,17 +585,13 @@ class Builder
      *
      * @param array $items
      * @param QUI\Locale $Locale
-     * @param string $parentTitle (optional) - title of parent menu node
+     * @param string|null $parentTitle (optional) - title of parent menu node
      * @return array
      */
-    protected function parseMenuData($items, $Locale, $parentTitle = null)
+    protected function parseMenuData(array $items, QUI\Locale $Locale, string $parentTitle = null): array
     {
         $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type'];
-
-        if (!is_array($items)) {
-            return [];
-        }
 
         foreach ($items as $item) {
             $title = $item['text'];
@@ -641,10 +641,7 @@ class Builder
                 'searchdata' => json_encode($searchData)
             ];
 
-            if (
-                isset($item['items'])
-                && !empty($item['items'])
-            ) {
+            if (!empty($item['items'])) {
                 $data = array_merge($data, $this->parseMenuData($item['items'], $Locale, $description));
             }
         }
@@ -657,16 +654,16 @@ class Builder
      *
      * @return array - list of search terms
      */
-    protected function getProfileSearchterms()
+    protected function getProfileSearchterms(): array
     {
         $search = [];
         $html = QUI::getUsers()->getProfileTemplate();
 
         try {
-            $Doc = new \DOMDocument();
+            $Doc = new DOMDocument();
             $Doc->loadHTML($html);
         } catch (\Exception $Exception) {
-            QUI\System\Log::addError(
+            QUI\System\Log::addNotice(
                 self::class . ' :: getProfileSearchterms -> Could not parse user profile search terms: '
                 . $Exception->getMessage()
             );
@@ -674,7 +671,7 @@ class Builder
             return $search;
         }
 
-        $Path = new \DOMXPath($Doc);
+        $Path = new DOMXPath($Doc);
 
         // table headers
         $titles = $Path->query('//table/thead/tr/th');
@@ -686,7 +683,7 @@ class Builder
         // labels
         $labels = $Path->query('//label/span');
 
-        /** @var \DOMNode $Label */
+        /** @var DOMNode $Label */
         foreach ($labels as $Label) {
             $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Label)));
         }
