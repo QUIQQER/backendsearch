@@ -18,7 +18,7 @@ class Cron
      *
      * @return void
      */
-    public static function buildSearchCache()
+    public static function buildSearchCache(): void
     {
         Builder::getInstance()->setup();
     }

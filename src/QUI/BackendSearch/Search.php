@@ -6,7 +6,9 @@
 
 namespace QUI\BackendSearch;
 
+use PDO;
 use QUI;
+use QUI\Database\Exception;
 
 /**
  * Class Search
@@ -23,7 +25,7 @@ class Search
     /**
      * @return Search
      */
-    public static function getInstance(): ?Search
+    public static function getInstance(): Search
     {
         if (is_null(self::$Instance)) {
             self::$Instance = new self();
@@ -40,7 +42,7 @@ class Search
      *
      * @return array
      */
-    public function search(string $string, array $params = [])
+    public function search(string $string, array $params = []): array
     {
         $DesktopSearch = Builder::getInstance();
         $string = trim($string);
@@ -53,7 +55,7 @@ class Search
         $binds = [
             'search' => [
                 'value' => '%' . $string . '%',
-                'type' => \PDO::PARAM_STR
+                'type' => PDO::PARAM_STR
             ]
         ];
 
@@ -63,7 +65,7 @@ class Search
             $where[] = '`group` = :group';
             $binds['group'] = [
                 'value' => $params['group'],
-                'type' => \PDO::PARAM_STR
+                'type' => PDO::PARAM_STR
             ];
 
             $groupFilter = true;
@@ -93,7 +95,7 @@ class Search
 
         try {
             $Stmt->execute();
-            $result = $Stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $result = $Stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Exception $Exception) {
             QUI\System\Log::addError(
                 self::class . ' :: search -> ' . $Exception->getMessage()
@@ -130,7 +132,7 @@ class Search
                 continue;
             }
 
-            if (!is_array($providerResult)) {
+            if (empty($providerResult)) {
                 continue;
             }
 
@@ -206,8 +208,9 @@ class Search
      *
      * @param string $id
      * @return array
+     * @throws Exception
      */
-    public function getEntry($id): array
+    public function getEntry(string $id): array
     {
         $result = QUI::getDataBase()->fetch([
             'from' => Builder::getInstance()->getTable(),
