@@ -59,7 +59,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
             );
 
             this.setAttribute('title', QUILocale.get(
-                'quiqqer/quiqqer',
+                'quiqqer/core',
                 'controls.workspace.search.filter.placeholder'
             ));
 
