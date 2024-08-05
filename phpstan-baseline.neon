@@ -1,0 +1,46 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^PHPDoc tag @return with type mixed is not subtype of native type array\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/Media.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, int given\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/Media.php
+
+		-
+			message: "#^PHPDoc tag @return with type mixed is not subtype of native type array\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/Projects.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<int\\<0, max\\>, array\\|string\\> given\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/Projects.php
+
+		-
+			message: "#^PHPDoc tag @return with type mixed is not subtype of native type array\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/SettingsCategories.php
+
+		-
+			message: "#^Parameter \\#2 \\$array of function implode expects array\\<string\\>, array\\<int\\<0, max\\>, array\\|string\\> given\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/SettingsCategories.php
+
+		-
+			message: "#^PHPDoc tag @return with type mixed is not subtype of native type array\\.$#"
+			count: 2
+			path: src/QUI/BackendSearch/Provider/Sites.php
+
+		-
+			message: "#^Parameter \\#2 \\$string of function explode expects string, int given\\.$#"
+			count: 1
+			path: src/QUI/BackendSearch/Provider/Sites.php
+
+		-
+			message: "#^Parameter \\#1 \\$string of function mb_substr expects string, int given\\.$#"
+			count: 2
+			path: src/QUI/BackendSearch/Provider/UsersAndGroups.php
