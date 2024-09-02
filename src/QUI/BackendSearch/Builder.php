@@ -9,6 +9,7 @@ namespace QUI\BackendSearch;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
+use ForceUTF8\Encoding;
 use QUI;
 use QUI\Cache\Manager as CacheManager;
 use QUI\Database\Exception;
@@ -677,7 +678,7 @@ class Builder
         $titles = $Path->query('//table/thead/tr/th');
 
         foreach ($titles as $Title) {
-            $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Title)));
+            $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Title)));
         }
 
         // labels
@@ -685,7 +686,7 @@ class Builder
 
         /** @var DOMNode $Label */
         foreach ($labels as $Label) {
-            $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Label)));
+            $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Label)));
         }
 
         return $search;
