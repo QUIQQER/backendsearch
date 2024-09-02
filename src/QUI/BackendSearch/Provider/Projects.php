@@ -6,6 +6,7 @@ use DOMDocument;
 use DOMElement;
 use DOMNode;
 use DOMXPath;
+use ForceUTF8\Encoding;
 use QUI;
 use QUI\BackendSearch\Builder;
 use QUI\BackendSearch\ProviderInterface;
@@ -155,7 +156,7 @@ class Projects implements ProviderInterface
             $titles = $Path->query('//table/thead/tr/th');
 
             foreach ($titles as $Title) {
-                $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Title)));
+                $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Title)));
             }
 
             // labels
@@ -163,7 +164,7 @@ class Projects implements ProviderInterface
 
             /** @var DOMNode $Label */
             foreach ($labels as $Label) {
-                $search[] = utf8_decode(trim(DOMUtils::getTextFromNode($Label)));
+                $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Label)));
             }
 
             $templateName = basename($template, '.html');
