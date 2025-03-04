@@ -24,7 +24,7 @@ class Sites implements ProviderInterface
      *
      * @param string $search
      * @param array $params
-     * @return mixed
+     * @return array
      *
      * @throws Exception
      * @throws QUI\Exception
@@ -92,11 +92,11 @@ class Sites implements ProviderInterface
      * Return a search entry
      *
      * @param integer $id
-     * @return mixed
+     * @return array
      */
     public function getEntry(int $id): array
     {
-        $data = explode('-', $id);
+        $data = explode('-', (string)$id);
 
         return [
             'searchdata' => json_encode([

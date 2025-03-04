@@ -173,13 +173,13 @@ class UsersAndGroups implements ProviderInterface
      */
     public function getEntry(int $id): array
     {
-        $type = mb_strtolower(mb_substr($id, 0, 1));
+        $type = mb_strtolower(mb_substr((string)$id, 0, 1));
 
         return [
             'searchdata' => [
                 'require' => 'package/quiqqer/backendsearch/bin/controls/provider/UsersAndGroups',
                 'params' => [
-                    'id' => mb_substr($id, 1),
+                    'id' => mb_substr((string)$id, 1),
                     'type' => $type === 'u' ? 'user' : 'group'
                 ]
             ]
