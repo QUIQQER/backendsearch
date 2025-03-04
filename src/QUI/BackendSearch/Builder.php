@@ -196,7 +196,7 @@ class Builder
      *
      * @throws QUI\BackendSearch\Exception
      */
-    public function getProvider(bool|string $provider = false): ProviderInterface|array
+    public function getProvider(bool | string $provider = false): ProviderInterface | array
     {
         $result = [];
 
@@ -589,8 +589,11 @@ class Builder
      * @param string|null $parentTitle (optional) - title of parent menu node
      * @return array
      */
-    protected function parseMenuData(array $items, QUI\Locale $Locale, string $parentTitle = null): array
-    {
+    protected function parseMenuData(
+        array $items,
+        QUI\Locale $Locale,
+        null | string $parentTitle = null
+    ): array {
         $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type'];
 

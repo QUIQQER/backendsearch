@@ -72,7 +72,7 @@ class Projects implements ProviderInterface
      *
      * @param string $search
      * @param array $params
-     * @return mixed
+     * @return array
      */
     public function search(string $search, array $params = []): array
     {
@@ -252,7 +252,6 @@ class Projects implements ProviderInterface
 
                 $searchStringParts = [];
 
-                /** @var DOMNode $Child */
                 foreach ($Category->childNodes as $Child) {
                     if ($Child->nodeName == '#text') {
                         continue;
@@ -262,7 +261,7 @@ class Projects implements ProviderInterface
                         $nodeText = DOMUtils::getTextFromNode($Child);
                         $entry['title'] = $nodeText;
                         $entry['description'] = $description;
-                        $searchStringParts[] = $nodeText;
+                        $searchStringParts[] = (string)$nodeText;
                         continue;
                     }
 
@@ -272,22 +271,21 @@ class Projects implements ProviderInterface
                     }
 
                     if ($Child->nodeName === 'settings') {
-                        /** @var DOMNode $SettingChild */
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
-                                $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }
 
                             if ($SettingChild->nodeName == 'description') {
-                                $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }
 
                             if ($SettingChild->hasChildNodes()) {
                                 foreach ($SettingChild->childNodes as $SettingInputChild) {
                                     if ($SettingInputChild->nodeName == 'title' || $SettingInputChild->nodeName == 'text') {
-                                        $searchStringParts[] = DOMUtils::getTextFromNode($SettingInputChild);
+                                        $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingInputChild);
                                         break;
                                     }
                                 }
