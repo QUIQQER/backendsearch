@@ -142,8 +142,11 @@ class SettingsCategories implements ProviderInterface
      * @param string|null $parentTitle (optional) - title of parent menu node
      * @return array
      */
-    protected function parseSettingsMenuData(array $items, QUI\Locale $Locale, string $parentTitle = null): array
-    {
+    protected function parseSettingsMenuData(
+        array $items,
+        QUI\Locale $Locale,
+        null | string $parentTitle = null
+    ): array {
         $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type', 'category'];
 
