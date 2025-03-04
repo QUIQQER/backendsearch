@@ -196,7 +196,7 @@ class Builder
      *
      * @throws QUI\BackendSearch\Exception
      */
-    public function getProvider(bool|string $provider = false): ProviderInterface|array
+    public function getProvider(bool | string $provider = false): ProviderInterface | array
     {
         $result = [];
 
