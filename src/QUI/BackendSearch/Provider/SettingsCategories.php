@@ -92,7 +92,7 @@ class SettingsCategories implements ProviderInterface
      *
      * @param string $search
      * @param array $params
-     * @return mixed
+     * @return array
      */
     public function search(string $search, array $params = []): array
     {
@@ -142,8 +142,11 @@ class SettingsCategories implements ProviderInterface
      * @param string|null $parentTitle (optional) - title of parent menu node
      * @return array
      */
-    protected function parseSettingsMenuData(array $items, QUI\Locale $Locale, string $parentTitle = null): array
-    {
+    protected function parseSettingsMenuData(
+        array $items,
+        QUI\Locale $Locale,
+        null | string $parentTitle = null
+    ): array {
         $data = [];
         $searchFields = ['require', 'exec', 'onClick', 'type', 'category'];
 
@@ -291,7 +294,7 @@ class SettingsCategories implements ProviderInterface
                         $nodeText = DOMUtils::getTextFromNode($Child);
                         $entry['title'] = $item['text'] . ' - ' . $nodeText;
                         $entry['description'] = $descPrefix . ' -> ' . $nodeText;
-                        $searchStringParts[] = $nodeText;
+                        $searchStringParts[] = (string)$nodeText;
                         continue;
                     }
 
@@ -299,19 +302,19 @@ class SettingsCategories implements ProviderInterface
                         /** @var DOMNode $SettingChild */
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
-                                $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }
 
                             if ($SettingChild->nodeName == 'description') {
-                                $searchStringParts[] = DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
                                 continue;
                             }
 
                             if ($SettingChild->hasChildNodes()) {
                                 foreach ($SettingChild->childNodes as $SettingInputChild) {
                                     if ($SettingInputChild->nodeName == 'title' || $SettingInputChild->nodeName == 'text') {
-                                        $searchStringParts[] = DOMUtils::getTextFromNode($SettingInputChild);
+                                        $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingInputChild);
                                         break;
                                     }
                                 }

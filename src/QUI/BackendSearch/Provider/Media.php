@@ -21,7 +21,7 @@ class Media implements ProviderInterface
      *
      * @param string $search
      * @param array $params
-     * @return mixed
+     * @return array
      */
     public function search(string $search, array $params = []): array
     {
@@ -126,7 +126,7 @@ class Media implements ProviderInterface
      */
     public function getEntry(int $id): array
     {
-        $data = explode('-', $id);
+        $data = explode('-', (string)$id);
 
         return [
             'searchdata' => json_encode([
