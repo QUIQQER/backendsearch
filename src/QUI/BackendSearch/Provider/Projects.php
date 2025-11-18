@@ -82,10 +82,10 @@ class Projects implements ProviderInterface
     /**
      * Return a search entry
      *
-     * @param integer $id
+     * @param string|integer $id
      * @return mixed
      */
-    public function getEntry(int $id): mixed
+    public function getEntry(string | int $id): mixed
     {
         return null;
     }
