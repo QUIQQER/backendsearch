@@ -34,10 +34,10 @@ interface ProviderInterface
     /**
      * Return a search entry
      *
-     * @param integer $id
+     * @param int|string $id
      * @return ?array
      */
-    public function getEntry(int $id): mixed;
+    public function getEntry(string | int $id): mixed;
 
     /**
      * Get all available search groups of this provider.

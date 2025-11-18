@@ -14,10 +14,13 @@ use QUI\BackendSearch\Search;
 QUI::$Ajax->registerFunction(
     'package_quiqqer_backendsearch_ajax_search',
     function ($search, $params) {
-        return Search::getInstance()->search(
-            $search,
-            json_decode($params, true)
-        );
+        $params = json_decode($params, true);
+
+        if (!is_array($params)) {
+            $params = [];
+        }
+
+        return Search::getInstance()->search($search, $params);
     },
     ['search', 'params']
 );

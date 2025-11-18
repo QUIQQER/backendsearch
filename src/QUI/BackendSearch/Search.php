@@ -41,6 +41,8 @@ class Search
      * @param array $params - search query params
      *
      * @return array
+     * @throws QUI\Exception
+     * @throws Exception
      */
     public function search(string $string, array $params = []): array
     {
@@ -206,11 +208,11 @@ class Search
     /**
      * Return one search cache entry
      *
-     * @param string $id
+     * @param string|int $id
      * @return array
      * @throws Exception
      */
-    public function getEntry(string $id): array
+    public function getEntry(string | int $id): array
     {
         $result = QUI::getDataBase()->fetch([
             'from' => Builder::getInstance()->getTable(),
