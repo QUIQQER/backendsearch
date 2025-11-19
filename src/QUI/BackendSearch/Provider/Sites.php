@@ -91,10 +91,10 @@ class Sites implements ProviderInterface
     /**
      * Return a search entry
      *
-     * @param integer $id
+     * @param string|integer $id
      * @return array
      */
-    public function getEntry(int $id): array
+    public function getEntry(string | int $id): array
     {
         $data = explode('-', (string)$id);
 
