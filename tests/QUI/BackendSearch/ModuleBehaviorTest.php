@@ -2,6 +2,8 @@
 
 namespace QUITests\BackendSearch;
 
+require_once __DIR__ . '/TestableSettingsCategories.php';
+
 use PHPUnit\Framework\TestCase;
 use QUI\BackendSearch\Events;
 use QUI\BackendSearch\Provider\Projects;
@@ -199,26 +201,5 @@ XML;
                 unlink($xmlFile);
             }
         }
-    }
-}
-
-class TestableSettingsCategories extends SettingsCategories
-{
-    /**
-     * @param array<int,array<string,mixed>> $items
-     * @return array<int,array<string,mixed>>
-     */
-    public function parseSettingsMenuDataPublic(array $items, \QUI\Locale $Locale): array
-    {
-        return $this->parseSettingsMenuData($items, $Locale);
-    }
-
-    /**
-     * @param array<string,mixed> $item
-     * @return array<int,array<string,mixed>>
-     */
-    public function parseSearchDataFromSettingsXmlItemPublic(array $item, \QUI\Locale $Locale): array
-    {
-        return $this->parseSearchDataFromSettingsXmlItem($item, $Locale);
     }
 }
