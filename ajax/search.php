@@ -11,7 +11,7 @@
 
 use QUI\BackendSearch\Search;
 
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_backendsearch_ajax_search',
     function ($search, $params) {
         $params = json_decode($params, true);

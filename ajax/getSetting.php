@@ -8,7 +8,7 @@
  * @return mixed - settings value
  */
 
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_backendsearch_ajax_getSetting',
     function ($section, $var = null) {
         $Conf = QUI::getConfig('etc/search.ini');

@@ -1,7 +1,3 @@
-/**
- * @module package/quiqqer/backendsearch/bin/controls/Input
- * @author www.pcsg.de (Henning Leutz)
- */
 define('package/quiqqer/backendsearch/bin/controls/Input', [
 
     'qui/QUI',
@@ -26,12 +22,12 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
         window.QUIQQER.backendSearch.Search = new Search();
     }
 
-    var lg = 'quiqqer/backendsearch';
+    const lg = 'quiqqer/backendsearch';
 
     return new Class({
 
         Extends: QUIControl,
-        Type   : 'package/quiqqer/backendsearch/bin/controls/Input',
+        Type: 'package/quiqqer/backendsearch/bin/controls/Input',
 
         Binds: [
             'create',
@@ -59,7 +55,7 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
          * event : on create
          */
         create: function () {
-            var Elm = this.parent();
+            const Elm = this.parent();
 
             Elm.addClass('qui-backendsearch-input');
             Elm.set('html', Mustache.render(template, {
@@ -77,7 +73,7 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
             }.bind(this));
 
             this.$SearchBtn = new QUIButton({
-                icon  : 'fa fa-search',
+                icon: 'fa fa-search',
                 events: {
                     onClick: this.openSearch
                 }

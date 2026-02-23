@@ -1,8 +1,5 @@
 /**
  * Display a password result for QUIQQER Desktop Search
- *
- * @module package/quiqqer/backendsearch/bin/controls/provider/UsersAndGroups
- * @author www.pcsg.de (Patrick Müller)
  */
 define('package/quiqqer/backendsearch/bin/controls/provider/UsersAndGroups', [
 
@@ -21,6 +18,7 @@ define('package/quiqqer/backendsearch/bin/controls/provider/UsersAndGroups', [
                 PanelUtils.openPanelInTasks(new UserPanel(options.id, {
                     '#id': options.id
                 }));
+
                 return;
             }
 
