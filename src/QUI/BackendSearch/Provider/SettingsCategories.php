@@ -31,7 +31,6 @@ class SettingsCategories implements ProviderInterface
         $QUILocale = QUI::getLocale();
         $quiLocaleCurrent = $QUILocale->getCurrent();
 
-        /** @var QUI\Locale $Locale */
         foreach ($locales as $Locale) {
             // temporarily set language of $QUILocale to current of $Locale (for categories parsing)
             $QUILocale->setCurrent($Locale->getCurrent());
@@ -91,8 +90,8 @@ class SettingsCategories implements ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<int,array<string,mixed>>
      */
     public function search(string $search, array $params = []): array
     {
@@ -114,7 +113,7 @@ class SettingsCategories implements ProviderInterface
      * Get all available search groups of this provider.
      * Search results can be filtered by these search groups.
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getFilterGroups(): array
     {
@@ -137,10 +136,10 @@ class SettingsCategories implements ProviderInterface
     /**
      * Parse menu entries to a data array
      *
-     * @param array $items
+     * @param array<int,array<string,mixed>> $items
      * @param QUI\Locale $Locale
      * @param string|null $parentTitle (optional) - title of parent menu node
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     protected function parseSettingsMenuData(
         array $items,
@@ -151,7 +150,7 @@ class SettingsCategories implements ProviderInterface
         $searchFields = ['require', 'exec', 'onClick', 'type', 'category'];
 
         foreach ($items as $item) {
-            $title = $item['text'];
+            $title = $this->toStringValue($item['text'] ?? '');
             $description = $title;
 
             if (!is_null($parentTitle)) {
@@ -168,7 +167,7 @@ class SettingsCategories implements ProviderInterface
 
                 continue;
             } else {
-                $search = $item['text'];
+                $search = $title;
             }
 
             // locale w. search string
@@ -198,7 +197,7 @@ class SettingsCategories implements ProviderInterface
                 'searchdata' => json_encode($searchData)
             ];
 
-            if (!empty($item['items'])) {
+            if (!empty($item['items']) && is_array($item['items'])) {
                 $data = array_merge($data, $this->parseSettingsMenuData($item['items'], $Locale, $description));
             }
         }
@@ -209,9 +208,9 @@ class SettingsCategories implements ProviderInterface
     /**
      * Parses a search string from settings.xml data
      *
-     * @param array $item - The settings item
+     * @param array<string,mixed> $item - The settings item
      * @param QUI\Locale $Locale
-     * @return array - search data
+     * @return array<int,array<string,mixed>> - search data
      */
     protected function parseSearchDataFromSettingsXmlItem(array $item, QUI\Locale $Locale): array
     {
@@ -226,6 +225,10 @@ class SettingsCategories implements ProviderInterface
         $dataEntries = [];
 
         foreach ($xmlFiles as $xmlFile) {
+            if (!is_string($xmlFile) || $xmlFile === '') {
+                continue;
+            }
+
             if (!file_exists($xmlFile)) {
                 $xmlFile = CMS_DIR . $xmlFile;
             }
@@ -241,12 +244,15 @@ class SettingsCategories implements ProviderInterface
             $Dom = XML::getDomFromXml($xmlFile);
             $Path = new DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
-            $descPrefix = $Locale->get('quiqqer/system', 'settings') . ' -> ' . $item['text'];
+            $itemText = $this->toStringValue($item['text'] ?? '');
+            $itemDescription = $this->toStringValue($item['description'] ?? '');
+            $itemIcon = !empty($item['icon']) ? $this->toStringValue($item['icon']) : 'fa fa-gears';
+            $descPrefix = $Locale->get('quiqqer/system', 'settings') . ' -> ' . $itemText;
 
             // add menu entry for settings
             $dataEntries[] = [
-                'title' => $item['text'],
-                'description' => $item['description'],
+                'title' => $itemText,
+                'description' => $itemDescription,
                 'group' => self::TYPE_SETTINGS,
                 'groupLabel' => $Locale->get(
                     'quiqqer/backendsearch',
@@ -262,9 +268,13 @@ class SettingsCategories implements ProviderInterface
                     ],
                     'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                 ]),
-                'icon' => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
-                'search' => $item['text']
+                'icon' => $itemIcon,
+                'search' => $itemText
             ];
+
+            if ($categories === false) {
+                continue;
+            }
 
             /** @var DOMElement $Category */
             foreach ($categories as $Category) {
@@ -276,7 +286,7 @@ class SettingsCategories implements ProviderInterface
                         ],
                         'require' => 'package/quiqqer/backendsearch/bin/controls/builder/Settings'
                     ],
-                    'icon' => !empty($item['icon']) ? $item['icon'] : 'fa fa-gears',
+                    'icon' => $itemIcon,
                     'group' => self::TYPE_SETTINGS_CONTENT,
                     'filterGroup' => self::TYPE_SETTINGS_CONTENT,
                     'groupLabel' => $Locale->get('quiqqer/system', 'settings')
@@ -291,10 +301,10 @@ class SettingsCategories implements ProviderInterface
                     }
 
                     if ($Child->nodeName == 'title' || $Child->nodeName == 'text') {
-                        $nodeText = DOMUtils::getTextFromNode($Child);
-                        $entry['title'] = $item['text'] . ' - ' . $nodeText;
+                        $nodeText = $this->toStringValue(DOMUtils::getTextFromNode($Child));
+                        $entry['title'] = $itemText . ' - ' . $nodeText;
                         $entry['description'] = $descPrefix . ' -> ' . $nodeText;
-                        $searchStringParts[] = (string)$nodeText;
+                        $searchStringParts[] = $nodeText;
                         continue;
                     }
 
@@ -302,19 +312,25 @@ class SettingsCategories implements ProviderInterface
                         /** @var DOMNode $SettingChild */
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
-                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = $this->toStringValue(
+                                    DOMUtils::getTextFromNode($SettingChild)
+                                );
                                 continue;
                             }
 
                             if ($SettingChild->nodeName == 'description') {
-                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = $this->toStringValue(
+                                    DOMUtils::getTextFromNode($SettingChild)
+                                );
                                 continue;
                             }
 
                             if ($SettingChild->hasChildNodes()) {
                                 foreach ($SettingChild->childNodes as $SettingInputChild) {
                                     if ($SettingInputChild->nodeName == 'title' || $SettingInputChild->nodeName == 'text') {
-                                        $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingInputChild);
+                                        $searchStringParts[] = $this->toStringValue(
+                                            DOMUtils::getTextFromNode($SettingInputChild)
+                                        );
                                         break;
                                     }
                                 }
@@ -330,5 +346,21 @@ class SettingsCategories implements ProviderInterface
         }
 
         return $dataEntries;
+    }
+
+    /**
+     * @param array<mixed>|string $value
+     */
+    protected function toStringValue(array | string $value): string
+    {
+        if (is_array($value)) {
+            $parts = array_map(static function ($part): string {
+                return is_scalar($part) ? (string)$part : '';
+            }, $value);
+
+            return implode(' ', array_filter($parts));
+        }
+
+        return $value;
     }
 }

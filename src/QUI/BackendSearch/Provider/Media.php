@@ -20,12 +20,15 @@ class Media implements ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<int,array<string,mixed>>
      */
     public function search(string $search, array $params = []): array
     {
-        $filter = array_flip($params['filterGroups']);
+        $filterGroups = isset($params['filterGroups']) && is_array($params['filterGroups'])
+            ? $params['filterGroups']
+            : [];
+        $filter = array_flip($filterGroups);
 
         $projects = QUI::getProjectManager()->getProjectList();
         $results = [];
@@ -60,6 +63,14 @@ class Media implements ProviderInterface
         $where[] = '(' . implode(' OR ', $whereOr) . ')';
 
         $PDO = QUI::getDataBase()->getPDO();
+
+        if (!$PDO instanceof PDO) {
+            QUI\System\Log::addError(
+                self::class . ' :: search -> No PDO instance available'
+            );
+
+            return $results;
+        }
 
         foreach ($projects as $Project) {
             $Media = $Project->getMedia();
@@ -122,7 +133,7 @@ class Media implements ProviderInterface
      * Return a search entry
      *
      * @param string|integer $id
-     * @return array
+     * @return array<string,mixed>
      */
     public function getEntry(string | int $id): array
     {
@@ -143,7 +154,7 @@ class Media implements ProviderInterface
      * Get all available search groups of this provider.
      * Search results can be filtered by these search groups.
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getFilterGroups(): array
     {

@@ -12,8 +12,6 @@ use QUI\Permissions\Permission;
  * Class UsersAndGroups
  *
  * Search QUIQQER users and groups
- *
- * @package QUI\BackendSearch\Provider
  */
 class UsersAndGroups implements ProviderInterface
 {
@@ -32,8 +30,8 @@ class UsersAndGroups implements ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<int,array<string,mixed>>
      */
     public function search(string $search, array $params = []): array
     {
@@ -50,7 +48,7 @@ class UsersAndGroups implements ProviderInterface
         $Locale = QUI::getLocale();
 
         // users
-        if (Permission::hasPermission('quiqqer.admin.users.edit')) {
+        if (Permission::hasPermission('quiqqer.admin.users.edit') && $PDO instanceof PDO) {
             $Users = QUI::getUsers();
 
             $sql = "SELECT users.id, users.uuid, users.username FROM ";
@@ -114,6 +112,10 @@ class UsersAndGroups implements ProviderInterface
                     ];
                 }
             }
+        } elseif (Permission::hasPermission('quiqqer.admin.users.edit')) {
+            QUI\System\Log::addError(
+                self::class . ' :: search (users) -> No PDO instance available'
+            );
         }
 
         // groups
@@ -169,7 +171,7 @@ class UsersAndGroups implements ProviderInterface
      * Return a search entry
      *
      * @param string|integer $id
-     * @return array
+     * @return array<string,mixed>
      */
     public function getEntry(string | int $id): array
     {
@@ -190,7 +192,7 @@ class UsersAndGroups implements ProviderInterface
      * Get all available search groups of this provider.
      * Search results can be filtered by these search groups.
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getFilterGroups(): array
     {

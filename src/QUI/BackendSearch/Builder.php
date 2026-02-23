@@ -19,8 +19,6 @@ use QUI\Utils\DOM as DOMUtils;
 /**
  * Class Builder
  * Building the Search DB
- *
- * @package QUI\Workspace
  */
 class Builder
 {
@@ -43,14 +41,14 @@ class Builder
     protected static ?Builder $Instance = null;
 
     /**
-     * @var array|null
+     * @var array<int,array<string,mixed>>|null
      */
     protected ?array $menu = null;
 
     /**
      * list of locales
      *
-     * @var array|null
+     * @var array<string,QUI\Locale>|null
      */
     protected ?array $locales = null;
 
@@ -85,14 +83,20 @@ class Builder
 
     /**
      * Returns all available locales
+     *
+     * @return array<string,QUI\Locale>
      */
-    public function getLocales(): ?array
+    public function getLocales(): array
     {
         if (!is_null($this->locales)) {
             return $this->locales;
         }
 
         $available = QUI\Translator::getAvailableLanguages();
+        if (!is_array($available)) {
+            $available = [];
+        }
+
         $this->locales = [];
 
         foreach ($available as $lang) {
@@ -106,14 +110,18 @@ class Builder
     /**
      * Return the complete available list of all providers classes
      *
-     * @return array
+     * @return array<int,string>
      */
     protected function getProviderClasses(): array
     {
         $cache = 'quiqqer/backendsearch/providers';
 
         try {
-            return QUI\Cache\Manager::get($cache);
+            $cached = QUI\Cache\Manager::get($cache);
+
+            if (is_array($cached)) {
+                return array_values(array_filter($cached, 'is_string'));
+            }
         } catch (QUI\Cache\Exception) {
         }
 
@@ -146,7 +154,7 @@ class Builder
     /**
      * Get all groups the search results can be grouped by
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      * @throws \QUI\BackendSearch\Exception
      */
     public function getFilterGroups(): array
@@ -154,12 +162,20 @@ class Builder
         $cacheName = 'quiqqer/desktopsearch/filtergroups';
 
         try {
-            return json_decode(CacheManager::get($cacheName), true);
+            $cached = json_decode(CacheManager::get($cacheName), true);
+
+            if (is_array($cached)) {
+                return $cached;
+            }
         } catch (\Exception) {
             // nothing, retrieve filter groups freshly
         }
 
         $providers = $this->getProvider();
+        if ($providers instanceof ProviderInterface) {
+            $providers = [$providers];
+        }
+
         $groups = [
             [
                 'group' => self::FILTER_NAVIGATION,
@@ -192,7 +208,7 @@ class Builder
      * Return the available provider instances
      *
      * @param bool|string $provider - optional, Return a specific provider
-     * @return array|ProviderInterface
+     * @return array<int,ProviderInterface>|ProviderInterface
      *
      * @throws QUI\BackendSearch\Exception
      */
@@ -210,10 +226,9 @@ class Builder
 
                 if ($Instance instanceof ProviderInterface) {
                     $result[] = $Instance;
-                }
-
-                if ($provider && get_class($Instance) == $provider) {
-                    return $Instance;
+                    if ($provider && get_class($Instance) == $provider) {
+                        return $Instance;
+                    }
                 }
             } catch (\Exception $Exception) {
                 QUI\System\Log::writeException(
@@ -236,7 +251,7 @@ class Builder
     /**
      * Return the menu data, entries of the admin menu
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getMenuData(): array
     {
@@ -247,7 +262,7 @@ class Builder
             $this->menu = $menu;
         }
 
-        return $this->menu;
+        return $this->menu ?? [];
     }
 
     /**
@@ -265,7 +280,11 @@ class Builder
      */
     public function buildCache(): void
     {
-        QUI::getDataBase()->table()->truncate($this->getTable());
+        $Table = QUI::getDataBase()->table();
+
+        if ($Table) {
+            $Table->truncate($this->getTable());
+        }
 
         // apps
         try {
@@ -289,6 +308,9 @@ class Builder
         }
 
         $provider = $this->getProvider();
+        if ($provider instanceof ProviderInterface) {
+            $provider = [$provider];
+        }
 
         /* @var $Provider ProviderInterface */
         foreach ($provider as $Provider) {
@@ -392,8 +414,8 @@ class Builder
     /**
      * Gets the WHERE constraint based on user permissions
      *
-     * @param array $filters - the filters that are considered
-     * @return array
+     * @param array<int,string> $filters - the filters that are considered
+     * @return array<int,string>
      */
     public function getWhereConstraint(array $filters): array
     {
@@ -526,7 +548,7 @@ class Builder
     /**
      * Add cache entry for a specific language
      *
-     * @param array $params
+     * @param array<string,mixed> $params
      * @param string $lang
      * @throws QUI\Exception
      */
@@ -584,10 +606,10 @@ class Builder
     /**
      * Parse menu entries to a data array
      *
-     * @param array $items
+     * @param array<int,array<string,mixed>> $items
      * @param QUI\Locale $Locale
      * @param string|null $parentTitle (optional) - title of parent menu node
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     protected function parseMenuData(
         array $items,
@@ -598,8 +620,8 @@ class Builder
         $searchFields = ['require', 'exec', 'onClick', 'type'];
 
         foreach ($items as $item) {
-            $title = $item['text'];
-            $search = $item['text'];
+            $title = $this->toStringValue($item['text'] ?? '');
+            $search = $title;
 
             // locale w. search string
             if (isset($item['locale']) && is_array($item['locale'])) {
@@ -625,7 +647,7 @@ class Builder
             $icon = '';
 
             if (isset($item['icon'])) {
-                $icon = $item['icon'];
+                $icon = $this->toStringValue($item['icon']);
             }
 
             $searchData = [];
@@ -637,7 +659,7 @@ class Builder
             }
 
             $data[] = [
-                'name' => $item['name'],
+                'name' => $this->toStringValue($item['name'] ?? ''),
                 'title' => $title,
                 'description' => $description,
                 'icon' => $icon,
@@ -645,7 +667,7 @@ class Builder
                 'searchdata' => json_encode($searchData)
             ];
 
-            if (!empty($item['items'])) {
+            if (!empty($item['items']) && is_array($item['items'])) {
                 $data = array_merge($data, $this->parseMenuData($item['items'], $Locale, $description));
             }
         }
@@ -656,7 +678,7 @@ class Builder
     /**
      * Get search terms from user profile (dynamic) template
      *
-     * @return array - list of search terms
+     * @return array<int,string> - list of search terms
      */
     protected function getProfileSearchterms(): array
     {
@@ -680,18 +702,42 @@ class Builder
         // table headers
         $titles = $Path->query('//table/thead/tr/th');
 
-        foreach ($titles as $Title) {
-            $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Title)));
+        if ($titles !== false) {
+            foreach ($titles as $Title) {
+                if (!$Title instanceof DOMNode) {
+                    continue;
+                }
+
+                $search[] = Encoding::toUTF8(trim($this->toStringValue(DOMUtils::getTextFromNode($Title))));
+            }
         }
 
         // labels
         $labels = $Path->query('//label/span');
 
-        /** @var DOMNode $Label */
-        foreach ($labels as $Label) {
-            $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Label)));
+        if ($labels !== false) {
+            /** @var DOMNode $Label */
+            foreach ($labels as $Label) {
+                $search[] = Encoding::toUTF8(trim($this->toStringValue(DOMUtils::getTextFromNode($Label))));
+            }
         }
 
         return $search;
+    }
+
+    /**
+     * @param array<mixed>|string $value
+     */
+    protected function toStringValue(array | string $value): string
+    {
+        if (is_array($value)) {
+            $parts = array_map(static function ($part): string {
+                return is_scalar($part) ? (string)$part : '';
+            }, $value);
+
+            return implode(' ', array_filter($parts));
+        }
+
+        return $value;
     }
 }
