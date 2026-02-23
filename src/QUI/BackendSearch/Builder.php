@@ -92,7 +92,7 @@ class Builder
             return $this->locales;
         }
 
-        $available = QUI\Translator::getAvailableLanguages();
+        $available = $this->getAvailableLanguages();
         if (!is_array($available)) {
             $available = [];
         }
@@ -683,7 +683,7 @@ class Builder
     protected function getProfileSearchterms(): array
     {
         $search = [];
-        $html = QUI::getUsers()->getProfileTemplate();
+        $html = $this->getUserProfileTemplate();
 
         try {
             $Doc = new DOMDocument();
@@ -723,6 +723,19 @@ class Builder
         }
 
         return $search;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getAvailableLanguages(): mixed
+    {
+        return QUI\Translator::getAvailableLanguages();
+    }
+
+    protected function getUserProfileTemplate(): string
+    {
+        return QUI::getUsers()->getProfileTemplate();
     }
 
     /**
