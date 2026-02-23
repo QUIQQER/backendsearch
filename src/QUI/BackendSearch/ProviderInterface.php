@@ -26,8 +26,8 @@ interface ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<int,array<string,mixed>>
      */
     public function search(string $search, array $params = []): array;
 
@@ -35,7 +35,7 @@ interface ProviderInterface
      * Return a search entry
      *
      * @param int|string $id
-     * @return ?array
+     * @return array<string,mixed>|null
      */
     public function getEntry(string | int $id): mixed;
 
@@ -43,7 +43,7 @@ interface ProviderInterface
      * Get all available search groups of this provider.
      * Search results can be filtered by these search groups.
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getFilterGroups(): array;
 }

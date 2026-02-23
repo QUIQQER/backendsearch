@@ -23,15 +23,19 @@ class Sites implements ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<int,array<string,mixed>>
      *
      * @throws Exception
      * @throws QUI\Exception
      */
     public function search(string $search, array $params = []): array
     {
-        if (!in_array('sites', $params['filterGroups'])) {
+        $filterGroups = isset($params['filterGroups']) && is_array($params['filterGroups'])
+            ? $params['filterGroups']
+            : [];
+
+        if (!in_array(self::FILTER_SITES, $filterGroups)) {
             return [];
         }
 
@@ -92,7 +96,7 @@ class Sites implements ProviderInterface
      * Return a search entry
      *
      * @param string|integer $id
-     * @return array
+     * @return array<string,mixed>
      */
     public function getEntry(string | int $id): array
     {
@@ -114,7 +118,7 @@ class Sites implements ProviderInterface
      * Get all available search groups of this provider.
      * Search results can be filtered by these search groups.
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getFilterGroups(): array
     {

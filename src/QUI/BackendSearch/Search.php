@@ -12,8 +12,6 @@ use QUI\Database\Exception;
 
 /**
  * Class Search
- *
- * @package QUI\Workspace
  */
 class Search
 {
@@ -38,9 +36,9 @@ class Search
      * Execute the search
      *
      * @param string $string - search string
-     * @param array $params - search query params
+     * @param array<string,mixed> $params - search query params
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      * @throws QUI\Exception
      * @throws Exception
      */
@@ -89,6 +87,15 @@ class Search
         }
 
         $PDO = QUI::getDataBase()->getPDO();
+
+        if (!$PDO instanceof PDO) {
+            QUI\System\Log::addError(
+                self::class . ' :: search -> No PDO instance available'
+            );
+
+            return [];
+        }
+
         $Stmt = $PDO->prepare($sql);
 
         foreach ($binds as $var => $bind) {
@@ -122,8 +129,14 @@ class Search
 //            $groupCounts[$row['group']] = $row['COUNT(`group`)'];
 //        }
 
-        /* @var $Provider ProviderInterface */
-        foreach ($DesktopSearch->getProvider() as $Provider) {
+        $providers = $DesktopSearch->getProvider();
+
+        if ($providers instanceof ProviderInterface) {
+            $providers = [$providers];
+        }
+
+        /* @var ProviderInterface $Provider */
+        foreach ($providers as $Provider) {
             try {
                 $providerResult = $Provider->search($string, $params);
             } catch (\Exception $Exception) {
@@ -149,7 +162,11 @@ class Search
         // filter duplicates
         $ids = [];
 
-        $result = array_filter($result, function ($data) use (&$ids) {
+        $result = array_filter($result, function (array $data) use (&$ids): bool {
+            if (!isset($data['id'])) {
+                return true;
+            }
+
             if (isset($ids[$data['id']])) {
                 return false;
             }
@@ -209,7 +226,7 @@ class Search
      * Return one search cache entry
      *
      * @param string|int $id
-     * @return array
+     * @return array<string,mixed>
      * @throws Exception
      */
     public function getEntry(string | int $id): array

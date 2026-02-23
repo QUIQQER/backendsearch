@@ -8,8 +8,6 @@ namespace QUI\BackendSearch;
 
 /**
  * Class Cron
- *
- * @package QUI\Workspace
  */
 class Cron
 {

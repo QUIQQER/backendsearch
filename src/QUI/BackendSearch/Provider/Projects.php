@@ -71,8 +71,8 @@ class Projects implements ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array $params
-     * @return array
+     * @param array<string,mixed> $params
+     * @return array<int,array<string,mixed>>
      */
     public function search(string $search, array $params = []): array
     {
@@ -94,7 +94,7 @@ class Projects implements ProviderInterface
      * Get all available search groups of this provider.
      * Search results can be filtered by these search groups.
      *
-     * @return array
+     * @return array<int,array<string,mixed>>
      */
     public function getFilterGroups(): array
     {
@@ -106,7 +106,7 @@ class Projects implements ProviderInterface
      *
      * @param QUI\Projects\Project $Project
      * @param QUI\Locale $Locale
-     * @return array - search strings
+     * @return array<int,array<string,mixed>> - search strings
      */
     protected function getProjectSettingsSearchTerms(QUI\Projects\Project $Project, QUI\Locale $Locale): array
     {
@@ -155,16 +155,24 @@ class Projects implements ProviderInterface
             // table headers
             $titles = $Path->query('//table/thead/tr/th');
 
-            foreach ($titles as $Title) {
-                $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Title)));
+            if ($titles !== false) {
+                foreach ($titles as $Title) {
+                    if (!$Title instanceof DOMNode) {
+                        continue;
+                    }
+
+                    $search[] = Encoding::toUTF8(trim($this->toStringValue(DOMUtils::getTextFromNode($Title))));
+                }
             }
 
             // labels
             $labels = $Path->query('//label');
 
-            /** @var DOMNode $Label */
-            foreach ($labels as $Label) {
-                $search[] = Encoding::toUTF8(trim(DOMUtils::getTextFromNode($Label)));
+            if ($labels !== false) {
+                /** @var DOMNode $Label */
+                foreach ($labels as $Label) {
+                    $search[] = Encoding::toUTF8(trim($this->toStringValue(DOMUtils::getTextFromNode($Label))));
+                }
             }
 
             $templateName = basename($template, '.html');
@@ -228,6 +236,10 @@ class Projects implements ProviderInterface
             $Path = new DOMXPath($Dom);
             $categories = $Path->query("//settings/window/categories/category");
 
+            if ($categories === false) {
+                continue;
+            }
+
             /** @var DOMElement $Category */
             foreach ($categories as $Category) {
                 $category = false;
@@ -258,10 +270,10 @@ class Projects implements ProviderInterface
                     }
 
                     if ($Child->nodeName == 'title' || $Child->nodeName == 'text') {
-                        $nodeText = DOMUtils::getTextFromNode($Child);
+                        $nodeText = $this->toStringValue(DOMUtils::getTextFromNode($Child));
                         $entry['title'] = $nodeText;
                         $entry['description'] = $description;
-                        $searchStringParts[] = (string)$nodeText;
+                        $searchStringParts[] = $nodeText;
                         continue;
                     }
 
@@ -273,19 +285,25 @@ class Projects implements ProviderInterface
                     if ($Child->nodeName === 'settings') {
                         foreach ($Child->childNodes as $SettingChild) {
                             if ($SettingChild->nodeName == 'title' || $SettingChild->nodeName == 'text') {
-                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = $this->toStringValue(
+                                    DOMUtils::getTextFromNode($SettingChild)
+                                );
                                 continue;
                             }
 
                             if ($SettingChild->nodeName == 'description') {
-                                $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingChild);
+                                $searchStringParts[] = $this->toStringValue(
+                                    DOMUtils::getTextFromNode($SettingChild)
+                                );
                                 continue;
                             }
 
                             if ($SettingChild->hasChildNodes()) {
                                 foreach ($SettingChild->childNodes as $SettingInputChild) {
                                     if ($SettingInputChild->nodeName == 'title' || $SettingInputChild->nodeName == 'text') {
-                                        $searchStringParts[] = (string)DOMUtils::getTextFromNode($SettingInputChild);
+                                        $searchStringParts[] = $this->toStringValue(
+                                            DOMUtils::getTextFromNode($SettingInputChild)
+                                        );
                                         break;
                                     }
                                 }
@@ -300,5 +318,21 @@ class Projects implements ProviderInterface
         }
 
         return $dataEntries;
+    }
+
+    /**
+     * @param array<mixed>|string $value
+     */
+    protected function toStringValue(array | string $value): string
+    {
+        if (is_array($value)) {
+            $parts = array_map(static function ($part): string {
+                return is_scalar($part) ? (string)$part : '';
+            }, $value);
+
+            return implode(' ', array_filter($parts));
+        }
+
+        return $value;
     }
 }

@@ -8,7 +8,7 @@
 
 use QUI\BackendSearch\Builder;
 
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_backendsearch_ajax_getFilterGroups',
     function () {
         return Builder::getInstance()->getFilterGroups();

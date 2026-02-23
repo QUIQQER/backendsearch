@@ -10,9 +10,10 @@
  */
 
 use QUI\BackendSearch\Builder;
+use QUI\BackendSearch\ProviderInterface;
 use QUI\BackendSearch\Search;
 
-QUI::$Ajax->registerFunction(
+QUI::getAjax()->registerFunction(
     'package_quiqqer_backendsearch_ajax_getEntry',
     function ($id, $provider) {
         $Search = Search::getInstance();
@@ -23,6 +24,11 @@ QUI::$Ajax->registerFunction(
         }
 
         $Provider = $Builder->getProvider($provider);
+
+        if (!$Provider instanceof ProviderInterface) {
+            return [];
+        }
+
         $entryData = $Provider->getEntry($id);
 
         if (
