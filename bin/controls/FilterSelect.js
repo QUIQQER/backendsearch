@@ -1,9 +1,6 @@
 /**
  * Select multiple filters for QUIQQER Backend Search
  *
- * @module package/quiqqer/backendsearch/bin/controls/FilterSelect
- * @author www.pcsg.de (Henning Leutz)
- *
  * @event onLoaded [this] - fires when all filters are loaded and the FilterSelect is ready
  */
 define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
@@ -18,7 +15,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
     return new Class({
 
         Extends: QUISelect,
-        Type   : 'package/quiqqer/backendsearch/bin/controls/FilterSelect',
+        Type: 'package/quiqqer/backendsearch/bin/controls/FilterSelect',
 
         Binds: [
             '$onCreate',
@@ -27,11 +24,11 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
         ],
 
         options: {
-            showIcons            : false,
-            checkable            : true,
-            placeholderIcon      : false,
+            showIcons: false,
+            checkable: true,
+            placeholderIcon: false,
             placeholderSelectable: false,
-            menuWidth            : 300
+            menuWidth: 300
         },
 
         initialize: function (options) {
@@ -51,7 +48,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
          * event: onCreate
          */
         create: function () {
-            var self = this;
+            const self = this;
 
             this.setAttribute(
                 'placeholderText',
@@ -67,7 +64,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
             this.$Elm.setStyle('width', 50);
 
             this.$Menu.addEvent('show', function () {
-                var pos  = self.$Elm.getPosition(),
+                const pos = self.$Elm.getPosition(),
                     left = pos.x - self.getAttribute('menuWidth') + self.$Elm.getSize().y - 2;
 
                 self.setAttribute('menuLeft', left);
@@ -82,10 +79,10 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
                     self.$DefaultGroups = result[0];
                 }
 
-                var filterGroups = result[1];
+                const filterGroups = result[1];
 
-                for (var i = 0, len = filterGroups.length; i < len; i++) {
-                    var Group = filterGroups[i];
+                for (let i = 0, len = filterGroups.length; i < len; i++) {
+                    const Group = filterGroups[i];
 
                     if ("label" in Group) {
                         Group.label = QUILocale.get(Group.label[0], Group.label[1]);
@@ -112,21 +109,21 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
          * event: onImport
          */
         $onImport: function () {
-            var self = this;
+            const self = this;
 
             this.$Input = this.getElm();
             this.$Input.type = 'hidden';
 
-            var Elm = this.create();
+            const Elm = this.create();
 
             Elm.addClass('field-container-field');
 
             self.addEvents({
                 onLoaded: function () {
                     if (self.$Input.value.length) {
-                        var FilterGroups = JSON.decode(self.$Input.value);
+                        const FilterGroups = JSON.decode(self.$Input.value);
 
-                        for (var group in FilterGroups) {
+                        for (const group in FilterGroups) {
                             if (!FilterGroups.hasOwnProperty(group)) {
                                 continue;
                             }
@@ -137,18 +134,18 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
                         return;
                     }
 
-                    var children = self.getChildren();
+                    const children = self.getChildren();
 
-                    for (var i = 0, len = children.length; i < len; i++) {
+                    for (let i = 0, len = children.length; i < len; i++) {
                         self.selectChild(children[i].getAttribute('value'));
                     }
                 },
                 onChange: function () {
-                    var FilterGroups = {};
-                    var values = self.getValue();
+                    const FilterGroups = {};
+                    const values = self.getValue();
 
-                    for (var i = 0, len = values.length; i < len; i++) {
-                        var Group = self.$Groups[values[i]];
+                    for (let i = 0, len = values.length; i < len; i++) {
+                        const Group = self.$Groups[values[i]];
                         FilterGroups[Group.group] = Group;
                     }
 
@@ -163,21 +160,21 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
          * event: onInject
          */
         $onInject: function () {
-            var self = this;
+            const self = this;
 
             this.addEvents({
                 onLoaded: function () {
                     if (!Object.getLength(self.$DefaultGroups)) {
-                        var children = self.getChildren();
+                        const children = self.getChildren();
 
-                        for (var i = 0, len = children.length; i < len; i++) {
+                        for (let i = 0, len = children.length; i < len; i++) {
                             self.selectChild(children[i].getAttribute('value'));
                         }
 
                         return;
                     }
 
-                    for (var group in self.$DefaultGroups) {
+                    for (const group in self.$DefaultGroups) {
                         if (!self.$DefaultGroups.hasOwnProperty(group)) {
                             continue;
                         }
@@ -198,9 +195,9 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
                 QUIAjax.get('package_quiqqer_backendsearch_ajax_getSetting', function (result) {
                     resolve(JSON.decode(result));
                 }, {
-                    onError  : reject,
-                    section  : 'general',
-                    'var'    : 'defaultFilterGroups',
+                    onError: reject,
+                    section: 'general',
+                    'var': 'defaultFilterGroups',
                     'package': 'quiqqer/backendsearch'
                 });
             });
@@ -214,7 +211,7 @@ define('package/quiqqer/backendsearch/bin/controls/FilterSelect', [
         $getFilterGroups: function () {
             return new Promise(function (resolve, reject) {
                 QUIAjax.get('package_quiqqer_backendsearch_ajax_getFilterGroups', resolve, {
-                    onError  : reject,
+                    onError: reject,
                     'package': 'quiqqer/backendsearch'
                 });
             });
