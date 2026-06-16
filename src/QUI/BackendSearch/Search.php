@@ -6,9 +6,11 @@
 
 namespace QUI\BackendSearch;
 
-use PDO;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Exception as DbalException;
 use QUI;
 use QUI\Database\Exception;
+use QUI\Utils\Doctrine as DoctrineUtils;
 
 /**
  * Class Search
@@ -46,88 +48,54 @@ class Search
     {
         $DesktopSearch = Builder::getInstance();
         $string = trim($string);
+        $filterGroups = isset($params["filterGroups"]) && is_array($params["filterGroups"])
+            ? array_values(array_filter($params["filterGroups"], "is_string"))
+            : [];
 
-        $sql = "SELECT * FROM " . $DesktopSearch->getTable();
-        $where = [
-            '`search` LIKE :search',
-            '`lang` = \'' . QUI::getUserBySession()->getLang() . '\''
-        ];
-        $binds = [
-            'search' => [
-                'value' => '%' . $string . '%',
-                'type' => PDO::PARAM_STR
-            ]
-        ];
+        $Connection = QUI::getDataBaseConnection();
+        $QueryBuilder = $Connection->createQueryBuilder();
 
-        $where = array_merge($where, $DesktopSearch->getWhereConstraint($params['filterGroups']));
+        $QueryBuilder
+            ->select("*")
+            ->from(DoctrineUtils::quoteIdentifier($DesktopSearch->getTable()))
+            ->where(DoctrineUtils::quoteIdentifier("search") . " LIKE :search")
+            ->andWhere(DoctrineUtils::quoteIdentifier("lang") . " = :lang")
+            ->setParameter("search", "%" . $string . "%")
+            ->setParameter("lang", QUI::getUserBySession()->getLang());
 
-        if (!empty($params['group'])) {
-            $where[] = '`group` = :group';
-            $binds['group'] = [
-                'value' => $params['group'],
-                'type' => PDO::PARAM_STR
-            ];
-
-            $groupFilter = true;
+        foreach ($DesktopSearch->getWhereConstraint($filterGroups) as $constraint) {
+            $QueryBuilder->andWhere($constraint);
         }
 
-        if (!empty($params['filterGroups']) && is_array($params['filterGroups'])) {
-            $where[] = '`filterGroup` IN (\'' . implode("','", $params['filterGroups']) . '\')';
+        if (!empty($params["group"])) {
+            $QueryBuilder
+                ->andWhere(DoctrineUtils::quoteIdentifier("group") . " = :group")
+                ->setParameter("group", $params["group"]);
         }
 
-        $sql .= " WHERE " . implode(' AND ', $where);
+        if (!empty($filterGroups)) {
+            $QueryBuilder
+                ->andWhere(DoctrineUtils::quoteIdentifier("filterGroup") . " IN (:filterGroups)")
+                ->setParameter("filterGroups", $filterGroups, ArrayParameterType::STRING);
+        }
 
-        if (!empty($params['limit'])) {
-            $sql .= " LIMIT " . (int)$params['limit'] * 3;
+        if (!empty($params["limit"])) {
+            $QueryBuilder->setMaxResults((int)$params["limit"] * 3);
         } else {
-            $limit = (int)QUI::getConfig('etc/search.ini.php')->get('general', 'maxResultsPerGroup');
-            $params['limit'] = $limit;  // set limit parameter for provider search
-
-            $sql .= " LIMIT " . $limit;
-        }
-
-        $PDO = QUI::getDataBase()->getPDO();
-
-        if (!$PDO instanceof PDO) {
-            QUI\System\Log::addError(
-                self::class . ' :: search -> No PDO instance available'
-            );
-
-            return [];
-        }
-
-        $Stmt = $PDO->prepare($sql);
-
-        foreach ($binds as $var => $bind) {
-            $Stmt->bindValue(':' . $var, $bind['value'], $bind['type']);
+            $limit = (int)QUI::getConfig("etc/search.ini.php")->get("general", "maxResultsPerGroup");
+            $params["limit"] = $limit;
+            $QueryBuilder->setMaxResults($limit);
         }
 
         try {
-            $Stmt->execute();
-            $result = $Stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\Exception $Exception) {
+            $result = $QueryBuilder->executeQuery()->fetchAllAssociative();
+        } catch (DbalException $Exception) {
             QUI\System\Log::addError(
-                self::class . ' :: search -> ' . $Exception->getMessage()
+                self::class . " :: search -> " . $Exception->getMessage()
             );
 
             return [];
         }
-
-        // get group counts
-//        $countResult = QUI::getDataBase()->fetch(array(
-//            'select' => array(
-//                'group',
-//                'COUNT(`group`)'
-//            ),
-//            'from'   => $DesktopSearch->getTable(),
-//            'group'  => 'group'
-//        ));
-//
-//        $groupCounts = array();
-//
-//        foreach ($countResult as $row) {
-//            $groupCounts[$row['group']] = $row['COUNT(`group`)'];
-//        }
 
         $providers = $DesktopSearch->getProvider();
 
@@ -141,7 +109,7 @@ class Search
                 $providerResult = $Provider->search($string, $params);
             } catch (\Exception $Exception) {
                 QUI\System\Log::addError(
-                    self::class . ' :: search -> ' . $Exception->getMessage()
+                    self::class . " :: search -> " . $Exception->getMessage()
                 );
 
                 continue;
@@ -152,74 +120,29 @@ class Search
             }
 
             foreach ($providerResult as $key => $product) {
-                $product['provider'] = get_class($Provider);
+                $product["provider"] = get_class($Provider);
                 $providerResult[$key] = $product;
             }
 
             $result = array_merge($result, $providerResult);
         }
 
-        // filter duplicates
         $ids = [];
 
         $result = array_filter($result, function (array $data) use (&$ids): bool {
-            if (!isset($data['id'])) {
+            if (!isset($data["id"])) {
                 return true;
             }
 
-            if (isset($ids[$data['id']])) {
+            if (isset($ids[$data["id"]])) {
                 return false;
             }
 
-            $ids[$data['id']] = true;
+            $ids[$data["id"]] = true;
             return true;
         });
 
         return array_values($result);
-
-//        $groups = array();
-//
-//        foreach ($result as $row) {
-//            $group = $row['group'];
-//
-//            if (!isset($groups[$group])) {
-//                $groups[$group] = array(
-//                    'count' => 0
-//                );
-//            }
-//
-//            $groups[$group]['count']++;
-//        }
-//
-//        $searchResult = array(
-//            'entries' => $result,
-//            'groups'  => $groups
-//        );
-
-        // if specific group was requested -> do not limit results
-//        if ($groupFilter) {
-//            return $searchResult;
-//        }
-
-//        // max limit per group
-//        $groupCount = array();
-//        $groupLimit = (int)QUI::getConfig('etc/search.ini.php')->get('general', 'maxResultsPerGroup');
-//
-//        foreach ($result as $k => $row) {
-//            $group = $row['group'];
-//
-//            if (!isset($groupCount[$group])) {
-//                $groupCount[$group] = 0;
-//            }
-//
-//            if ($groupCount[$group] >= $groupLimit) {
-//                unset($result[$k]);
-//            }
-//
-//            $groupCount[$group]++;
-//        }
-//
-//        return $result;
     }
 
     /**
@@ -231,14 +154,20 @@ class Search
      */
     public function getEntry(string | int $id): array
     {
-        $result = QUI::getDataBase()->fetch([
-            'from' => Builder::getInstance()->getTable(),
-            'where' => [
-                'id' => $id
-            ],
-            'limit' => 1
-        ]);
+        try {
+            $result = QUI::getDataBaseConnection()
+                ->createQueryBuilder()
+                ->select("*")
+                ->from(DoctrineUtils::quoteIdentifier(Builder::getInstance()->getTable()))
+                ->where(DoctrineUtils::quoteIdentifier("id") . " = :id")
+                ->setParameter("id", $id)
+                ->setMaxResults(1)
+                ->executeQuery()
+                ->fetchAssociative();
+        } catch (DbalException $Exception) {
+            throw new Exception($Exception->getMessage(), $Exception->getCode());
+        }
 
-        return $result[0] ?? [];
+        return is_array($result) ? $result : [];
     }
 }

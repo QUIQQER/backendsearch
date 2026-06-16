@@ -2,10 +2,11 @@
 
 namespace QUI\BackendSearch\Provider;
 
-use Exception;
-use PDO;
+use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\Exception as DbalException;
 use QUI;
 use QUI\BackendSearch\ProviderInterface;
+use QUI\Utils\Doctrine as DoctrineUtils;
 
 class Media implements ProviderInterface
 {
@@ -25,74 +26,62 @@ class Media implements ProviderInterface
      */
     public function search(string $search, array $params = []): array
     {
-        $filterGroups = isset($params['filterGroups']) && is_array($params['filterGroups'])
-            ? $params['filterGroups']
+        $filterGroups = isset($params["filterGroups"]) && is_array($params["filterGroups"])
+            ? $params["filterGroups"]
             : [];
         $filter = array_flip($filterGroups);
 
         $projects = QUI::getProjectManager()->getProjectList();
         $results = [];
+        $types = [];
 
-        // if no groups are selected, return empty result list
-        if (
-            !isset($filter['file'])
-            && !isset($filter['image'])
-            && !isset($filter['folder'])
-        ) {
+        if (isset($filter["file"])) {
+            $types[] = "file";
+        }
+
+        if (isset($filter["image"])) {
+            $types[] = "image";
+        }
+
+        if (isset($filter["folder"])) {
+            $types[] = "folder";
+        }
+
+        if (empty($types)) {
             return $results;
         }
 
-        $where = [
-            '(`title` LIKE :search OR `mime_type` LIKE :search)'
-        ];
-
-        $whereOr = [];
-
-        if (isset($filter['file'])) {
-            $whereOr[] = '`type` = \'file\'';
-        }
-
-        if (isset($filter['image'])) {
-            $whereOr[] = '`type` = \'image\'';
-        }
-
-        if (isset($filter['folder'])) {
-            $whereOr[] = '`type` = \'folder\'';
-        }
-
-        $where[] = '(' . implode(' OR ', $whereOr) . ')';
-
-        $PDO = QUI::getDataBase()->getPDO();
-
-        if (!$PDO instanceof PDO) {
-            QUI\System\Log::addError(
-                self::class . ' :: search -> No PDO instance available'
-            );
-
-            return $results;
-        }
+        $Connection = QUI::getDataBaseConnection();
 
         foreach ($projects as $Project) {
             $Media = $Project->getMedia();
+            $QueryBuilder = $Connection->createQueryBuilder();
 
-            $sql = "SELECT id,title,file,type FROM " . $Media->getTable();
-            $sql .= " WHERE " . implode(' AND ', $where);
+            $QueryBuilder
+                ->select(
+                    DoctrineUtils::quoteIdentifier("id"),
+                    DoctrineUtils::quoteIdentifier("title"),
+                    DoctrineUtils::quoteIdentifier("file"),
+                    DoctrineUtils::quoteIdentifier("type")
+                )
+                ->from(DoctrineUtils::quoteIdentifier($Media->getTable()))
+                ->where(
+                    "(" . DoctrineUtils::quoteIdentifier("title") . " LIKE :search OR "
+                    . DoctrineUtils::quoteIdentifier("mime_type") . " LIKE :search)"
+                )
+                ->andWhere(DoctrineUtils::quoteIdentifier("type") . " IN (:types)")
+                ->setParameter("search", "%" . $search . "%")
+                ->setParameter("types", $types, ArrayParameterType::STRING);
 
-            if (isset($params['limit'])) {
-                $sql .= " LIMIT " . (int)$params['limit'];
+            if (isset($params["limit"])) {
+                $QueryBuilder->setMaxResults((int)$params["limit"]);
             }
 
-            $Stmt = $PDO->prepare($sql);
-
-            // bind
-            $Stmt->bindValue(':search', '%' . $search . '%');
-
             try {
-                $Stmt->execute();
-                $result = $Stmt->fetchAll(PDO::FETCH_ASSOC);
-            } catch (Exception $Exception) {
+                $result = $QueryBuilder->executeQuery()->fetchAllAssociative();
+            } catch (DbalException $Exception) {
                 QUI\System\Log::addError(
-                    self::class . ' :: search -> ' . $Exception->getMessage()
+                    self::class . " :: search -> " . $Exception->getMessage()
                 );
 
                 continue;
@@ -102,26 +91,26 @@ class Media implements ProviderInterface
 
             foreach ($result as $row) {
                 $groupLabel = QUI::getLocale()->get(
-                    'quiqqer/backendsearch',
-                    'search.provider.media.group.label',
+                    "quiqqer/backendsearch",
+                    "search.provider.media.group.label",
                     [
-                        'projectName' => $projectName
+                        "projectName" => $projectName
                     ]
                 );
 
-                $icon = match ($row['type']) {
-                    'file' => 'fa fa-file-text-o',
-                    'folder' => 'fa fa-folder-o',
-                    default => 'fa fa-picture-o',
+                $icon = match ($row["type"]) {
+                    "file" => "fa fa-file-text-o",
+                    "folder" => "fa fa-folder-o",
+                    default => "fa fa-picture-o",
                 };
 
                 $results[] = [
-                    'id' => $projectName . '-' . $row['id'],
-                    'title' => $row['title'],
-                    'description' => $row['file'],
-                    'icon' => $icon,
-                    'groupLabel' => $groupLabel,
-                    'group' => $projectName . '-media'
+                    "id" => $projectName . "-" . $row["id"],
+                    "title" => $row["title"],
+                    "description" => $row["file"],
+                    "icon" => $icon,
+                    "groupLabel" => $groupLabel,
+                    "group" => $projectName . "-media"
                 ];
             }
         }
