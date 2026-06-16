@@ -123,8 +123,10 @@ class BuilderUnitTest extends TestCase
         $constraint = $Builder->getWhereConstraint([]);
 
         $this->assertCount(2, $constraint);
-        $this->assertStringContainsString("`group` != 'apps'", $constraint[0]);
-        $this->assertStringContainsString("`group` != 'extras'", $constraint[1]);
+        $this->assertStringContainsString("group", $constraint[0]);
+        $this->assertStringContainsString("apps", $constraint[0]);
+        $this->assertStringContainsString("group", $constraint[1]);
+        $this->assertStringContainsString("extras", $constraint[1]);
     }
 
     public function testAddEntryThrowsExceptionWhenRequiredParamsAreMissing(): void

@@ -6,6 +6,7 @@
 
 namespace QUI\BackendSearch;
 
+use Doctrine\DBAL\Exception as DbalException;
 use DOMDocument;
 use DOMNode;
 use DOMXPath;
@@ -14,6 +15,7 @@ use QUI;
 use QUI\Cache\Manager as CacheManager;
 use QUI\Database\Exception;
 use QUI\Permissions\Permission;
+use QUI\Utils\Doctrine as DoctrineUtils;
 use QUI\Utils\DOM as DOMUtils;
 
 /**
@@ -280,10 +282,13 @@ class Builder
      */
     public function buildCache(): void
     {
-        $Table = QUI::getDataBase()->table();
-
-        if ($Table) {
-            $Table->truncate($this->getTable());
+        try {
+            QUI::getDataBaseConnection()
+                ->createQueryBuilder()
+                ->delete(DoctrineUtils::quoteIdentifier($this->getTable()))
+                ->executeStatement();
+        } catch (DbalException $Exception) {
+            QUI\System\Log::writeException($Exception);
         }
 
         // apps
@@ -346,9 +351,7 @@ class Builder
      */
     public function buildProfileCache(): void
     {
-        QUI::getDataBase()->delete($this->getTable(), [
-            'group' => self::TYPE_PROFILE
-        ]);
+        $this->deleteEntriesByGroup(self::TYPE_PROFILE);
 
         $locales = $this->getLocales();
         $QUILocale = QUI::getLocale();
@@ -420,8 +423,8 @@ class Builder
     public function getWhereConstraint(array $filters): array
     {
         $where = [
-            'navApps' => '`group` != \'' . self::TYPE_APPS . '\'',
-            'navExtras' => '`group` != \'' . self::TYPE_EXTRAS . '\'',
+            'navApps' => DoctrineUtils::quoteIdentifier('group') . ' != ' . QUI::getDataBaseConnection()->quote(self::TYPE_APPS),
+            'navExtras' => DoctrineUtils::quoteIdentifier('group') . ' != ' . QUI::getDataBaseConnection()->quote(self::TYPE_EXTRAS),
         ];
 
         foreach ($filters as $filter) {
@@ -447,9 +450,7 @@ class Builder
      */
     protected function buildMenuCacheHelper(string $type): void
     {
-        QUI::getDataBase()->delete($this->getTable(), [
-            'group' => $type
-        ]);
+        $this->deleteEntriesByGroup($type);
 
         $menu = $this->getMenuData();
 
@@ -594,13 +595,49 @@ class Builder
             $params['groupLabel'] = json_encode($params['groupLabel']);
         }
 
-        if (isset($params['searchdata']) && is_array($params['searchdata'])) {
+        if (is_array($params['searchdata'])) {
             $params['searchdata'] = json_encode($params['searchdata']);
         }
 
         $params['lang'] = $lang;
 
-        QUI::getDataBase()->insert($this->getTable(), $params);
+        try {
+            QUI::getDataBaseConnection()->insert(
+                DoctrineUtils::quoteIdentifier($this->getTable()),
+                self::quoteDbalArrayKeys($params)
+            );
+        } catch (DbalException $Exception) {
+            throw new Exception($Exception->getMessage(), $Exception->getCode());
+        }
+    }
+
+    protected function deleteEntriesByGroup(string $group): void
+    {
+        try {
+            QUI::getDataBaseConnection()
+                ->createQueryBuilder()
+                ->delete(DoctrineUtils::quoteIdentifier($this->getTable()))
+                ->where(DoctrineUtils::quoteIdentifier('group') . ' = :group')
+                ->setParameter('group', $group)
+                ->executeStatement();
+        } catch (DbalException $Exception) {
+            QUI\System\Log::writeException($Exception);
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    protected static function quoteDbalArrayKeys(array $data): array
+    {
+        $quoted = [];
+
+        foreach ($data as $key => $value) {
+            $quoted[DoctrineUtils::quoteIdentifier((string)$key)] = $value;
+        }
+
+        return $quoted;
     }
 
     /**

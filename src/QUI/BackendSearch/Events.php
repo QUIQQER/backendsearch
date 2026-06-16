@@ -7,7 +7,6 @@
 namespace QUI\BackendSearch;
 
 use QUI;
-use QUI\Database\Tables;
 use QUI\Package\Package;
 
 /**
@@ -47,14 +46,14 @@ class Events
             return;
         }
 
-        $Table = QUI::getDataBase()->table();
-
-        if (!$Table instanceof Tables) {
-            QUI\System\Log::addError(self::class . ' :: onPackageSetup -> No table manager available');
+        try {
+            $cronTableExists = QUI::getSchemaManager()->tablesExist([QUI::getDBTableName('cron')]);
+        } catch (\Doctrine\DBAL\Exception $Exception) {
+            QUI\System\Log::writeException($Exception);
             return;
         }
 
-        if (!$Table->exist('cron')) {
+        if (!$cronTableExists) {
             try {
                 $CronPackage = QUI::getPackage('quiqqer/cron');
                 $CronPackage->setup();
