@@ -2,11 +2,11 @@
 
 namespace QUI\BackendSearch\Provider;
 
-use Exception;
-use PDO;
+use Doctrine\DBAL\Exception as DbalException;
 use QUI;
 use QUI\BackendSearch\ProviderInterface;
 use QUI\Permissions\Permission;
+use QUI\Utils\Doctrine as DoctrineUtils;
 
 /**
  * Class UsersAndGroups
@@ -36,131 +36,134 @@ class UsersAndGroups implements ProviderInterface
     public function search(string $search, array $params = []): array
     {
         if (
-            isset($params['filterGroups'])
-            && is_array($params['filterGroups'])
-            && !in_array(self::FILTER_USERS_GROUPS, $params['filterGroups'])
+            isset($params["filterGroups"])
+            && is_array($params["filterGroups"])
+            && !in_array(self::FILTER_USERS_GROUPS, $params["filterGroups"])
         ) {
             return [];
         }
 
         $results = [];
-        $PDO = QUI::getDataBase()->getPDO();
         $Locale = QUI::getLocale();
+        $Connection = QUI::getDataBaseConnection();
 
-        // users
-        if (Permission::hasPermission('quiqqer.admin.users.edit') && $PDO instanceof PDO) {
+        if (Permission::hasPermission("quiqqer.admin.users.edit")) {
             $Users = QUI::getUsers();
+            $QueryBuilder = $Connection->createQueryBuilder();
+            $userAlias = "users";
+            $addressAlias = "address";
+            $userColumn = static fn (string $column): string => $userAlias . "." . DoctrineUtils::quoteIdentifier($column);
+            $addressColumn = static fn (string $column): string => $addressAlias . "." . DoctrineUtils::quoteIdentifier($column);
+            $where = [
+                $userColumn("uuid") . " LIKE :search",
+                $userColumn("username") . " LIKE :search",
+                $userColumn("firstname") . " LIKE :search",
+                $userColumn("lastname") . " LIKE :search",
+                $userColumn("email") . " LIKE :search",
+                $addressColumn("firstname") . " LIKE :search",
+                $addressColumn("lastname") . " LIKE :search",
+                $addressColumn("mail") . " LIKE :search",
+                $addressColumn("company") . " LIKE :search",
+                $addressColumn("street_no") . " LIKE :search",
+                $addressColumn("zip") . " LIKE :search",
+                $addressColumn("city") . " LIKE :search"
+            ];
 
-            $sql = "SELECT users.id, users.uuid, users.username FROM ";
-            $sql .= " `" . $Users->table() . "`, `" . $Users->tableAddress() . "` address";
-
-            $where = [];
-
-            // users table
-            $where[] = "users.`uuid` LIKE :search";
-            $where[] = "users.`id` LIKE :search";
-            $where[] = "users.`username` LIKE :search";
-            $where[] = "users.`firstname` LIKE :search";
-            $where[] = "users.`lastname` LIKE :search";
-            $where[] = "users.`email` LIKE :search";
-
-            // users_address table
-            $where[] = "address.`firstname` LIKE :search";
-            $where[] = "address.`lastname` LIKE :search";
-            $where[] = "address.`mail` LIKE :search";
-            $where[] = "address.`company` LIKE :search";
-            $where[] = "address.`street_no` LIKE :search";
-            $where[] = "address.`zip` LIKE :search";
-            $where[] = "address.`city` LIKE :search";
-
-            $sql .= " WHERE " . implode(" OR ", $where);
-
-            if (isset($params['limit'])) {
-                $sql .= " LIMIT " . (int)$params['limit'];
+            if (ctype_digit($search)) {
+                $where[] = $userColumn("id") . " = :userId";
+                $QueryBuilder->setParameter("userId", (int)$search);
             }
 
-            $Stmt = $PDO->prepare($sql);
+            $QueryBuilder
+                ->select(
+                    $userColumn("id"),
+                    $userColumn("uuid"),
+                    $userColumn("username")
+                )
+                ->distinct()
+                ->from(DoctrineUtils::quoteIdentifier($Users->table()), $userAlias)
+                ->leftJoin(
+                    $userAlias,
+                    DoctrineUtils::quoteIdentifier($Users->tableAddress()),
+                    $addressAlias,
+                    $userColumn("uuid") . " = " . $addressColumn("userUuid")
+                )
+                ->where("(" . implode(" OR ", $where) . ")")
+                ->setParameter("search", "%" . $search . "%");
 
-            // bind
-            $Stmt->bindValue(':search', '%' . $search . '%');
-            $error = false;
+            if (isset($params["limit"])) {
+                $QueryBuilder->setMaxResults((int)$params["limit"]);
+            }
 
             try {
-                $Stmt->execute();
-                $result = $Stmt->fetchAll(PDO::FETCH_ASSOC);
-            } catch (Exception $Exception) {
+                $result = $QueryBuilder->executeQuery()->fetchAllAssociative();
+            } catch (DbalException $Exception) {
                 QUI\System\Log::addError(
-                    self::class . ' :: search (users) -> ' . $Exception->getMessage()
+                    self::class . " :: search (users) -> " . $Exception->getMessage()
                 );
 
-                $error = true;
+                $result = [];
             }
 
             $groupLabel = $Locale->get(
-                'quiqqer/backendsearch',
-                'search.builder.group.label.users'
+                "quiqqer/backendsearch",
+                "search.builder.group.label.users"
             );
 
-            if (!$error) {
-                foreach ($result as $row) {
-                    $results[] = [
-                        'id' => 'u' . $row['id'],
-                        'title' => $row['username'],
-                        'icon' => 'fa fa-user',
-                        'group' => 'users',
-                        'groupLabel' => $groupLabel
-                    ];
-                }
+            foreach ($result as $row) {
+                $results[] = [
+                    "id" => "u" . $row["id"],
+                    "title" => $row["username"],
+                    "icon" => "fa fa-user",
+                    "group" => "users",
+                    "groupLabel" => $groupLabel
+                ];
             }
-        } elseif (Permission::hasPermission('quiqqer.admin.users.edit')) {
-            QUI\System\Log::addError(
-                self::class . ' :: search (users) -> No PDO instance available'
-            );
         }
 
-        // groups
-        if (!Permission::hasPermission('quiqqer.admin.groups.edit')) {
+        if (!Permission::hasPermission("quiqqer.admin.groups.edit")) {
             return $results;
         }
 
+        $QueryBuilder = $Connection->createQueryBuilder();
+        $where = [DoctrineUtils::quoteIdentifier("name") . " LIKE :search"];
+
+        if (ctype_digit($search)) {
+            $where[] = DoctrineUtils::quoteIdentifier("id") . " = :groupId";
+            $QueryBuilder->setParameter("groupId", (int)$search);
+        }
+
+        $QueryBuilder
+            ->select(
+                DoctrineUtils::quoteIdentifier("id"),
+                DoctrineUtils::quoteIdentifier("name")
+            )
+            ->from(DoctrineUtils::quoteIdentifier(QUI::getGroups()->table()))
+            ->where("(" . implode(" OR ", $where) . ")")
+            ->setParameter("search", "%" . $search . "%");
+
         try {
-            $result = QUI::getDataBase()->fetch([
-                'select' => [
-                    'id',
-                    'name'
-                ],
-                'from' => QUI::getGroups()->table(),
-                'where_or' => [
-                    'id' => [
-                        'type' => '%LIKE%',
-                        'value' => $search
-                    ],
-                    'name' => [
-                        'type' => '%LIKE%',
-                        'value' => $search
-                    ]
-                ]
-            ]);
-        } catch (Exception $Exception) {
+            $result = $QueryBuilder->executeQuery()->fetchAllAssociative();
+        } catch (DbalException $Exception) {
             QUI\System\Log::addError(
-                self::class . ' :: search (groups) -> ' . $Exception->getMessage()
+                self::class . " :: search (groups) -> " . $Exception->getMessage()
             );
 
             return $results;
         }
 
         $groupLabel = $Locale->get(
-            'quiqqer/backendsearch',
-            'search.builder.group.label.groups'
+            "quiqqer/backendsearch",
+            "search.builder.group.label.groups"
         );
 
         foreach ($result as $row) {
             $results[] = [
-                'id' => 'g' . $row['id'],
-                'title' => $row['name'],
-                'icon' => 'fa fa-users',
-                'group' => 'groups',
-                'groupLabel' => $groupLabel
+                "id" => "g" . $row["id"],
+                "title" => $row["name"],
+                "icon" => "fa fa-users",
+                "group" => "groups",
+                "groupLabel" => $groupLabel
             ];
         }
 
