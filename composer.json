@@ -18,6 +18,7 @@
     "source": "https://dev.quiqqer.com/quiqqer/backendsearch/tree/dev"
   },
   "require": {
+    "php": "^8.2",
     "quiqqer/core": "^2",
     "quiqqer/utils": "^2.4"
   },
