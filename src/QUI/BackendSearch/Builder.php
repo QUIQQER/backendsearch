@@ -662,11 +662,11 @@ class Builder
 
             // locale w. search string
             if (isset($item['locale']) && is_array($item['locale'])) {
-                $localeGroup = $item['locale'][0];
-                $localeVar = $item['locale'][1];
+                $localeGroup = $this->toStringValue($item['locale'][0] ?? '');
+                $localeVar = $this->toStringValue($item['locale'][1] ?? '');
 
                 if ($Locale->exists($localeGroup, $localeVar)) {
-                    $search = $Locale->get($item['locale'][0], $item['locale'][1]);
+                    $search = $Locale->get($localeGroup, $localeVar);
                     $title = $search;
                 }
             }
