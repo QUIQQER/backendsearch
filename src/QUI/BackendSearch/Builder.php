@@ -724,7 +724,7 @@ class Builder
 
         try {
             $Doc = new DOMDocument();
-            $Doc->loadHTML($html);
+            $Doc->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING);
         } catch (\Exception $Exception) {
             QUI\System\Log::addNotice(
                 self::class . ' :: getProfileSearchterms -> Could not parse user profile search terms: '
