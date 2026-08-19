@@ -8,6 +8,7 @@ namespace QUI\BackendSearch;
 
 use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Exception as DbalException;
+use Doctrine\DBAL\Query\QueryBuilder;
 use QUI;
 use QUI\Database\Exception;
 use QUI\Utils\Doctrine as DoctrineUtils;
@@ -48,6 +49,10 @@ class Search
     {
         $DesktopSearch = Builder::getInstance();
         $string = trim($string);
+        $limit = $this->getResultLimit($params);
+        $requestedGroup = isset($params['group']) && is_string($params['group'])
+            ? trim($params['group'])
+            : '';
         $filterGroups = isset($params["filterGroups"]) && is_array($params["filterGroups"])
             ? array_values(array_filter($params["filterGroups"], "is_string"))
             : [];
@@ -56,7 +61,6 @@ class Search
         $QueryBuilder = $Connection->createQueryBuilder();
 
         $QueryBuilder
-            ->select("*")
             ->from(DoctrineUtils::quoteIdentifier($DesktopSearch->getTable()))
             ->where(DoctrineUtils::quoteIdentifier("search") . " LIKE :search")
             ->andWhere(DoctrineUtils::quoteIdentifier("lang") . " = :lang")
@@ -67,28 +71,18 @@ class Search
             $QueryBuilder->andWhere($constraint);
         }
 
-        if (!empty($params["group"])) {
-            $QueryBuilder
-                ->andWhere(DoctrineUtils::quoteIdentifier("group") . " = :group")
-                ->setParameter("group", $params["group"]);
-        }
-
         if (!empty($filterGroups)) {
             $QueryBuilder
                 ->andWhere(DoctrineUtils::quoteIdentifier("filterGroup") . " IN (:filterGroups)")
                 ->setParameter("filterGroups", $filterGroups, ArrayParameterType::STRING);
         }
 
-        if (!empty($params["limit"])) {
-            $QueryBuilder->setMaxResults((int)$params["limit"] * 3);
-        } else {
-            $limit = (int)QUI::getConfig("etc/search.ini.php")->get("general", "maxResultsPerGroup");
-            $params["limit"] = $limit;
-            $QueryBuilder->setMaxResults($limit);
-        }
-
         try {
-            $result = $QueryBuilder->executeQuery()->fetchAllAssociative();
+            $result = $this->getCachedResults(
+                $QueryBuilder,
+                $requestedGroup,
+                $limit
+            );
         } catch (DbalException $Exception) {
             QUI\System\Log::addError(
                 self::class . " :: search -> " . $Exception->getMessage()
@@ -103,10 +97,13 @@ class Search
             $providers = [$providers];
         }
 
+        $providerParams = $params;
+        $providerParams['limit'] = $limit + 1;
+
         /* @var ProviderInterface $Provider */
         foreach ($providers as $Provider) {
             try {
-                $providerResult = $Provider->search($string, $params);
+                $providerResult = $Provider->search($string, $providerParams);
             } catch (\Exception $Exception) {
                 QUI\System\Log::addError(
                     self::class . " :: search -> " . $Exception->getMessage()
@@ -142,10 +139,118 @@ class Search
             return true;
         });
 
+        $result = $this->limitResultsByGroup(
+            array_values($result),
+            $limit,
+            $requestedGroup
+        );
+
         return array_map(
             $this->prepareResultIcon(...),
-            array_values($result)
+            $result
         );
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function getResultLimit(array $params): int
+    {
+        if (isset($params['limit']) && is_numeric($params['limit'])) {
+            return max(1, (int)$params['limit']);
+        }
+
+        return max(
+            1,
+            (int)QUI::getConfig('etc/search.ini.php')->get('general', 'maxResultsPerGroup')
+        );
+    }
+
+    /**
+     * Load one additional cache entry per group to determine whether more
+     * matching results exist without loading the complete result set.
+     *
+     * @return array<int, array<string, mixed>>
+     * @throws DbalException
+     */
+    private function getCachedResults(
+        QueryBuilder $QueryBuilder,
+        string $requestedGroup,
+        int $limit
+    ): array {
+        $groupColumn = DoctrineUtils::quoteIdentifier('group');
+
+        if ($requestedGroup !== '') {
+            $groups = [$requestedGroup];
+        } else {
+            $GroupQueryBuilder = clone $QueryBuilder;
+            $groups = $GroupQueryBuilder
+                ->select($groupColumn)
+                ->groupBy($groupColumn)
+                ->orderBy($groupColumn, 'ASC')
+                ->executeQuery()
+                ->fetchFirstColumn();
+        }
+
+        $result = [];
+
+        foreach ($groups as $group) {
+            if (!is_scalar($group)) {
+                continue;
+            }
+
+            $GroupResultQueryBuilder = clone $QueryBuilder;
+            $groupResult = $GroupResultQueryBuilder
+                ->select('*')
+                ->andWhere($groupColumn . ' = :resultGroup')
+                ->setParameter('resultGroup', (string)$group)
+                ->orderBy(DoctrineUtils::quoteIdentifier('id'), 'ASC')
+                ->setMaxResults($limit + 1)
+                ->executeQuery()
+                ->fetchAllAssociative();
+
+            $result = array_merge($result, $groupResult);
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $result
+     * @return array<int, array<string, mixed>>
+     */
+    private function limitResultsByGroup(
+        array $result,
+        int $limit,
+        string $requestedGroup
+    ): array {
+        $resultsByGroup = [];
+
+        foreach ($result as $entry) {
+            $group = isset($entry['group']) && is_scalar($entry['group'])
+                ? (string)$entry['group']
+                : '';
+
+            if ($requestedGroup !== '' && $group !== $requestedGroup) {
+                continue;
+            }
+
+            $entry['group'] = $group;
+            $resultsByGroup[$group][] = $entry;
+        }
+
+        $limitedResult = [];
+
+        foreach ($resultsByGroup as $groupResult) {
+            $hasMore = count($groupResult) > $limit;
+
+            foreach (array_slice($groupResult, 0, $limit) as $entry) {
+                $entry['groupHasMore'] = $hasMore;
+                $limitedResult[] = $entry;
+            }
+        }
+
+        return $limitedResult;
     }
 
     /**

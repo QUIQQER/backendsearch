@@ -19,4 +19,12 @@
         {{/entries}}
     </ul>
 
+    {{#hasMore}}
+    <div class="qui-backendsearch-search-resultGroup-more">
+        <button type="button"
+                class="qui-button"
+                data-name="show-more"
+                data-group="{{group}}">{{showMoreText}}</button>
+    </div>
+    {{/hasMore}}
 </section>

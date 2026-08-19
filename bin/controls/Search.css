@@ -233,6 +233,12 @@ section.qui-backendsearch-search-resultGroup.highlight {
     width: calc(100% - 30px);
 }
 
+.qui-backendsearch-search-resultGroup-more {
+    display: flex;
+    justify-content: center;
+    margin: 5px;
+}
+
 /* todo css grid wenn möglich */
 /*
 .qui-backendsearch-search-container {

@@ -36,6 +36,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             'open',
             'executeSearch',
             '$onInject',
+            '$loadMoreResults',
             'changeEntryFocus',
             '$onWindowKeyUp',
             '$renderResult',
@@ -61,6 +62,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$FilterSelect = null;
             this.$extendedSearch = false;
             this.$Settings = {};
+            this.$results = [];
 
             this.$execSearchOnNextFilterClose = false;
 
@@ -388,7 +390,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 self.executeSearch(self.$Input.value, Params).then((result) => {
                     self.$renderResult(result);
 
-                    if (!self.$extendedSearch && twoStepSearch && result.length >= 5) {
+                    const hasMoreResults = result.some(function (Entry) {
+                        return Entry.groupHasMore === true;
+                    });
+
+                    if (!self.$extendedSearch && twoStepSearch && hasMoreResults) {
                         self.$extendedSearch = true;
                         self.search();  // execute search without limits
                     } else {
@@ -407,9 +413,12 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * Render the result array
          *
          * @param {Array} result
+         * @param {Number} [scrollTop]
          */
-        $renderResult: function (result) {
+        $renderResult: function (result, scrollTop) {
             var group, groupHTML, Entry, label;
+
+            this.$results = result;
 
             if (result.length === 0) {
                 // no search results
@@ -457,13 +466,19 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     }
 
                     ResultsByGroup[Entry.group] = {
+                        group: Entry.group,
                         label: label,
                         entries: [],
+                        hasMore: false,
                         resultId: encodeURI(label)
                     };
                 }
 
                 ResultsByGroup[result[i].group].entries.push(result[i]);
+
+                if (result[i].groupHasMore === true) {
+                    ResultsByGroup[result[i].group].hasMore = true;
+                }
             }
 
             var ResultHeader = new Element('div', {
@@ -476,6 +491,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             for (group in ResultsByGroup) {
                 var buttonLabel = ResultsByGroup[group].label;
                 buttonLabel += ' <strong>(' + ResultsByGroup[group].entries.length;
+
+                if (ResultsByGroup[group].hasMore) {
+                    buttonLabel += '+';
+                }
+
                 buttonLabel += '</strong>)';
 
                 var resultButton = new Element('button', {
@@ -506,7 +526,10 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 groupHTML = Mustache.render(templateResultGroup, {
                     title: ResultsByGroup[group].label,
                     entries: ResultsByGroup[group].entries,
-                    resultId: ResultsByGroup[group].resultId
+                    resultId: ResultsByGroup[group].resultId,
+                    group: ResultsByGroup[group].group,
+                    hasMore: ResultsByGroup[group].hasMore,
+                    showMoreText: QUILocale.get(lg, 'controls.Search.results.showMore')
                 });
 
                 html = html + groupHTML;
@@ -526,10 +549,22 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 this.openEntry(Target.get('data-id'), Target.get('data-provider'));
             }.bind(this));
 
+            const showMoreButtons = this.$Result.querySelectorAll('[data-name="show-more"]');
+
+            Array.prototype.forEach.call(showMoreButtons, function (Button) {
+                Button.addEventListener('click', function () {
+                    this.$loadMoreResults(Button.dataset.group, Button);
+                }.bind(this));
+            }.bind(this));
+
             // click event for result buttons
             var resultButtons = this.$Result.getElements('.result-header-entry'),
                 resultGroup = this.$Result.getElements('.qui-backendsearch-search-resultGroup'),
                 resultGroupWrapper = this.$Result.getElement('.qui-backendsearch-search-resultGroup-wrapper');
+
+            if (typeof scrollTop === 'number') {
+                resultGroupWrapper.scrollTop = scrollTop;
+            }
 
             resultButtons.addEvent('click', function (event) {
                 var Target = event.target;
@@ -539,6 +574,56 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
 
                 this.changeEntryFocus(Target, resultButtons, resultGroup, resultGroupWrapper);
+            }.bind(this));
+        },
+
+        /**
+         * Load the next result page for one group.
+         *
+         * @param {String} group
+         * @param {HTMLButtonElement} Button
+         */
+        $loadMoreResults: function (group, Button) {
+            const currentResults = this.$results;
+            const currentGroupSize = currentResults.filter(function (Entry) {
+                return Entry.group === group;
+            }).length;
+            const configuredPageSize = parseInt(this.$Settings.maxResultsPerGroup, 10);
+            const pageSize = configuredPageSize > 0 ? configuredPageSize : 100;
+            const searchValue = this.$Input.value;
+            const resultGroupWrapper = this.$Result.querySelector(
+                '.qui-backendsearch-search-resultGroup-wrapper'
+            );
+            const scrollTop = resultGroupWrapper ? resultGroupWrapper.scrollTop : 0;
+
+            Button.disabled = true;
+
+            this.executeSearch(searchValue, {
+                filterGroups: this.$FilterSelect.getValue(),
+                group: group,
+                limit: currentGroupSize + pageSize
+            }).then(function (groupResult) {
+                if (this.$results !== currentResults || this.$Input.value !== searchValue) {
+                    Button.disabled = false;
+                    return;
+                }
+
+                const mergedResult = [];
+                let groupInserted = false;
+
+                currentResults.forEach(function (Entry) {
+                    if (Entry.group !== group) {
+                        mergedResult.push(Entry);
+                        return;
+                    }
+
+                    if (!groupInserted) {
+                        mergedResult.push.apply(mergedResult, groupResult);
+                        groupInserted = true;
+                    }
+                });
+
+                this.$renderResult(mergedResult, scrollTop);
             }.bind(this));
         },
 

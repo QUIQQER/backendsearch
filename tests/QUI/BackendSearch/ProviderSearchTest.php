@@ -60,6 +60,7 @@ class ProviderSearchTest extends TestCase
                 return $variable . ':' . (is_array($params) ? implode(',', $params) : '');
             }
         );
+        $Locale->method('getCurrent')->willReturn('en');
         QUI::$Locale = $Locale;
     }
 
@@ -127,6 +128,37 @@ class ProviderSearchTest extends TestCase
             array_column($Provider->search('44', ['filterGroups' => $filterGroups]), 'id')
         );
         self::assertSame([], $Provider->search('43', ['filterGroups' => ['image']]));
+    }
+
+    public function testMediaSearchLocalizesJsonTitlesAndUsesAvailableFallbacks(): void
+    {
+        $this->createMediaSearchProject([
+            [
+                1,
+                '{"de":"Deutscher Needle-Titel","en":"English Needle title"}',
+                'localized.pdf',
+                'file',
+                'application/pdf'
+            ],
+            [
+                2,
+                '{"de":"Fallback Needle-Titel"}',
+                'fallback.pdf',
+                'file',
+                'application/pdf'
+            ],
+            [3, 'Plain Needle title', 'plain.pdf', 'file', 'application/pdf']
+        ]);
+
+        $results = (new MediaProvider())->search('Needle', [
+            'filterGroups' => ['file'],
+            'limit' => 10
+        ]);
+
+        self::assertSame(
+            ['English Needle title', 'Fallback Needle-Titel', 'Plain Needle title'],
+            array_column($results, 'title')
+        );
     }
 
     public function testSitesSearchBuildsProjectSpecificResults(): void

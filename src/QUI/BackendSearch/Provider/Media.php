@@ -116,7 +116,7 @@ class Media implements ProviderInterface
 
                 $results[] = [
                     "id" => $projectName . "-" . $row["id"],
-                    "title" => $row["title"],
+                    "title" => $this->getMediaTitle($row["title"], $row["file"]),
                     "description" => $row["file"],
                     "icon" => $icon,
                     "groupLabel" => $groupLabel,
@@ -126,6 +126,35 @@ class Media implements ProviderInterface
         }
 
         return $results;
+    }
+
+    private function getMediaTitle(mixed $title, mixed $file): string
+    {
+        $title = is_scalar($title) ? trim((string)$title) : '';
+        $file = is_scalar($file) ? trim((string)$file) : '';
+        $localizedTitles = json_decode($title, true);
+
+        if (!is_array($localizedTitles)) {
+            return $title !== '' ? $title : $file;
+        }
+
+        $currentLanguage = QUI::getLocale()->getCurrent();
+
+        if (
+            isset($localizedTitles[$currentLanguage])
+            && is_string($localizedTitles[$currentLanguage])
+            && trim($localizedTitles[$currentLanguage]) !== ''
+        ) {
+            return trim($localizedTitles[$currentLanguage]);
+        }
+
+        foreach ($localizedTitles as $localizedTitle) {
+            if (is_string($localizedTitle) && trim($localizedTitle) !== '') {
+                return trim($localizedTitle);
+            }
+        }
+
+        return $file;
     }
 
     /**

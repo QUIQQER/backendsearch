@@ -104,9 +104,14 @@ class SearchDatabaseTest extends TestCase
                 $this->receivedParams = $params;
 
                 return [
-                    ['id' => $this->duplicateId, 'title' => 'Duplicate'],
-                    ['id' => 'provider-result', 'title' => 'Provider result', 'icon' => 'fa fa-star'],
-                    ['title' => 'Provider result without ID']
+                    ['id' => $this->duplicateId, 'title' => 'Duplicate', 'group' => 'target-group'],
+                    [
+                        'id' => 'provider-result',
+                        'title' => 'Provider result',
+                        'icon' => 'fa fa-star',
+                        'group' => 'provider-group'
+                    ],
+                    ['title' => 'Provider result without ID', 'group' => 'provider-group']
                 ];
             }
 
@@ -166,7 +171,6 @@ class SearchDatabaseTest extends TestCase
         $this->builderInstance->setValue(null, $Builder);
 
         $result = (new Search())->search('  alpha  ', [
-            'group' => 'target-group',
             'filterGroups' => ['test-filter', 123],
             'limit' => 2
         ]);
@@ -180,10 +184,63 @@ class SearchDatabaseTest extends TestCase
         self::assertSame('fa fa-star', $result[1]['icon']);
         self::assertArrayNotHasKey('iconUrl', $result[1]);
         self::assertArrayNotHasKey('id', $result[2]);
+        self::assertSame([false, false, false], array_column($result, 'groupHasMore'));
         self::assertSame(['test-filter'], $Builder->receivedFilters);
-        self::assertSame(2, $Provider->receivedParams['limit']);
+        self::assertSame(3, $Provider->receivedParams['limit']);
         self::assertSame(get_class($Provider), $result[1]['provider']);
         self::assertSame(get_class($Provider), $result[2]['provider']);
+
+        $providerGroupResult = (new Search())->search('alpha', [
+            'group' => 'provider-group',
+            'limit' => 1
+        ]);
+
+        self::assertCount(1, $providerGroupResult);
+        self::assertSame('provider-result', $providerGroupResult[0]['id']);
+        self::assertTrue($providerGroupResult[0]['groupHasMore']);
+        self::assertSame(2, $Provider->receivedParams['limit']);
+    }
+
+    public function testSearchLimitsEachGroupAndReportsAdditionalResults(): void
+    {
+        $Builder = new Builder();
+
+        foreach (range(1, 4) as $number) {
+            $Builder->addEntry([
+                'title' => 'Group A entry ' . $number,
+                'search' => 'group limit test',
+                'group' => 'group-a',
+                'filterGroup' => 'limit-test',
+                'searchdata' => ['require' => 'controls/phpunit/GroupA']
+            ], 'en');
+        }
+
+        foreach (range(1, 2) as $number) {
+            $Builder->addEntry([
+                'title' => 'Group B entry ' . $number,
+                'search' => 'group limit test',
+                'group' => 'group-b',
+                'filterGroup' => 'limit-test',
+                'searchdata' => ['require' => 'controls/phpunit/GroupB']
+            ], 'en');
+        }
+
+        $this->builderInstance->setValue(null, $Builder);
+        $Search = new Search();
+        $result = $Search->search('group limit', ['limit' => 2]);
+
+        self::assertCount(4, $result);
+        self::assertSame(['group-a', 'group-a', 'group-b', 'group-b'], array_column($result, 'group'));
+        self::assertSame([true, true, false, false], array_column($result, 'groupHasMore'));
+
+        $groupResult = $Search->search('group limit', [
+            'group' => 'group-a',
+            'limit' => 3
+        ]);
+
+        self::assertCount(3, $groupResult);
+        self::assertSame(['group-a', 'group-a', 'group-a'], array_column($groupResult, 'group'));
+        self::assertSame([true, true, true], array_column($groupResult, 'groupHasMore'));
     }
 
     public function testGetEntryReturnsStoredEntryAndEmptyArrayForMissingId(): void
