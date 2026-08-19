@@ -80,39 +80,12 @@ class ProviderSearchTest extends TestCase
 
     public function testMediaSearchUsesSelectedTypesAndMapsResultIcons(): void
     {
-        $tableName = 'phpunit_backendsearch_media';
-        $Table = new Table($tableName);
-        $Table->addColumn('id', 'integer');
-        $Table->addColumn('title', 'string', ['length' => 100]);
-        $Table->addColumn('file', 'string', ['length' => 100]);
-        $Table->addColumn('type', 'string', ['length' => 20]);
-        $Table->addColumn('mime_type', 'string', ['length' => 100]);
-        $Table->setPrimaryKey(['id']);
-        $this->connection->createSchemaManager()->createTable($Table);
-
-        foreach (
-            [
-                [1, 'Needle document', 'document.pdf', 'file', 'application/pdf'],
-                [2, 'Needle folder', '', 'folder', ''],
-                [3, 'Needle image', 'image.png', 'image', 'image/png'],
-                [4, 'Needle ignored', 'ignored.bin', 'other', 'application/octet-stream']
-            ] as [$id, $title, $file, $type, $mimeType]
-        ) {
-            $this->connection->insert($tableName, [
-                'id' => $id,
-                'title' => $title,
-                'file' => $file,
-                'type' => $type,
-                'mime_type' => $mimeType
-            ]);
-        }
-
-        $Media = $this->createMock(ProjectMedia::class);
-        $Media->method('getTable')->willReturn($tableName);
-        $Project = $this->createMock(Project::class);
-        $Project->method('getName')->willReturn('phpunit-media-project');
-        $Project->method('getMedia')->willReturn($Media);
-        $this->setProjects(['phpunit-media-project' => ['de' => $Project]]);
+        $this->createMediaSearchProject([
+            [1, 'Needle document', 'document.pdf', 'file', 'application/pdf'],
+            [2, 'Needle folder', '', 'folder', ''],
+            [3, 'Needle image', 'image.png', 'image', 'image/png'],
+            [4, 'Needle ignored', 'ignored.bin', 'other', 'application/octet-stream']
+        ]);
 
         $results = (new MediaProvider())->search('Needle', [
             'filterGroups' => ['file', 'folder', 'image'],
@@ -127,6 +100,33 @@ class ProviderSearchTest extends TestCase
         );
         self::assertSame('document.pdf', $results[0]['description']);
         self::assertSame('phpunit-media-project-media', $results[0]['group']);
+    }
+
+    public function testMediaSearchFindsExactIdsWithinSelectedTypes(): void
+    {
+        $this->createMediaSearchProject([
+            [42, 'First image', 'first.png', 'image', 'image/png'],
+            [142, 'Second image', 'second.png', 'image', 'image/png'],
+            [43, 'Document', 'document.pdf', 'file', 'application/pdf'],
+            [44, 'Folder', '', 'folder', '']
+        ]);
+
+        $Provider = new MediaProvider();
+        $filterGroups = ['file', 'folder', 'image'];
+
+        self::assertSame(
+            ['phpunit-media-project-42'],
+            array_column($Provider->search('42', ['filterGroups' => $filterGroups]), 'id')
+        );
+        self::assertSame(
+            ['phpunit-media-project-43'],
+            array_column($Provider->search('43', ['filterGroups' => $filterGroups]), 'id')
+        );
+        self::assertSame(
+            ['phpunit-media-project-44'],
+            array_column($Provider->search('44', ['filterGroups' => $filterGroups]), 'id')
+        );
+        self::assertSame([], $Provider->search('43', ['filterGroups' => ['image']]));
     }
 
     public function testSitesSearchBuildsProjectSpecificResults(): void
@@ -251,6 +251,37 @@ class ProviderSearchTest extends TestCase
         $Config->method('toArray')->willReturn($config);
         QUI::$Configs['etc/projects.ini'] = $Config;
         ProjectManager::$projects = $projects;
+    }
+
+    /** @param list<array{int, string, string, string, string}> $rows */
+    private function createMediaSearchProject(array $rows): void
+    {
+        $tableName = 'phpunit_backendsearch_media';
+        $Table = new Table($tableName);
+        $Table->addColumn('id', 'integer');
+        $Table->addColumn('title', 'string', ['length' => 100]);
+        $Table->addColumn('file', 'string', ['length' => 100]);
+        $Table->addColumn('type', 'string', ['length' => 20]);
+        $Table->addColumn('mime_type', 'string', ['length' => 100]);
+        $Table->setPrimaryKey(['id']);
+        $this->connection->createSchemaManager()->createTable($Table);
+
+        foreach ($rows as [$id, $title, $file, $type, $mimeType]) {
+            $this->connection->insert($tableName, [
+                'id' => $id,
+                'title' => $title,
+                'file' => $file,
+                'type' => $type,
+                'mime_type' => $mimeType
+            ]);
+        }
+
+        $Media = $this->createMock(ProjectMedia::class);
+        $Media->method('getTable')->willReturn($tableName);
+        $Project = $this->createMock(Project::class);
+        $Project->method('getName')->willReturn('phpunit-media-project');
+        $Project->method('getMedia')->willReturn($Media);
+        $this->setProjects(['phpunit-media-project' => ['de' => $Project]]);
     }
 
     private function setConnection(Connection $Connection): void
