@@ -34,6 +34,7 @@ class Media implements ProviderInterface
         $projects = QUI::getProjectManager()->getProjectList();
         $results = [];
         $types = [];
+        $mediaId = ctype_digit($search) ? $search : null;
 
         if (isset($filter["file"])) {
             $types[] = "file";
@@ -56,6 +57,14 @@ class Media implements ProviderInterface
         foreach ($projects as $Project) {
             $Media = $Project->getMedia();
             $QueryBuilder = $Connection->createQueryBuilder();
+            $searchConditions = [
+                DoctrineUtils::quoteIdentifier("title") . " LIKE :search",
+                DoctrineUtils::quoteIdentifier("mime_type") . " LIKE :search"
+            ];
+
+            if ($mediaId !== null) {
+                $searchConditions[] = DoctrineUtils::quoteIdentifier("id") . " = :mediaId";
+            }
 
             $QueryBuilder
                 ->select(
@@ -65,13 +74,14 @@ class Media implements ProviderInterface
                     DoctrineUtils::quoteIdentifier("type")
                 )
                 ->from(DoctrineUtils::quoteIdentifier($Media->getTable()))
-                ->where(
-                    "(" . DoctrineUtils::quoteIdentifier("title") . " LIKE :search OR "
-                    . DoctrineUtils::quoteIdentifier("mime_type") . " LIKE :search)"
-                )
+                ->where("(" . implode(" OR ", $searchConditions) . ")")
                 ->andWhere(DoctrineUtils::quoteIdentifier("type") . " IN (:types)")
                 ->setParameter("search", "%" . $search . "%")
                 ->setParameter("types", $types, ArrayParameterType::STRING);
+
+            if ($mediaId !== null) {
+                $QueryBuilder->setParameter("mediaId", $mediaId);
+            }
 
             if (isset($params["limit"])) {
                 $QueryBuilder->setMaxResults((int)$params["limit"]);
@@ -106,7 +116,7 @@ class Media implements ProviderInterface
 
                 $results[] = [
                     "id" => $projectName . "-" . $row["id"],
-                    "title" => $row["title"],
+                    "title" => $this->getMediaTitle($row["title"], $row["file"]),
                     "description" => $row["file"],
                     "icon" => $icon,
                     "groupLabel" => $groupLabel,
@@ -116,6 +126,35 @@ class Media implements ProviderInterface
         }
 
         return $results;
+    }
+
+    private function getMediaTitle(mixed $title, mixed $file): string
+    {
+        $title = is_scalar($title) ? trim((string)$title) : '';
+        $file = is_scalar($file) ? trim((string)$file) : '';
+        $localizedTitles = json_decode($title, true);
+
+        if (!is_array($localizedTitles)) {
+            return $title !== '' ? $title : $file;
+        }
+
+        $currentLanguage = QUI::getLocale()->getCurrent();
+
+        if (
+            isset($localizedTitles[$currentLanguage])
+            && is_string($localizedTitles[$currentLanguage])
+            && trim($localizedTitles[$currentLanguage]) !== ''
+        ) {
+            return trim($localizedTitles[$currentLanguage]);
+        }
+
+        foreach ($localizedTitles as $localizedTitle) {
+            if (is_string($localizedTitle) && trim($localizedTitle) !== '') {
+                return trim($localizedTitle);
+            }
+        }
+
+        return $file;
     }
 
     /**

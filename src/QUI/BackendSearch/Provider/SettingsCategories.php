@@ -179,7 +179,7 @@ class SettingsCategories implements ProviderInterface
             $icon = '';
 
             if (isset($item['icon'])) {
-                $icon = $item['icon'];
+                $icon = $this->toStringValue($item['icon']);
             }
 
             $searchData = [];

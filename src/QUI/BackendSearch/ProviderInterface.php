@@ -26,7 +26,7 @@ interface ProviderInterface
      * Execute a search
      *
      * @param string $search
-     * @param array<string,mixed> $params
+     * @param array<string,mixed> $params The limit parameter applies to each result group.
      * @return array<int,array<string,mixed>>
      */
     public function search(string $search, array $params = []): array;

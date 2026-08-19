@@ -71,6 +71,9 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
             window.QUIQQER.backendSearch.Search.addEvent('close', function () {
                 this.$Input.value = window.QUIQQER.backendSearch.Search.getValue();
             }.bind(this));
+            window.QUIQQER.backendSearch.Search.addEvent('hide', function () {
+                this.$Input.value = window.QUIQQER.backendSearch.Search.getValue();
+            }.bind(this));
 
             this.$SearchBtn = new QUIButton({
                 icon: 'fa fa-search',
@@ -101,10 +104,9 @@ define('package/quiqqer/backendsearch/bin/controls/Input', [
         openSearch: function () {
             this.$SearchBtn.setAttribute('icon', 'fa fa-spinner fa-spin');
 
-            return window.QUIQQER.backendSearch.Search.open().then(function () {
-                window.QUIQQER.backendSearch.Search.setValue(this.$Input.value);
-                window.QUIQQER.backendSearch.Search.search();
+            window.QUIQQER.backendSearch.Search.setValue(this.$Input.value);
 
+            return window.QUIQQER.backendSearch.Search.open().then(function () {
                 this.$SearchBtn.setAttribute('icon', 'fa fa-search');
             }.bind(this));
         }

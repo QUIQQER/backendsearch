@@ -210,6 +210,21 @@ class BuilderUnitTest extends TestCase
         $this->assertSame('valid', $data[0]['name']);
     }
 
+    public function testParseMenuDataPreservesImageIconPaths(): void
+    {
+        $Builder = new TestableBuilder();
+        $Locale = $this->createMock(\QUI\Locale::class);
+        $items = [[
+            'name' => 'custom-icon',
+            'text' => 'Custom icon',
+            'icon' => '/packages/example/custom-icon.svg'
+        ]];
+
+        $data = $Builder->parseMenuDataPublic($items, $Locale);
+
+        $this->assertSame('/packages/example/custom-icon.svg', $data[0]['icon']);
+    }
+
     public function testToStringValueConvertsArrayPartsToString(): void
     {
         $Builder = new TestableBuilder();
@@ -251,5 +266,39 @@ HTML;
         $this->assertContains('Header One', $terms);
         $this->assertContains('Header Two', $terms);
         $this->assertContains('Label One', $terms);
+    }
+
+    public function testGetProfileSearchTermsIgnoresRecoverableHtmlParserWarnings(): void
+    {
+        $Builder = new TestableBuilder();
+        $Builder->profileTemplate = <<<'HTML'
+<html>
+<body>
+  <label><span>Research & Development</span></label>
+</body>
+</html>
+HTML;
+        $warnings = [];
+        $previousInternalErrors = libxml_use_internal_errors(false);
+
+        set_error_handler(static function (int $severity, string $message) use (&$warnings): bool {
+            if ($severity !== E_WARNING) {
+                return false;
+            }
+
+            $warnings[] = $message;
+
+            return true;
+        });
+
+        try {
+            $terms = $Builder->getProfileSearchtermsPublic();
+        } finally {
+            restore_error_handler();
+            libxml_use_internal_errors($previousInternalErrors);
+        }
+
+        $this->assertSame([], $warnings);
+        $this->assertContains('Research & Development', $terms);
     }
 }
