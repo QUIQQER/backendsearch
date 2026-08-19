@@ -80,7 +80,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             var self = this;
 
             Elm.addClass('qui-backendsearch-search');
-            Elm.set('html', Mustache.render(template));
+            Elm.addClass('is-idle');
+            Elm.set('html', Mustache.render(template, {
+                inputPlaceholder: QUILocale.get(lg, 'controls.input.placeholder'),
+                closeText: QUILocale.get(lg, 'controls.Search.close')
+            }));
 
             Elm.setStyles({
                 position: 'absolute'
@@ -155,7 +159,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$Close.addEvent('click', this.close);
 
             new Element('img', {
-                src: URL_BIN_DIR + 'quiqqer_logo.png'
+                src: URL_BIN_DIR + 'quiqqer_logo.png',
+                alt: 'QUIQQER'
             }).inject(this.$Header, 'top');
 
             return Elm;
@@ -360,6 +365,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 return;
             }
 
+            this.$Elm.removeClass('is-idle');
+            this.$Elm.addClass('has-search');
+
             this.Loader.inject(this.$Result);
             this.Loader.show(
                 QUILocale.get(lg, 'controls.Search.loader.searching')
@@ -416,13 +424,25 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * @param {Number} [scrollTop]
          */
         $renderResult: function (result, scrollTop) {
-            var group, groupHTML, Entry, label;
+            var groupHTML, Entry, label;
 
             this.$results = result;
 
             if (result.length === 0) {
-                // no search results
                 this.$Result.set('html', '');
+
+                const EmptyResult = document.createElement('div');
+                const EmptyIcon = document.createElement('span');
+                const EmptyText = document.createElement('p');
+
+                EmptyResult.className = 'qui-backendsearch-search-empty';
+                EmptyResult.setAttribute('role', 'status');
+                EmptyIcon.className = 'fa fa-search';
+                EmptyIcon.setAttribute('aria-hidden', 'true');
+                EmptyText.textContent = QUILocale.get(lg, 'controls.Search.results.empty');
+                EmptyResult.appendChild(EmptyIcon);
+                EmptyResult.appendChild(EmptyText);
+                this.$Result.appendChild(EmptyResult);
                 this.Loader.hide();
                 return;
             }
@@ -435,13 +455,13 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             let i, len;
 
-            let html = '',
-                ResultsByGroup = {},
+            let ResultsByGroup = Object.create(null),
+                groupOrder = [],
                 current = QUILocale.getCurrent();
 
             // parse json titles
             for (i = 0, len = result.length; i < len; i++) {
-                if (result[i].title.indexOf('{') === -1) {
+                if (typeof result[i].title !== 'string' || result[i].title.indexOf('{') === -1) {
                     continue;
                 }
 
@@ -450,6 +470,18 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
                     if (title && typeof title[current] !== 'undefined') {
                         result[i].title = title[current];
+                        continue;
+                    }
+
+                    if (title && typeof title === 'object') {
+                        Object.keys(title).some(function (language) {
+                            if (typeof title[language] !== 'string' || title[language].trim() === '') {
+                                return false;
+                            }
+
+                            result[i].title = title[language];
+                            return true;
+                        });
                     }
                 } catch (e) {
                 }
@@ -470,8 +502,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         label: label,
                         entries: [],
                         hasMore: false,
-                        resultId: encodeURI(label)
+                        resultId: 'backendsearch-result-group-' + groupOrder.length
                     };
+                    groupOrder.push(Entry.group);
                 }
 
                 ResultsByGroup[result[i].group].entries.push(result[i]);
@@ -481,72 +514,71 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
             }
 
-            var ResultHeader = new Element('div', {
-                'class': 'result-header',
-                html: '<header class="result-header-title">' +
-                    QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') +
-                    '</header>'
-            });
+            const ResultLayout = document.createElement('div');
+            const ResultHeader = document.createElement('aside');
+            const ResultHeaderTitle = document.createElement('h2');
+            const ResultNavigation = document.createElement('nav');
+            const ResultContent = document.createElement('main');
+            const ResultContentTitle = document.createElement('h2');
+            const ResultGroupWrapper = document.createElement('div');
 
-            for (group in ResultsByGroup) {
-                var buttonLabel = ResultsByGroup[group].label;
-                buttonLabel += ' <strong>(' + ResultsByGroup[group].entries.length;
+            ResultLayout.className = 'qui-backendsearch-search-result-layout';
+            ResultHeader.className = 'result-header';
+            ResultHeaderTitle.className = 'result-header-title';
+            ResultHeaderTitle.textContent = QUILocale.get(lg, 'search.popup.title.group');
+            ResultNavigation.className = 'result-header-navigation';
+            ResultNavigation.setAttribute(
+                'aria-label',
+                QUILocale.get(lg, 'search.popup.title.group')
+            );
+            ResultContent.className = 'qui-backendsearch-search-result-content';
+            ResultContentTitle.className = 'qui-backendsearch-search-resultGroup-title';
+            ResultContentTitle.textContent = QUILocale.get(lg, 'search.popup.title.entries');
+            ResultGroupWrapper.className = 'qui-backendsearch-search-resultGroup-wrapper';
 
-                if (ResultsByGroup[group].hasMore) {
-                    buttonLabel += '+';
-                }
+            groupOrder.forEach(function (group) {
+                const Group = ResultsByGroup[group];
+                const ResultButton = document.createElement('button');
+                const ResultButtonLabel = document.createElement('span');
+                const ResultButtonCount = document.createElement('strong');
 
-                buttonLabel += '</strong>)';
-
-                var resultButton = new Element('button', {
-                    'class': 'result-header-entry qui-button',
-                    html: buttonLabel,
-                    'data-qui-id': ResultsByGroup[group].resultId
-                });
-
-                resultButton.inject(ResultHeader);
-            }
-
-            html += ResultHeader.outerHTML;
-
-            new Element('header', {
-                'class': 'qui-backendsearch-search-resultGroup-title',
-                html: 'Ergebnisse'
-            }).inject(ResultHeader);
-
-            html += '<header class="qui-backendsearch-search-resultGroup-title">';
-            html += QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') + '</header>';
-            html += '<div class="qui-backendsearch-search-resultGroup-wrapper">';
-
-            for (group in ResultsByGroup) {
-                if (!ResultsByGroup.hasOwnProperty(group)) {
-                    continue;
-                }
+                ResultButton.type = 'button';
+                ResultButton.className = 'result-header-entry qui-button';
+                ResultButton.setAttribute('data-qui-id', Group.resultId);
+                ResultButton.setAttribute('aria-controls', Group.resultId);
+                ResultButtonLabel.className = 'result-header-entry-label';
+                ResultButtonLabel.textContent = Group.label;
+                ResultButtonCount.textContent = Group.entries.length + (Group.hasMore ? '+' : '');
+                ResultButton.appendChild(ResultButtonLabel);
+                ResultButton.appendChild(ResultButtonCount);
+                ResultNavigation.appendChild(ResultButton);
 
                 groupHTML = Mustache.render(templateResultGroup, {
-                    title: ResultsByGroup[group].label,
-                    entries: ResultsByGroup[group].entries,
-                    resultId: ResultsByGroup[group].resultId,
-                    group: ResultsByGroup[group].group,
-                    hasMore: ResultsByGroup[group].hasMore,
+                    title: Group.label,
+                    entries: Group.entries,
+                    resultId: Group.resultId,
+                    group: Group.group,
+                    hasMore: Group.hasMore,
                     showMoreText: QUILocale.get(lg, 'controls.Search.results.showMore')
                 });
+                ResultGroupWrapper.insertAdjacentHTML('beforeend', groupHTML);
+            }.bind(this));
 
-                html = html + groupHTML;
-            }
+            ResultHeader.appendChild(ResultHeaderTitle);
+            ResultHeader.appendChild(ResultNavigation);
+            ResultContent.appendChild(ResultContentTitle);
+            ResultContent.appendChild(ResultGroupWrapper);
+            ResultLayout.appendChild(ResultHeader);
+            ResultLayout.appendChild(ResultContent);
+            this.$Result.set('html', '');
+            this.$Result.appendChild(ResultLayout);
 
-            html += '</div>';
+            const resultEntries = this.$Result.querySelectorAll('[data-name="result-entry"]');
 
-            this.$Result.set('html', html);
-
-            this.$Result.getElements('li').addEvent('click', function (event) {
-                var Target = event.target;
-
-                if (Target.nodeName !== 'LI') {
-                    Target = Target.getParent('li');
-                }
-
-                this.openEntry(Target.get('data-id'), Target.get('data-provider'));
+            Array.prototype.forEach.call(resultEntries, function (ResultEntry) {
+                ResultEntry.addEventListener('click', function () {
+                    this.openEntry(ResultEntry.dataset.id, ResultEntry.dataset.provider);
+                }.bind(this));
             }.bind(this));
 
             const showMoreButtons = this.$Result.querySelectorAll('[data-name="show-more"]');
@@ -637,12 +669,14 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          */
         changeEntryFocus: function (Button, resultButtons, resultGroup, resultGroupWrapper) {
             resultButtons.removeClass('highlight');
+            resultButtons.set('aria-current', 'false');
             resultGroup.removeClass('highlight');
 
-            var selector = 'section[name="' + Button.get('data-qui-id') + '"]',
+            var selector = '#' + Button.get('data-qui-id'),
                 selectedElm = resultGroupWrapper.getElement(selector);
 
             Button.addClass('highlight');
+            Button.set('aria-current', 'true');
 
             new Fx.Scroll(resultGroupWrapper).toElement(selectedElm);
             selectedElm.addClass('highlight');

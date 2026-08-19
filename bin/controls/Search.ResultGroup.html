@@ -1,20 +1,29 @@
-<section name="{{resultId}}" class="qui-backendsearch-search-resultGroup">
-    <header class="qui-backendsearch-search-resultGroup-header">
+<section id="{{resultId}}"
+         class="qui-backendsearch-search-resultGroup"
+         aria-labelledby="{{resultId}}-title">
+    <h3 id="{{resultId}}-title" class="qui-backendsearch-search-resultGroup-header">
         {{title}}
-    </header>
+    </h3>
 
     <ul>
         {{#entries}}
-        <li data-id="{{id}}" data-provider="{{provider}}" title="{{description}}">
-            {{#iconUrl}}
-            <img class="qui-backendsearch-search-resultGroup-entry-icon"
-                 src="{{iconUrl}}"
-                 alt="">
-            {{/iconUrl}}
-            {{^iconUrl}}
-            <span class="qui-backendsearch-search-resultGroup-entry-icon {{icon}}" aria-hidden="true"></span>
-            {{/iconUrl}}
-            <span class="qui-backendsearch-search-resultGroup-entry-text">{{title}}</span>
+        <li>
+            <button type="button"
+                    class="qui-backendsearch-search-resultGroup-entry"
+                    data-name="result-entry"
+                    data-id="{{id}}"
+                    data-provider="{{provider}}"
+                    title="{{description}}">
+                {{#iconUrl}}
+                <img class="qui-backendsearch-search-resultGroup-entry-icon"
+                     src="{{iconUrl}}"
+                     alt="">
+                {{/iconUrl}}
+                {{^iconUrl}}
+                <span class="qui-backendsearch-search-resultGroup-entry-icon {{icon}}" aria-hidden="true"></span>
+                {{/iconUrl}}
+                <span class="qui-backendsearch-search-resultGroup-entry-text">{{title}}</span>
+            </button>
         </li>
         {{/entries}}
     </ul>

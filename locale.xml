@@ -190,6 +190,14 @@
             <de><![CDATA[Mehr anzeigen]]></de>
             <en><![CDATA[Show more]]></en>
         </locale>
+        <locale name="controls.Search.results.empty">
+            <de><![CDATA[Keine passenden Ergebnisse gefunden.]]></de>
+            <en><![CDATA[No matching results found.]]></en>
+        </locale>
+        <locale name="controls.Search.close">
+            <de><![CDATA[Suche schließen]]></de>
+            <en><![CDATA[Close search]]></en>
+        </locale>
 
     </groups>
 </locales>

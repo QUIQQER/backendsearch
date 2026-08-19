@@ -2,8 +2,10 @@
     <header class="qui-backendsearch-search-container-header">
         <div class="qui-backendsearch-search-container-input">
             <label>
-                <span class="fa fa-arrow-right"></span>
-                <input type="search" placeholder="QUIQQER durchsuchen"/>
+                <span class="fa fa-arrow-right" aria-hidden="true"></span>
+                <input type="search"
+                       placeholder="{{inputPlaceholder}}"
+                       aria-label="{{inputPlaceholder}}"/>
             </label>
             <div class="qui-backendsearch-search-container-filterselect"></div>
         </div>
@@ -13,7 +15,11 @@
 
     </div>
 
-    <div class="qui-backendsearch-search-container-close">
-        <span class="fa fa-close"></span>
-    </div>
+    <button type="button"
+            class="qui-backendsearch-search-container-close"
+            data-name="close"
+            aria-label="{{closeText}}"
+            title="{{closeText}}">
+        <span class="fa fa-close" aria-hidden="true"></span>
+    </button>
 </section>
