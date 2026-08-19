@@ -33,6 +33,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         Binds: [
             'close',
             'create',
+            'hide',
             'open',
             'executeSearch',
             '$onInject',
@@ -63,6 +64,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$extendedSearch = false;
             this.$Settings = {};
             this.$results = [];
+            this.$lastSearchValue = null;
+            this.$pendingSearchValue = null;
+            this.$searchGeneration = 0;
 
             this.$execSearchOnNextFilterClose = false;
 
@@ -179,25 +183,27 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }
 
             if (this.$open) {
+                this.$searchIfNeeded();
                 return Promise.resolve();
             }
 
             this.$open = true;
 
             this.$Elm.setStyles({
+                opacity: 1,
                 top: '-100%'
             });
 
             this.Loader.inject(this.$Elm);
             this.$Elm.inject(document.body);
 
-            // filter select
-            this.$FilterSelect = new FilterSelect().inject(this.$FilterSelectContainer);
+            let initialization = Promise.resolve();
 
-            this.Loader.show();
+            if (!this.$FilterSelect) {
+                this.Loader.show();
+                this.$FilterSelect = new FilterSelect().inject(this.$FilterSelectContainer);
 
-            return new Promise(function (resolve) {
-                self.$getSettings('general').then(function (Settings) {
+                initialization = self.$getSettings('general').then(function (Settings) {
                     self.$Settings = Settings;
 
                     self.$FilterSelect.addEvents({
@@ -217,11 +223,18 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         }
                     });
 
-                    self.$FilterSelect.setAttribute(
-                        'menuWidth',
-                        self.$InputContainer.getSize().x
-                    );
+                });
+            } else {
+                this.Loader.hide();
+            }
 
+            return initialization.then(function () {
+                self.$FilterSelect.setAttribute(
+                    'menuWidth',
+                    self.$InputContainer.getSize().x
+                );
+
+                return new Promise(function (resolve) {
                     moofx(self.$Elm).animate({
                         top: 0
                     }, {
@@ -234,13 +247,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                             window.addEvent('keyup', self.$onWindowKeyUp);
 
                             self.$Input.focus();
-
-                            if (self.$Input.value !== '') {
-                                self.search();
-                            }
-
-                            self.fireEvent('open', [self]);
                             self.Loader.hide();
+                            self.$searchIfNeeded();
+                            self.fireEvent('open', [self]);
 
                             resolve();
                         }
@@ -255,12 +264,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * @param {String} value
          */
         setValue: function (value) {
+            this.$value = value;
+
             if (this.$Input) {
                 this.$Input.value = value;
-                return;
             }
-
-            this.$value = value;
         },
 
         /**
@@ -277,37 +285,142 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         },
 
         /**
+         * Check if the current result state belongs to a search value.
+         *
+         * @param {String} value
+         * @return {Boolean}
+         */
+        hasSearchState: function (value) {
+            const normalizedValue = String(value || '').trim();
+
+            if (normalizedValue === '') {
+                return false;
+            }
+
+            return this.$lastSearchValue === normalizedValue ||
+                this.$pendingSearchValue === normalizedValue;
+        },
+
+        /**
+         * Execute a search only if the displayed state does not match the input.
+         */
+        $searchIfNeeded: function () {
+            if (!this.$Input || !this.$Result) {
+                return;
+            }
+
+            const searchValue = this.$Input.value.trim();
+
+            if (searchValue === '') {
+                this.$results = [];
+                this.$lastSearchValue = null;
+                this.$pendingSearchValue = null;
+                this.$Result.set('html', '');
+                this.$Elm.removeClass('has-search');
+                this.$Elm.addClass('is-idle');
+                return;
+            }
+
+            if (!this.hasSearchState(searchValue)) {
+                this.search();
+            }
+        },
+
+        /**
          * Close the complete search
          *
          * @return {Promise}
          */
         close: function () {
-            return new Promise(function (resolve) {
+            return this.$dismiss(false);
+        },
 
+        /**
+         * Hide the search and retain its complete DOM and result state.
+         *
+         * @return {Promise}
+         */
+        hide: function () {
+            return this.$dismiss(true);
+        },
+
+        /**
+         * @param {Boolean} preserveState
+         * @return {Promise}
+         */
+        $dismiss: function (preserveState) {
+            if (!this.$Elm) {
+                return Promise.resolve();
+            }
+
+            this.$value = this.$Input ? this.$Input.value : this.$value;
+            this.$execSearchOnNextFilterClose = false;
+            window.removeEvent('keyup', this.$onWindowKeyUp);
+
+            if (this.$FilterSelect && this.$FilterSelect.$Menu) {
+                this.$FilterSelect.$Menu.hide();
+            }
+
+            const finish = function () {
+                this.$open = false;
+
+                if (preserveState) {
+                    this.$Elm.dispose();
+                    this.fireEvent('hide', [this]);
+                    return;
+                }
+
+                this.$searchGeneration++;
+
+                if (this.$Timer) {
+                    clearTimeout(this.$Timer);
+                    this.$Timer = null;
+                }
+
+                if (this.$FilterSelect) {
+                    this.$FilterSelect.destroy();
+                }
+
+                this.$Elm.destroy();
+                this.$Elm = null;
+                this.$Input = null;
+                this.$Header = null;
+                this.$Close = null;
+                this.$Result = null;
+                this.$BtnSearch = null;
+                this.$FilterSelect = null;
+                this.$FilterSelectContainer = null;
+                this.$InputContainer = null;
+                this.$SearchIcon = null;
+                this.$Settings = {};
+                this.$results = [];
+                this.$lastSearchValue = null;
+                this.$pendingSearchValue = null;
+                this.$extendedSearch = false;
+                this.fireEvent('close', [this]);
+            }.bind(this);
+
+            if (!this.$open) {
+                finish();
+                return Promise.resolve();
+            }
+
+            return new Promise(function (resolve) {
                 moofx(this.$Elm).animate({
                     opacity: 0,
                     top: -200
                 }, {
                     duration: 250,
                     callback: function () {
-                        this.$Elm.destroy();
-
-                        this.$Elm = null;
-                        this.$open = false;
-                        this.$value = this.$Input.value;
-
-                        window.removeEvent('keyup', this.$onWindowKeyUp);
-                        this.fireEvent('close', [this]);
-
+                        finish();
                         resolve();
-                    }.bind(this)
+                    }
                 });
-
             }.bind(this));
         },
 
         /**
-         * Open a cache entry and close the search
+         * Open a cache entry and hide the search
          *
          * @param {Number|String} id
          * @param {String} [provider]
@@ -342,7 +455,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         }
                     });
 
-                    this.close();
+                    this.hide();
                 }
             }.bind(this)).catch(function (Exception) {
                 console.error(Exception);
@@ -355,7 +468,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         search: function () {
 
             if (!this.$open) {
-                this.open();
+                return this.open();
             }
 
             var searchValue = this.$Input.value.trim();
@@ -364,6 +477,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 this.$Input.value = '';
                 return;
             }
+
+            this.$pendingSearchValue = searchValue;
 
             this.$Elm.removeClass('is-idle');
             this.$Elm.addClass('has-search');
@@ -385,6 +500,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }
 
             var twoStepSearch = parseInt(this.$Settings.twoStepSearch);
+            const searchGeneration = this.$searchGeneration;
 
             this.$Timer = (() => {
                 var Params = {
@@ -396,6 +512,12 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
 
                 self.executeSearch(self.$Input.value, Params).then((result) => {
+                    if (searchGeneration !== self.$searchGeneration) {
+                        return;
+                    }
+
+                    self.$lastSearchValue = searchValue;
+                    self.$pendingSearchValue = null;
                     self.$renderResult(result);
 
                     const hasMoreResults = result.some(function (Entry) {

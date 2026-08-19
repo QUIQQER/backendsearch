@@ -19,6 +19,18 @@ require([
         window.QUIQQER.backendSearch = {};
     }
 
+    const DesktopSearch = window.QUIQQER.backendSearch.Search;
+
+    DesktopSearch.addEvent('open', function () {
+        window.QUIQQER.backendSearch.searchWindowOpen = true;
+    });
+    DesktopSearch.addEvent('hide', function () {
+        window.QUIQQER.backendSearch.searchWindowOpen = false;
+    });
+    DesktopSearch.addEvent('close', function () {
+        window.QUIQQER.backendSearch.searchWindowOpen = false;
+    });
+
     // search keyboard shortcut
     window.addEvent('keydown', function (event) {
         if (!event.alt) {
@@ -32,18 +44,7 @@ require([
                 return;
             }
 
-            require(['package/quiqqer/backendsearch/bin/controls/Search'], function (Search) {
-                new Search({
-                    events: {
-                        onClose: function (S) {
-                            window.QUIQQER.backendSearch.searchWindowOpen = false;
-                            S.destroy();
-                        }
-                    }
-                }).open();
-
-                window.QUIQQER.backendSearch.searchWindowOpen = true;
-            });
+            DesktopSearch.open();
         }
     });
 });
