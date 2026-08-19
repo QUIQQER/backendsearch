@@ -9,7 +9,7 @@ define('package/quiqqer/backendsearch/bin/controls/provider/Media', [
     return new Class({
         Type: 'package/quiqqer/backendsearch/bin/controls/provider/Media',
         initialize: function (options) {
-            PanelUtils.openMediaPanel(options.project, {fileid: options.id});
+            PanelUtils.openMediaItemPanel(options.project, options.id);
         }
     });
 });
