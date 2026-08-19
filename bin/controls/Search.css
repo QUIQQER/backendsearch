@@ -223,6 +223,7 @@ section.qui-backendsearch-search-resultGroup.highlight {
     float: left;
     height: 20px;
     line-height: 20px;
+    object-fit: contain;
     text-align: center;
     width: 30px;
 }

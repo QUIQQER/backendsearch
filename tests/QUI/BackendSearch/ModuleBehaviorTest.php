@@ -102,7 +102,7 @@ class ModuleBehaviorTest extends TestCase
 
         $this->assertCount(2, $data);
         $this->assertSame('Localized Parent', $data[0]['title']);
-        $this->assertSame(['fa', 'fa-cog'], $data[0]['icon']);
+        $this->assertSame('fa fa-cog', $data[0]['icon']);
         $this->assertSame('Child Item', $data[1]['title']);
         $this->assertSame('Child Item', $data[1]['search']);
     }
@@ -151,7 +151,7 @@ XML;
             $item = [
                 'text' => ['Module', 'Settings'],
                 'description' => ['Top', 'Entry'],
-                'icon' => ['fa', 'fa-gears'],
+                'icon' => '/packages/example/settings-icon.png',
                 'qui-xml-file' => $xmlFile
             ];
 
@@ -160,7 +160,7 @@ XML;
             $this->assertNotEmpty($data);
             $this->assertSame('Module Settings', $data[0]['title']);
             $this->assertSame('Top Entry', $data[0]['description']);
-            $this->assertSame('fa fa-gears', $data[0]['icon']);
+            $this->assertSame('/packages/example/settings-icon.png', $data[0]['icon']);
             $this->assertSame(SettingsCategories::TYPE_SETTINGS, $data[0]['group']);
 
             $this->assertCount(2, $data);

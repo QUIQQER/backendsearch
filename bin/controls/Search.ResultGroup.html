@@ -6,7 +6,14 @@
     <ul>
         {{#entries}}
         <li data-id="{{id}}" data-provider="{{provider}}" title="{{description}}">
-            <span class="qui-backendsearch-search-resultGroup-entry-icon {{icon}}"></span>
+            {{#iconUrl}}
+            <img class="qui-backendsearch-search-resultGroup-entry-icon"
+                 src="{{iconUrl}}"
+                 alt="">
+            {{/iconUrl}}
+            {{^iconUrl}}
+            <span class="qui-backendsearch-search-resultGroup-entry-icon {{icon}}" aria-hidden="true"></span>
+            {{/iconUrl}}
             <span class="qui-backendsearch-search-resultGroup-entry-text">{{title}}</span>
         </li>
         {{/entries}}

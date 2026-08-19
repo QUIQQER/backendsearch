@@ -68,7 +68,7 @@ class SearchDatabaseTest extends TestCase
         $databaseBuilder->addEntry([
             'title' => 'Matching database entry',
             'description' => 'Stored in SQLite',
-            'icon' => 'fa fa-database',
+            'icon' => '/bin/22x22/quiqqer.png',
             'search' => 'alpha searchable',
             'group' => 'target-group',
             'filterGroup' => 'test-filter',
@@ -105,7 +105,7 @@ class SearchDatabaseTest extends TestCase
 
                 return [
                     ['id' => $this->duplicateId, 'title' => 'Duplicate'],
-                    ['id' => 'provider-result', 'title' => 'Provider result'],
+                    ['id' => 'provider-result', 'title' => 'Provider result', 'icon' => 'fa fa-star'],
                     ['title' => 'Provider result without ID']
                 ];
             }
@@ -174,7 +174,11 @@ class SearchDatabaseTest extends TestCase
         self::assertCount(3, $result);
         self::assertSame($storedId, (int)$result[0]['id']);
         self::assertSame('Matching database entry', $result[0]['title']);
+        self::assertSame('', $result[0]['icon']);
+        self::assertSame('/bin/22x22/quiqqer.png', $result[0]['iconUrl']);
         self::assertSame('provider-result', $result[1]['id']);
+        self::assertSame('fa fa-star', $result[1]['icon']);
+        self::assertArrayNotHasKey('iconUrl', $result[1]);
         self::assertArrayNotHasKey('id', $result[2]);
         self::assertSame(['test-filter'], $Builder->receivedFilters);
         self::assertSame(2, $Provider->receivedParams['limit']);

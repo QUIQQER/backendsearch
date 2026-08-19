@@ -142,7 +142,37 @@ class Search
             return true;
         });
 
-        return array_values($result);
+        return array_map(
+            $this->prepareResultIcon(...),
+            array_values($result)
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $entry
+     * @return array<string, mixed>
+     */
+    private function prepareResultIcon(array $entry): array
+    {
+        if (!isset($entry['icon']) || !is_string($entry['icon'])) {
+            return $entry;
+        }
+
+        $icon = trim($entry['icon']);
+
+        if (
+            !preg_match(
+                '~\.(?:avif|bmp|gif|ico|jpe?g|png|svg|webp)(?:[?#].*)?$~i',
+                $icon
+            )
+        ) {
+            return $entry;
+        }
+
+        $entry['icon'] = '';
+        $entry['iconUrl'] = $icon;
+
+        return $entry;
     }
 
     /**

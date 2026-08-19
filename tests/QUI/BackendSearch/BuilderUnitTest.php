@@ -210,6 +210,21 @@ class BuilderUnitTest extends TestCase
         $this->assertSame('valid', $data[0]['name']);
     }
 
+    public function testParseMenuDataPreservesImageIconPaths(): void
+    {
+        $Builder = new TestableBuilder();
+        $Locale = $this->createMock(\QUI\Locale::class);
+        $items = [[
+            'name' => 'custom-icon',
+            'text' => 'Custom icon',
+            'icon' => '/packages/example/custom-icon.svg'
+        ]];
+
+        $data = $Builder->parseMenuDataPublic($items, $Locale);
+
+        $this->assertSame('/packages/example/custom-icon.svg', $data[0]['icon']);
+    }
+
     public function testToStringValueConvertsArrayPartsToString(): void
     {
         $Builder = new TestableBuilder();
