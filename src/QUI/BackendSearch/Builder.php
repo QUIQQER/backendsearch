@@ -389,7 +389,7 @@ class Builder
                 $entry['groupLabel'] = $groupLabel;
                 $entry['filterGroup'] = self::FILTER_NAVIGATION;
 
-                if (!isset($entry['icon'])) {
+                if (empty($entry['icon'])) {
                     $entry['icon'] = self::TYPE_PROFILE_ICON;
                 }
 
@@ -584,7 +584,7 @@ class Builder
         }
 
         if (!isset($params['icon'])) {
-            $params['description'] = '';
+            $params['icon'] = '';
         }
 
         if (isset($params['name'])) {

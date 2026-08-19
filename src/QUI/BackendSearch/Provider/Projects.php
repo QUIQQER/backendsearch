@@ -62,7 +62,6 @@ class Projects implements ProviderInterface
                 foreach ($settingsEntries as $settingsEntry) {
                     $Builder->addEntry($settingsEntry, $Locale->getCurrent());
                 }
-                return;
             }
         }
     }
@@ -299,12 +298,33 @@ class Projects implements ProviderInterface
                             }
 
                             if ($SettingChild->hasChildNodes()) {
-                                foreach ($SettingChild->childNodes as $SettingInputChild) {
-                                    if ($SettingInputChild->nodeName == 'title' || $SettingInputChild->nodeName == 'text') {
+                                foreach ($SettingChild->childNodes as $SettingField) {
+                                    if (
+                                        $SettingField->nodeName == 'title'
+                                        || $SettingField->nodeName == 'text'
+                                        || $SettingField->nodeName == 'description'
+                                    ) {
                                         $searchStringParts[] = $this->toStringValue(
-                                            DOMUtils::getTextFromNode($SettingInputChild)
+                                            DOMUtils::getTextFromNode($SettingField)
                                         );
-                                        break;
+
+                                        continue;
+                                    }
+
+                                    if (!$SettingField->hasChildNodes()) {
+                                        continue;
+                                    }
+
+                                    foreach ($SettingField->childNodes as $SettingInputChild) {
+                                        if (
+                                            $SettingInputChild->nodeName == 'title'
+                                            || $SettingInputChild->nodeName == 'text'
+                                        ) {
+                                            $searchStringParts[] = $this->toStringValue(
+                                                DOMUtils::getTextFromNode($SettingInputChild)
+                                            );
+                                            break;
+                                        }
                                     }
                                 }
                             }

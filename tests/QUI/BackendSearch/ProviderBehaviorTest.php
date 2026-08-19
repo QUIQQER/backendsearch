@@ -4,8 +4,12 @@ namespace QUITests\BackendSearch;
 
 use PHPUnit\Framework\TestCase;
 use QUI\BackendSearch\Provider\Media;
+use QUI\BackendSearch\Provider\SettingsCategories;
 use QUI\BackendSearch\Provider\Sites;
 use QUI\BackendSearch\Provider\UsersAndGroups;
+use QUI\Interfaces\Users\User;
+use QUI\Permissions\Permission;
+use ReflectionProperty;
 
 class ProviderBehaviorTest extends TestCase
 {
@@ -92,5 +96,27 @@ class ProviderBehaviorTest extends TestCase
         ]);
 
         $this->assertSame([], $result);
+    }
+
+    public function testSettingsFilterGroupIsAvailableWithSettingsPermission(): void
+    {
+        $PermissionUser = new ReflectionProperty(Permission::class, 'User');
+        $originalUser = $PermissionUser->getValue();
+        $User = $this->createMock(User::class);
+        $User->method('isSU')->willReturn(true);
+
+        try {
+            Permission::setUser($User);
+            $groups = (new SettingsCategories())->getFilterGroups();
+        } finally {
+            $PermissionUser->setValue(null, $originalUser);
+        }
+
+        $this->assertCount(1, $groups);
+        $this->assertSame(SettingsCategories::TYPE_SETTINGS_CONTENT, $groups[0]['group']);
+        $this->assertSame(
+            ['quiqqer/backendsearch', 'search.builder.filter.label.settings'],
+            $groups[0]['label']
+        );
     }
 }
