@@ -33,9 +33,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         Binds: [
             'close',
             'create',
+            'hide',
             'open',
             'executeSearch',
             '$onInject',
+            '$loadMoreResults',
             'changeEntryFocus',
             '$onWindowKeyUp',
             '$renderResult',
@@ -61,6 +63,10 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$FilterSelect = null;
             this.$extendedSearch = false;
             this.$Settings = {};
+            this.$results = [];
+            this.$lastSearchValue = null;
+            this.$pendingSearchValue = null;
+            this.$searchGeneration = 0;
 
             this.$execSearchOnNextFilterClose = false;
 
@@ -78,7 +84,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             var self = this;
 
             Elm.addClass('qui-backendsearch-search');
-            Elm.set('html', Mustache.render(template));
+            Elm.addClass('is-idle');
+            Elm.set('html', Mustache.render(template, {
+                inputPlaceholder: QUILocale.get(lg, 'controls.input.placeholder'),
+                closeText: QUILocale.get(lg, 'controls.Search.close')
+            }));
 
             Elm.setStyles({
                 position: 'absolute'
@@ -153,7 +163,8 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             this.$Close.addEvent('click', this.close);
 
             new Element('img', {
-                src: URL_BIN_DIR + 'quiqqer_logo.png'
+                src: URL_BIN_DIR + 'quiqqer_logo.png',
+                alt: 'QUIQQER'
             }).inject(this.$Header, 'top');
 
             return Elm;
@@ -172,25 +183,27 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }
 
             if (this.$open) {
+                this.$searchIfNeeded();
                 return Promise.resolve();
             }
 
             this.$open = true;
 
             this.$Elm.setStyles({
+                opacity: 1,
                 top: '-100%'
             });
 
             this.Loader.inject(this.$Elm);
             this.$Elm.inject(document.body);
 
-            // filter select
-            this.$FilterSelect = new FilterSelect().inject(this.$FilterSelectContainer);
+            let initialization = Promise.resolve();
 
-            this.Loader.show();
+            if (!this.$FilterSelect) {
+                this.Loader.show();
+                this.$FilterSelect = new FilterSelect().inject(this.$FilterSelectContainer);
 
-            return new Promise(function (resolve) {
-                self.$getSettings('general').then(function (Settings) {
+                initialization = self.$getSettings('general').then(function (Settings) {
                     self.$Settings = Settings;
 
                     self.$FilterSelect.addEvents({
@@ -210,11 +223,18 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         }
                     });
 
-                    self.$FilterSelect.setAttribute(
-                        'menuWidth',
-                        self.$InputContainer.getSize().x
-                    );
+                });
+            } else {
+                this.Loader.hide();
+            }
 
+            return initialization.then(function () {
+                self.$FilterSelect.setAttribute(
+                    'menuWidth',
+                    self.$InputContainer.getSize().x
+                );
+
+                return new Promise(function (resolve) {
                     moofx(self.$Elm).animate({
                         top: 0
                     }, {
@@ -227,13 +247,9 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                             window.addEvent('keyup', self.$onWindowKeyUp);
 
                             self.$Input.focus();
-
-                            if (self.$Input.value !== '') {
-                                self.search();
-                            }
-
-                            self.fireEvent('open', [self]);
                             self.Loader.hide();
+                            self.$searchIfNeeded();
+                            self.fireEvent('open', [self]);
 
                             resolve();
                         }
@@ -248,12 +264,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * @param {String} value
          */
         setValue: function (value) {
+            this.$value = value;
+
             if (this.$Input) {
                 this.$Input.value = value;
-                return;
             }
-
-            this.$value = value;
         },
 
         /**
@@ -270,37 +285,142 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         },
 
         /**
+         * Check if the current result state belongs to a search value.
+         *
+         * @param {String} value
+         * @return {Boolean}
+         */
+        hasSearchState: function (value) {
+            const normalizedValue = String(value || '').trim();
+
+            if (normalizedValue === '') {
+                return false;
+            }
+
+            return this.$lastSearchValue === normalizedValue ||
+                this.$pendingSearchValue === normalizedValue;
+        },
+
+        /**
+         * Execute a search only if the displayed state does not match the input.
+         */
+        $searchIfNeeded: function () {
+            if (!this.$Input || !this.$Result) {
+                return;
+            }
+
+            const searchValue = this.$Input.value.trim();
+
+            if (searchValue === '') {
+                this.$results = [];
+                this.$lastSearchValue = null;
+                this.$pendingSearchValue = null;
+                this.$Result.set('html', '');
+                this.$Elm.removeClass('has-search');
+                this.$Elm.addClass('is-idle');
+                return;
+            }
+
+            if (!this.hasSearchState(searchValue)) {
+                this.search();
+            }
+        },
+
+        /**
          * Close the complete search
          *
          * @return {Promise}
          */
         close: function () {
-            return new Promise(function (resolve) {
+            return this.$dismiss(false);
+        },
 
+        /**
+         * Hide the search and retain its complete DOM and result state.
+         *
+         * @return {Promise}
+         */
+        hide: function () {
+            return this.$dismiss(true);
+        },
+
+        /**
+         * @param {Boolean} preserveState
+         * @return {Promise}
+         */
+        $dismiss: function (preserveState) {
+            if (!this.$Elm) {
+                return Promise.resolve();
+            }
+
+            this.$value = this.$Input ? this.$Input.value : this.$value;
+            this.$execSearchOnNextFilterClose = false;
+            window.removeEvent('keyup', this.$onWindowKeyUp);
+
+            if (this.$FilterSelect && this.$FilterSelect.$Menu) {
+                this.$FilterSelect.$Menu.hide();
+            }
+
+            const finish = function () {
+                this.$open = false;
+
+                if (preserveState) {
+                    this.$Elm.dispose();
+                    this.fireEvent('hide', [this]);
+                    return;
+                }
+
+                this.$searchGeneration++;
+
+                if (this.$Timer) {
+                    clearTimeout(this.$Timer);
+                    this.$Timer = null;
+                }
+
+                if (this.$FilterSelect) {
+                    this.$FilterSelect.destroy();
+                }
+
+                this.$Elm.destroy();
+                this.$Elm = null;
+                this.$Input = null;
+                this.$Header = null;
+                this.$Close = null;
+                this.$Result = null;
+                this.$BtnSearch = null;
+                this.$FilterSelect = null;
+                this.$FilterSelectContainer = null;
+                this.$InputContainer = null;
+                this.$SearchIcon = null;
+                this.$Settings = {};
+                this.$results = [];
+                this.$lastSearchValue = null;
+                this.$pendingSearchValue = null;
+                this.$extendedSearch = false;
+                this.fireEvent('close', [this]);
+            }.bind(this);
+
+            if (!this.$open) {
+                finish();
+                return Promise.resolve();
+            }
+
+            return new Promise(function (resolve) {
                 moofx(this.$Elm).animate({
                     opacity: 0,
                     top: -200
                 }, {
                     duration: 250,
                     callback: function () {
-                        this.$Elm.destroy();
-
-                        this.$Elm = null;
-                        this.$open = false;
-                        this.$value = this.$Input.value;
-
-                        window.removeEvent('keyup', this.$onWindowKeyUp);
-                        this.fireEvent('close', [this]);
-
+                        finish();
                         resolve();
-                    }.bind(this)
+                    }
                 });
-
             }.bind(this));
         },
 
         /**
-         * Open a cache entry and close the search
+         * Open a cache entry and hide the search
          *
          * @param {Number|String} id
          * @param {String} [provider]
@@ -335,7 +455,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                         }
                     });
 
-                    this.close();
+                    this.hide();
                 }
             }.bind(this)).catch(function (Exception) {
                 console.error(Exception);
@@ -348,7 +468,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         search: function () {
 
             if (!this.$open) {
-                this.open();
+                return this.open();
             }
 
             var searchValue = this.$Input.value.trim();
@@ -357,6 +477,11 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 this.$Input.value = '';
                 return;
             }
+
+            this.$pendingSearchValue = searchValue;
+
+            this.$Elm.removeClass('is-idle');
+            this.$Elm.addClass('has-search');
 
             this.Loader.inject(this.$Result);
             this.Loader.show(
@@ -375,6 +500,7 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
             }
 
             var twoStepSearch = parseInt(this.$Settings.twoStepSearch);
+            const searchGeneration = this.$searchGeneration;
 
             this.$Timer = (() => {
                 var Params = {
@@ -386,9 +512,19 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                 }
 
                 self.executeSearch(self.$Input.value, Params).then((result) => {
+                    if (searchGeneration !== self.$searchGeneration) {
+                        return;
+                    }
+
+                    self.$lastSearchValue = searchValue;
+                    self.$pendingSearchValue = null;
                     self.$renderResult(result);
 
-                    if (!self.$extendedSearch && twoStepSearch && result.length >= 5) {
+                    const hasMoreResults = result.some(function (Entry) {
+                        return Entry.groupHasMore === true;
+                    });
+
+                    if (!self.$extendedSearch && twoStepSearch && hasMoreResults) {
                         self.$extendedSearch = true;
                         self.search();  // execute search without limits
                     } else {
@@ -407,13 +543,28 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          * Render the result array
          *
          * @param {Array} result
+         * @param {Number} [scrollTop]
          */
-        $renderResult: function (result) {
-            var group, groupHTML, Entry, label;
+        $renderResult: function (result, scrollTop) {
+            var groupHTML, Entry, label;
+
+            this.$results = result;
 
             if (result.length === 0) {
-                // no search results
                 this.$Result.set('html', '');
+
+                const EmptyResult = document.createElement('div');
+                const EmptyIcon = document.createElement('span');
+                const EmptyText = document.createElement('p');
+
+                EmptyResult.className = 'qui-backendsearch-search-empty';
+                EmptyResult.setAttribute('role', 'status');
+                EmptyIcon.className = 'fa fa-search';
+                EmptyIcon.setAttribute('aria-hidden', 'true');
+                EmptyText.textContent = QUILocale.get(lg, 'controls.Search.results.empty');
+                EmptyResult.appendChild(EmptyIcon);
+                EmptyResult.appendChild(EmptyText);
+                this.$Result.appendChild(EmptyResult);
                 this.Loader.hide();
                 return;
             }
@@ -426,13 +577,13 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
             let i, len;
 
-            let html = '',
-                ResultsByGroup = {},
+            let ResultsByGroup = Object.create(null),
+                groupOrder = [],
                 current = QUILocale.getCurrent();
 
             // parse json titles
             for (i = 0, len = result.length; i < len; i++) {
-                if (result[i].title.indexOf('{') === -1) {
+                if (typeof result[i].title !== 'string' || result[i].title.indexOf('{') === -1) {
                     continue;
                 }
 
@@ -441,6 +592,18 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
 
                     if (title && typeof title[current] !== 'undefined') {
                         result[i].title = title[current];
+                        continue;
+                    }
+
+                    if (title && typeof title === 'object') {
+                        Object.keys(title).some(function (language) {
+                            if (typeof title[language] !== 'string' || title[language].trim() === '') {
+                                return false;
+                            }
+
+                            result[i].title = title[language];
+                            return true;
+                        });
                     }
                 } catch (e) {
                 }
@@ -457,79 +620,105 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
                     }
 
                     ResultsByGroup[Entry.group] = {
+                        group: Entry.group,
                         label: label,
                         entries: [],
-                        resultId: encodeURI(label)
+                        hasMore: false,
+                        resultId: 'backendsearch-result-group-' + groupOrder.length
                     };
+                    groupOrder.push(Entry.group);
                 }
 
                 ResultsByGroup[result[i].group].entries.push(result[i]);
-            }
 
-            var ResultHeader = new Element('div', {
-                'class': 'result-header',
-                html: '<header class="result-header-title">' +
-                    QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') +
-                    '</header>'
-            });
-
-            for (group in ResultsByGroup) {
-                var buttonLabel = ResultsByGroup[group].label;
-                buttonLabel += ' <strong>(' + ResultsByGroup[group].entries.length;
-                buttonLabel += '</strong>)';
-
-                var resultButton = new Element('button', {
-                    'class': 'result-header-entry qui-button',
-                    html: buttonLabel,
-                    'data-qui-id': ResultsByGroup[group].resultId
-                });
-
-                resultButton.inject(ResultHeader);
-            }
-
-            html += ResultHeader.outerHTML;
-
-            new Element('header', {
-                'class': 'qui-backendsearch-search-resultGroup-title',
-                html: 'Ergebnisse'
-            }).inject(ResultHeader);
-
-            html += '<header class="qui-backendsearch-search-resultGroup-title">';
-            html += QUILocale.get('quiqqer/backendsearch', 'search.popup.title.group') + '</header>';
-            html += '<div class="qui-backendsearch-search-resultGroup-wrapper">';
-
-            for (group in ResultsByGroup) {
-                if (!ResultsByGroup.hasOwnProperty(group)) {
-                    continue;
+                if (result[i].groupHasMore === true) {
+                    ResultsByGroup[result[i].group].hasMore = true;
                 }
+            }
+
+            const ResultLayout = document.createElement('div');
+            const ResultHeader = document.createElement('aside');
+            const ResultHeaderTitle = document.createElement('h2');
+            const ResultNavigation = document.createElement('nav');
+            const ResultContent = document.createElement('main');
+            const ResultContentTitle = document.createElement('h2');
+            const ResultGroupWrapper = document.createElement('div');
+
+            ResultLayout.className = 'qui-backendsearch-search-result-layout';
+            ResultHeader.className = 'result-header';
+            ResultHeaderTitle.className = 'result-header-title';
+            ResultHeaderTitle.textContent = QUILocale.get(lg, 'search.popup.title.group');
+            ResultNavigation.className = 'result-header-navigation';
+            ResultNavigation.setAttribute(
+                'aria-label',
+                QUILocale.get(lg, 'search.popup.title.group')
+            );
+            ResultContent.className = 'qui-backendsearch-search-result-content';
+            ResultContentTitle.className = 'qui-backendsearch-search-resultGroup-title';
+            ResultContentTitle.textContent = QUILocale.get(lg, 'search.popup.title.entries');
+            ResultGroupWrapper.className = 'qui-backendsearch-search-resultGroup-wrapper';
+
+            groupOrder.forEach(function (group) {
+                const Group = ResultsByGroup[group];
+                const ResultButton = document.createElement('button');
+                const ResultButtonLabel = document.createElement('span');
+                const ResultButtonCount = document.createElement('strong');
+
+                ResultButton.type = 'button';
+                ResultButton.className = 'result-header-entry qui-button';
+                ResultButton.setAttribute('data-qui-id', Group.resultId);
+                ResultButton.setAttribute('aria-controls', Group.resultId);
+                ResultButtonLabel.className = 'result-header-entry-label';
+                ResultButtonLabel.textContent = Group.label;
+                ResultButtonCount.textContent = Group.entries.length + (Group.hasMore ? '+' : '');
+                ResultButton.appendChild(ResultButtonLabel);
+                ResultButton.appendChild(ResultButtonCount);
+                ResultNavigation.appendChild(ResultButton);
 
                 groupHTML = Mustache.render(templateResultGroup, {
-                    title: ResultsByGroup[group].label,
-                    entries: ResultsByGroup[group].entries,
-                    resultId: ResultsByGroup[group].resultId
+                    title: Group.label,
+                    entries: Group.entries,
+                    resultId: Group.resultId,
+                    group: Group.group,
+                    hasMore: Group.hasMore,
+                    showMoreText: QUILocale.get(lg, 'controls.Search.results.showMore')
                 });
+                ResultGroupWrapper.insertAdjacentHTML('beforeend', groupHTML);
+            }.bind(this));
 
-                html = html + groupHTML;
-            }
+            ResultHeader.appendChild(ResultHeaderTitle);
+            ResultHeader.appendChild(ResultNavigation);
+            ResultContent.appendChild(ResultContentTitle);
+            ResultContent.appendChild(ResultGroupWrapper);
+            ResultLayout.appendChild(ResultHeader);
+            ResultLayout.appendChild(ResultContent);
+            this.$Result.set('html', '');
+            this.$Result.appendChild(ResultLayout);
 
-            html += '</div>';
+            const resultEntries = this.$Result.querySelectorAll('[data-name="result-entry"]');
 
-            this.$Result.set('html', html);
+            Array.prototype.forEach.call(resultEntries, function (ResultEntry) {
+                ResultEntry.addEventListener('click', function () {
+                    this.openEntry(ResultEntry.dataset.id, ResultEntry.dataset.provider);
+                }.bind(this));
+            }.bind(this));
 
-            this.$Result.getElements('li').addEvent('click', function (event) {
-                var Target = event.target;
+            const showMoreButtons = this.$Result.querySelectorAll('[data-name="show-more"]');
 
-                if (Target.nodeName !== 'LI') {
-                    Target = Target.getParent('li');
-                }
-
-                this.openEntry(Target.get('data-id'), Target.get('data-provider'));
+            Array.prototype.forEach.call(showMoreButtons, function (Button) {
+                Button.addEventListener('click', function () {
+                    this.$loadMoreResults(Button.dataset.group, Button);
+                }.bind(this));
             }.bind(this));
 
             // click event for result buttons
             var resultButtons = this.$Result.getElements('.result-header-entry'),
                 resultGroup = this.$Result.getElements('.qui-backendsearch-search-resultGroup'),
                 resultGroupWrapper = this.$Result.getElement('.qui-backendsearch-search-resultGroup-wrapper');
+
+            if (typeof scrollTop === 'number') {
+                resultGroupWrapper.scrollTop = scrollTop;
+            }
 
             resultButtons.addEvent('click', function (event) {
                 var Target = event.target;
@@ -543,6 +732,56 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
         },
 
         /**
+         * Load the next result page for one group.
+         *
+         * @param {String} group
+         * @param {HTMLButtonElement} Button
+         */
+        $loadMoreResults: function (group, Button) {
+            const currentResults = this.$results;
+            const currentGroupSize = currentResults.filter(function (Entry) {
+                return Entry.group === group;
+            }).length;
+            const configuredPageSize = parseInt(this.$Settings.maxResultsPerGroup, 10);
+            const pageSize = configuredPageSize > 0 ? configuredPageSize : 100;
+            const searchValue = this.$Input.value;
+            const resultGroupWrapper = this.$Result.querySelector(
+                '.qui-backendsearch-search-resultGroup-wrapper'
+            );
+            const scrollTop = resultGroupWrapper ? resultGroupWrapper.scrollTop : 0;
+
+            Button.disabled = true;
+
+            this.executeSearch(searchValue, {
+                filterGroups: this.$FilterSelect.getValue(),
+                group: group,
+                limit: currentGroupSize + pageSize
+            }).then(function (groupResult) {
+                if (this.$results !== currentResults || this.$Input.value !== searchValue) {
+                    Button.disabled = false;
+                    return;
+                }
+
+                const mergedResult = [];
+                let groupInserted = false;
+
+                currentResults.forEach(function (Entry) {
+                    if (Entry.group !== group) {
+                        mergedResult.push(Entry);
+                        return;
+                    }
+
+                    if (!groupInserted) {
+                        mergedResult.push.apply(mergedResult, groupResult);
+                        groupInserted = true;
+                    }
+                });
+
+                this.$renderResult(mergedResult, scrollTop);
+            }.bind(this));
+        },
+
+        /**
          * Change focus on result button and result list
          *
          * @param Button
@@ -552,12 +791,14 @@ define('package/quiqqer/backendsearch/bin/controls/Search', [
          */
         changeEntryFocus: function (Button, resultButtons, resultGroup, resultGroupWrapper) {
             resultButtons.removeClass('highlight');
+            resultButtons.set('aria-current', 'false');
             resultGroup.removeClass('highlight');
 
-            var selector = 'section[name="' + Button.get('data-qui-id') + '"]',
+            var selector = '#' + Button.get('data-qui-id'),
                 selectedElm = resultGroupWrapper.getElement(selector);
 
             Button.addClass('highlight');
+            Button.set('aria-current', 'true');
 
             new Fx.Scroll(resultGroupWrapper).toElement(selectedElm);
             selectedElm.addClass('highlight');

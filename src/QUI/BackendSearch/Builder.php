@@ -389,7 +389,7 @@ class Builder
                 $entry['groupLabel'] = $groupLabel;
                 $entry['filterGroup'] = self::FILTER_NAVIGATION;
 
-                if (!isset($entry['icon'])) {
+                if (empty($entry['icon'])) {
                     $entry['icon'] = self::TYPE_PROFILE_ICON;
                 }
 
@@ -584,7 +584,7 @@ class Builder
         }
 
         if (!isset($params['icon'])) {
-            $params['description'] = '';
+            $params['icon'] = '';
         }
 
         if (isset($params['name'])) {
@@ -724,7 +724,7 @@ class Builder
 
         try {
             $Doc = new DOMDocument();
-            $Doc->loadHTML($html);
+            $Doc->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING);
         } catch (\Exception $Exception) {
             QUI\System\Log::addNotice(
                 self::class . ' :: getProfileSearchterms -> Could not parse user profile search terms: '
