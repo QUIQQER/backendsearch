@@ -236,7 +236,7 @@ class ProviderSearchTest extends TestCase
             'zip' => '12345',
             'city' => 'Test City'
         ]);
-        $this->connection->insert($groupsTable, [
+        $this->insertFixture($groupsTable, [
             'id' => $fixtureId,
             'uuid' => $this->groupFixtureUuid,
             'name' => 'phpunit-group-' . $fixtureToken
@@ -340,6 +340,22 @@ class ProviderSearchTest extends TestCase
         throw new RuntimeException('Could not allocate a database fixture ID.');
     }
 
+    /** @param array<string, mixed> $data */
+    private function insertFixture(string $table, array $data): void
+    {
+        $QueryBuilder = $this->connection->createQueryBuilder()
+            ->insert($this->connection->quoteIdentifier($table));
+
+        foreach ($data as $column => $value) {
+            $parameter = 'value_' . $column;
+            $QueryBuilder
+                ->setValue($this->connection->quoteIdentifier($column), ':' . $parameter)
+                ->setParameter($parameter, $value);
+        }
+
+        $QueryBuilder->executeStatement();
+    }
+
     private function removeDatabaseFixtures(): void
     {
         if ($this->userFixtureUuid !== null) {
@@ -352,9 +368,11 @@ class ProviderSearchTest extends TestCase
         }
 
         if ($this->groupFixtureUuid !== null) {
-            $this->connection->delete(GroupManager::table(), [
-                'uuid' => $this->groupFixtureUuid
-            ]);
+            $this->connection->createQueryBuilder()
+                ->delete($this->connection->quoteIdentifier(GroupManager::table()))
+                ->where($this->connection->quoteIdentifier('uuid') . ' = :uuid')
+                ->setParameter('uuid', $this->groupFixtureUuid)
+                ->executeStatement();
         }
 
         $SchemaManager = $this->connection->createSchemaManager();

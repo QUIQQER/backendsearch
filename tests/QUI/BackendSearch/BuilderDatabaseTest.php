@@ -28,7 +28,7 @@ class BuilderDatabaseTest extends DatabaseTestCase
         $stored = $this->connection->createQueryBuilder()
             ->select('description', 'icon', 'searchdata', 'lang')
             ->from($Builder->getTable())
-            ->where('"group" = :group')
+            ->where(DoctrineUtils::quoteIdentifier('group') . ' = :group')
             ->setParameter('group', $group)
             ->executeQuery()
             ->fetchAssociative();
