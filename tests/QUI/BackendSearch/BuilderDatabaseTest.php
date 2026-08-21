@@ -2,60 +2,22 @@
 
 namespace QUITests\BackendSearch;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
-use PHPUnit\Framework\TestCase;
-use QUI;
 use QUI\BackendSearch\Builder;
 use QUI\BackendSearch\ProviderInterface;
-use QUI\Update;
-use ReflectionProperty;
+use QUI\Utils\Doctrine as DoctrineUtils;
 use RuntimeException;
-use Throwable;
 
-class BuilderDatabaseTest extends TestCase
+class BuilderDatabaseTest extends DatabaseTestCase
 {
-    private Connection $originalConnection;
-    private Connection $connection;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->originalConnection = QUI::getDataBaseConnection();
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true
-        ]);
-
-        try {
-            $this->setConnection($this->connection);
-            Update::importDatabase(dirname(__DIR__, 3) . '/database.xml');
-        } catch (Throwable $Exception) {
-            $this->setConnection($this->originalConnection);
-            $this->connection->close();
-
-            throw $Exception;
-        }
-    }
-
-    protected function tearDown(): void
-    {
-        $this->setConnection($this->originalConnection);
-        $this->connection->close();
-
-        parent::tearDown();
-    }
-
     public function testAddEntryPreservesDescriptionWhenIconIsMissing(): void
     {
         $Builder = new Builder();
         $group = 'phpunit-add-entry-' . bin2hex(random_bytes(8));
 
         $Builder->addEntry([
-            'title' => 'SQLite entry',
+            'title' => 'Database entry',
             'description' => 'Description must be preserved',
-            'search' => 'sqlite searchable text',
+            'search' => 'database searchable text',
             'group' => $group,
             'filterGroup' => 'phpunit',
             'searchdata' => [
@@ -66,7 +28,7 @@ class BuilderDatabaseTest extends TestCase
         $stored = $this->connection->createQueryBuilder()
             ->select('description', 'icon', 'searchdata', 'lang')
             ->from($Builder->getTable())
-            ->where('"group" = :group')
+            ->where(DoctrineUtils::quoteIdentifier('group') . ' = :group')
             ->setParameter('group', $group)
             ->executeQuery()
             ->fetchAssociative();
@@ -185,6 +147,9 @@ class BuilderDatabaseTest extends TestCase
 
     public function testDeleteEntriesByGroupOnlyRemovesSelectedGroup(): void
     {
+        $prefix = 'phpunit-delete-' . bin2hex(random_bytes(8));
+        $removeGroup = $prefix . '-remove';
+        $keepGroup = $prefix . '-keep';
         $Builder = new class extends Builder {
             public function deleteEntriesByGroupPublic(string $group): void
             {
@@ -192,7 +157,7 @@ class BuilderDatabaseTest extends TestCase
             }
         };
 
-        foreach (['remove-group', 'keep-group'] as $group) {
+        foreach ([$removeGroup, $keepGroup] as $group) {
             $Builder->addEntry([
                 'title' => $group,
                 'search' => $group,
@@ -202,18 +167,16 @@ class BuilderDatabaseTest extends TestCase
             ], 'en');
         }
 
-        $Builder->deleteEntriesByGroupPublic('remove-group');
+        $Builder->deleteEntriesByGroupPublic($removeGroup);
 
         self::assertSame(
-            ['keep-group'],
+            [$keepGroup],
             $this->connection->fetchFirstColumn(
-                'SELECT "group" FROM ' . $Builder->getTable() . ' ORDER BY "group"'
+                'SELECT ' . DoctrineUtils::quoteIdentifier('group') . ' FROM ' . $Builder->getTable()
+                . ' WHERE ' . DoctrineUtils::quoteIdentifier('group') . ' IN (?, ?)'
+                . ' ORDER BY ' . DoctrineUtils::quoteIdentifier('group'),
+                [$removeGroup, $keepGroup]
             )
         );
-    }
-
-    private function setConnection(Connection $Connection): void
-    {
-        (new ReflectionProperty(QUI::class, 'QueryBuilder'))->setValue(null, $Connection);
     }
 }

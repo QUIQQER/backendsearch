@@ -3,7 +3,6 @@
 namespace QUITests\BackendSearch;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Schema\Table;
 use PHPUnit\Framework\TestCase;
 use QUI;
@@ -20,11 +19,12 @@ use QUI\Projects\Media as ProjectMedia;
 use QUI\Projects\Project;
 use QUI\Projects\Site;
 use QUI\Users\Manager as UserManager;
+use QUI\Utils\Doctrine as DoctrineUtils;
 use ReflectionProperty;
+use RuntimeException;
 
 class ProviderSearchTest extends TestCase
 {
-    private Connection $originalConnection;
     private Connection $connection;
     private ?ProjectManager $originalProjectManager;
     private array $originalConfigs;
@@ -34,11 +34,17 @@ class ProviderSearchTest extends TestCase
     private ?GroupManager $originalGroups;
     private mixed $originalPermissionUser;
 
+    /** @var list<string> */
+    private array $ownedTables = [];
+
+    private ?string $userFixtureUuid = null;
+    private ?string $groupFixtureUuid = null;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->originalConnection = QUI::getDataBaseConnection();
+        $this->connection = QUI::getDataBaseConnection();
         $this->originalProjectManager = QUI::$ProjectManager;
         $this->originalConfigs = QUI::$Configs;
         $this->originalProjects = ProjectManager::$projects;
@@ -46,12 +52,6 @@ class ProviderSearchTest extends TestCase
         $this->originalUsers = QUI::$Users;
         $this->originalGroups = QUI::$Groups;
         $this->originalPermissionUser = (new ReflectionProperty(Permission::class, 'User'))->getValue();
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_sqlite',
-            'memory' => true
-        ]);
-
-        $this->setConnection($this->connection);
         QUI::$ProjectManager = new ProjectManager();
 
         $Locale = $this->createMock(Locale::class);
@@ -66,15 +66,17 @@ class ProviderSearchTest extends TestCase
 
     protected function tearDown(): void
     {
-        $this->setConnection($this->originalConnection);
-        QUI::$ProjectManager = $this->originalProjectManager;
-        QUI::$Configs = $this->originalConfigs;
-        ProjectManager::$projects = $this->originalProjects;
-        QUI::$Locale = $this->originalLocale;
-        QUI::$Users = $this->originalUsers;
-        QUI::$Groups = $this->originalGroups;
-        (new ReflectionProperty(Permission::class, 'User'))->setValue(null, $this->originalPermissionUser);
-        $this->connection->close();
+        try {
+            $this->removeDatabaseFixtures();
+        } finally {
+            QUI::$ProjectManager = $this->originalProjectManager;
+            QUI::$Configs = $this->originalConfigs;
+            ProjectManager::$projects = $this->originalProjects;
+            QUI::$Locale = $this->originalLocale;
+            QUI::$Users = $this->originalUsers;
+            QUI::$Groups = $this->originalGroups;
+            (new ReflectionProperty(Permission::class, 'User'))->setValue(null, $this->originalPermissionUser);
+        }
 
         parent::tearDown();
     }
@@ -164,9 +166,9 @@ class ProviderSearchTest extends TestCase
     public function testSitesSearchBuildsProjectSpecificResults(): void
     {
         $Site = $this->createMock(Site::class);
-        $Site->method('getAttribute')->with('title')->willReturn('SQLite site');
+        $Site->method('getAttribute')->with('title')->willReturn('Database site');
         $Site->method('getId')->willReturn(42);
-        $Site->method('getUrlRewritten')->willReturn('/sqlite-site');
+        $Site->method('getUrlRewritten')->willReturn('/database-site');
 
         $Project = $this->createMock(Project::class);
         $Project->method('getName')->willReturn('phpunit-sites');
@@ -191,12 +193,12 @@ class ProviderSearchTest extends TestCase
 
         self::assertCount(1, $results);
         self::assertSame('phpunit-sites-en-42', $results[0]['id']);
-        self::assertSame('SQLite site (#42)', $results[0]['title']);
-        self::assertSame('/sqlite-site', $results[0]['description']);
+        self::assertSame('Database site (#42)', $results[0]['title']);
+        self::assertSame('/database-site', $results[0]['description']);
         self::assertSame('project-phpunit-sites-en', $results[0]['group']);
     }
 
-    public function testUsersAndGroupsSearchesSqliteTablesWithNumericTerm(): void
+    public function testUsersAndGroupsSearchesDatabaseTablesWithNumericTerm(): void
     {
         QUI::$Users = new UserManager();
         QUI::$Groups = new GroupManager();
@@ -208,40 +210,24 @@ class ProviderSearchTest extends TestCase
         $usersTable = UserManager::table();
         $addressesTable = UserManager::tableAddress();
         $groupsTable = GroupManager::table();
-
-        $Users = new Table($usersTable);
-        $Users->addColumn('id', 'integer');
-        $Users->addColumn('uuid', 'string', ['length' => 64]);
-        $Users->addColumn('username', 'string', ['length' => 100]);
-        $Users->addColumn('firstname', 'string', ['length' => 100]);
-        $Users->addColumn('lastname', 'string', ['length' => 100]);
-        $Users->addColumn('email', 'string', ['length' => 100]);
-        $Users->setPrimaryKey(['id']);
-        $this->connection->createSchemaManager()->createTable($Users);
-
-        $Addresses = new Table($addressesTable);
-        $Addresses->addColumn('userUuid', 'string', ['length' => 64]);
-        foreach (['firstname', 'lastname', 'mail', 'company', 'street_no', 'zip', 'city'] as $column) {
-            $Addresses->addColumn($column, 'string', ['length' => 100]);
-        }
-        $this->connection->createSchemaManager()->createTable($Addresses);
-
-        $Groups = new Table($groupsTable);
-        $Groups->addColumn('id', 'integer');
-        $Groups->addColumn('name', 'string', ['length' => 100]);
-        $Groups->setPrimaryKey(['id']);
-        $this->connection->createSchemaManager()->createTable($Groups);
+        $fixtureId = $this->findUnusedUserAndGroupId($usersTable, $groupsTable);
+        $fixtureToken = bin2hex(random_bytes(8));
+        $this->userFixtureUuid = 'phpunit-user-' . $fixtureToken;
+        $this->groupFixtureUuid = 'phpunit-group-' . $fixtureToken;
 
         $this->connection->insert($usersTable, [
-            'id' => 7,
-            'uuid' => 'phpunit-user-uuid',
-            'username' => 'sqlite-user',
+            'id' => $fixtureId,
+            'uuid' => $this->userFixtureUuid,
+            'username' => 'phpunit-user-' . $fixtureToken,
             'firstname' => 'Test',
             'lastname' => 'User',
             'email' => 'test@example.invalid'
         ]);
         $this->connection->insert($addressesTable, [
-            'userUuid' => 'phpunit-user-uuid',
+            'id' => $fixtureId,
+            'uuid' => 'phpunit-address-' . $fixtureToken,
+            'uid' => (string)$fixtureId,
+            'userUuid' => $this->userFixtureUuid,
             'firstname' => 'Test',
             'lastname' => 'User',
             'mail' => 'test@example.invalid',
@@ -250,20 +236,29 @@ class ProviderSearchTest extends TestCase
             'zip' => '12345',
             'city' => 'Test City'
         ]);
-        $this->connection->insert($groupsTable, [
-            'id' => 7,
-            'name' => 'sqlite-group'
+        $this->insertFixture($groupsTable, [
+            'id' => $fixtureId,
+            'uuid' => $this->groupFixtureUuid,
+            'name' => 'phpunit-group-' . $fixtureToken
         ]);
 
         $Provider = new UsersAndGroups();
-        $results = $Provider->search('7', [
+        $results = $Provider->search((string)$fixtureId, [
             'filterGroups' => [UsersAndGroups::FILTER_USERS_GROUPS],
             'limit' => 5
         ]);
+        $expectedIds = ['u' . $fixtureId, 'g' . $fixtureId];
+        $fixtureResults = array_values(array_filter(
+            $results,
+            static fn (array $result): bool => in_array($result['id'] ?? null, $expectedIds, true)
+        ));
 
-        self::assertSame(['u7', 'g7'], array_column($results, 'id'));
-        self::assertSame(['sqlite-user', 'sqlite-group'], array_column($results, 'title'));
-        self::assertSame(['users', 'groups'], array_column($results, 'group'));
+        self::assertSame($expectedIds, array_column($fixtureResults, 'id'));
+        self::assertSame(
+            ['phpunit-user-' . $fixtureToken, 'phpunit-group-' . $fixtureToken],
+            array_column($fixtureResults, 'title')
+        );
+        self::assertSame(['users', 'groups'], array_column($fixtureResults, 'group'));
         self::assertSame(UsersAndGroups::FILTER_USERS_GROUPS, $Provider->getFilterGroups()[0]['group']);
     }
 
@@ -288,7 +283,7 @@ class ProviderSearchTest extends TestCase
     /** @param list<array{int, string, string, string, string}> $rows */
     private function createMediaSearchProject(array $rows): void
     {
-        $tableName = 'phpunit_backendsearch_media';
+        $tableName = QUI::getDBTableName('backendsearch_test_media_' . bin2hex(random_bytes(6)));
         $Table = new Table($tableName);
         $Table->addColumn('id', 'integer');
         $Table->addColumn('title', 'string', ['length' => 100]);
@@ -297,6 +292,7 @@ class ProviderSearchTest extends TestCase
         $Table->addColumn('mime_type', 'string', ['length' => 100]);
         $Table->setPrimaryKey(['id']);
         $this->connection->createSchemaManager()->createTable($Table);
+        $this->ownedTables[] = $tableName;
 
         foreach ($rows as [$id, $title, $file, $type, $mimeType]) {
             $this->connection->insert($tableName, [
@@ -316,8 +312,75 @@ class ProviderSearchTest extends TestCase
         $this->setProjects(['phpunit-media-project' => ['de' => $Project]]);
     }
 
-    private function setConnection(Connection $Connection): void
+    private function findUnusedUserAndGroupId(string $usersTable, string $groupsTable): int
     {
-        (new ReflectionProperty(QUI::class, 'QueryBuilder'))->setValue(null, $Connection);
+        foreach (range(1, 20) as $_attempt) {
+            $fixtureId = random_int(1_000_000, 2_000_000_000);
+
+            $userExists = (int)$this->connection->createQueryBuilder()
+                ->select('COUNT(*)')
+                ->from(DoctrineUtils::quoteIdentifier($usersTable))
+                ->where(DoctrineUtils::quoteIdentifier('id') . ' = :id')
+                ->setParameter('id', $fixtureId)
+                ->executeQuery()
+                ->fetchOne();
+            $groupExists = (int)$this->connection->createQueryBuilder()
+                ->select('COUNT(*)')
+                ->from(DoctrineUtils::quoteIdentifier($groupsTable))
+                ->where(DoctrineUtils::quoteIdentifier('id') . ' = :id')
+                ->setParameter('id', $fixtureId)
+                ->executeQuery()
+                ->fetchOne();
+
+            if ($userExists === 0 && $groupExists === 0) {
+                return $fixtureId;
+            }
+        }
+
+        throw new RuntimeException('Could not allocate a database fixture ID.');
+    }
+
+    /** @param array<string, mixed> $data */
+    private function insertFixture(string $table, array $data): void
+    {
+        $QueryBuilder = $this->connection->createQueryBuilder()
+            ->insert($this->connection->quoteIdentifier($table));
+
+        foreach ($data as $column => $value) {
+            $parameter = 'value_' . $column;
+            $QueryBuilder
+                ->setValue($this->connection->quoteIdentifier($column), ':' . $parameter)
+                ->setParameter($parameter, $value);
+        }
+
+        $QueryBuilder->executeStatement();
+    }
+
+    private function removeDatabaseFixtures(): void
+    {
+        if ($this->userFixtureUuid !== null) {
+            $this->connection->delete(UserManager::tableAddress(), [
+                'userUuid' => $this->userFixtureUuid
+            ]);
+            $this->connection->delete(UserManager::table(), [
+                'uuid' => $this->userFixtureUuid
+            ]);
+        }
+
+        if ($this->groupFixtureUuid !== null) {
+            $this->connection->createQueryBuilder()
+                ->delete($this->connection->quoteIdentifier(GroupManager::table()))
+                ->where($this->connection->quoteIdentifier('uuid') . ' = :uuid')
+                ->setParameter('uuid', $this->groupFixtureUuid)
+                ->executeStatement();
+        }
+
+        $SchemaManager = $this->connection->createSchemaManager();
+
+        foreach (array_reverse($this->ownedTables) as $tableName) {
+            if ($SchemaManager->tablesExist([$tableName])) {
+                $SchemaManager->dropTable($tableName);
+            }
+        }
     }
 }
