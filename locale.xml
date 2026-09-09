@@ -6,16 +6,31 @@
         <locale name="package.title">
             <de><![CDATA[QUIQQER - Backend-Suche]]></de>
             <en><![CDATA[QUIQQER - Backend Search]]></en>
+            <es><![CDATA[QUIQQER - Búsqueda en la administración]]></es>
+            <pt><![CDATA[QUIQQER - Pesquisa na administração]]></pt>
+            <fr><![CDATA[QUIQQER - Recherche dans l'administration]]></fr>
+            <it><![CDATA[QUIQQER - Ricerca nell'amministrazione]]></it>
+            <pl><![CDATA[QUIQQER - Wyszukiwanie w panelu administracyjnym]]></pl>
         </locale>
         <locale name="package.description">
             <de><![CDATA[Mit der Backend-Suche durchsuchen Sie alle Inhalte in der Administration von QUIQQER.
-            Zum Beispiel: Navigation, Seiten, Benutzer, Media Inhalte so wie die verschiedenen Module.
-            Das Modul stellt eine Entwickler API mit der die Suchergebnisse frei erweitert werden können.]]></de>
-            <en><![CDATA[With the QUIQEQR Backend Search module you are able to search contents of the QUIQQER Backend (Administration). You can search sites, users, media content, settings etc. The Backend Search can be extended by other QUIQQER modules to allow searching for custom content.]]></en>
+            Zum Beispiel: Navigation, Seiten, Benutzer, Medieninhalte sowie die verschiedenen Module.
+            Das Modul stellt eine Entwickler-API bereit, mit der die Suchergebnisse frei erweitert werden können.]]></de>
+            <en><![CDATA[With the QUIQQER Backend Search module you are able to search contents of the QUIQQER Backend (Administration). You can search sites, users, media content, settings etc. The Backend Search can be extended by other QUIQQER modules to allow searching for custom content.]]></en>
+            <es><![CDATA[El módulo de búsqueda permite buscar contenido en la administración de QUIQQER, como páginas, usuarios, archivos multimedia y opciones de configuración. Otros módulos de QUIQQER pueden ampliar la búsqueda mediante una API para incluir contenidos personalizados.]]></es>
+            <pt><![CDATA[O módulo de pesquisa permite procurar conteúdos na administração do QUIQQER, como páginas, utilizadores, conteúdos multimédia e definições. Outros módulos do QUIQQER podem alargar a pesquisa através de uma API para incluir conteúdos personalizados.]]></pt>
+            <fr><![CDATA[Le module de recherche permet de rechercher des contenus dans l'administration de QUIQQER : pages, utilisateurs, médias, paramètres, etc. D'autres modules QUIQQER peuvent étendre la recherche via une API pour y inclure des contenus personnalisés.]]></fr>
+            <it><![CDATA[Il modulo di ricerca consente di cercare contenuti nell'amministrazione di QUIQQER, come pagine, utenti, contenuti multimediali e impostazioni. Altri moduli QUIQQER possono estendere la ricerca tramite un'API per includere contenuti personalizzati.]]></it>
+            <pl><![CDATA[Moduł wyszukiwania umożliwia przeszukiwanie treści w panelu administracyjnym QUIQQER, takich jak strony, użytkownicy, multimedia i ustawienia. Inne moduły QUIQQER mogą rozszerzać wyszukiwanie przez API, aby uwzględniać własne treści.]]></pl>
         </locale>
         <locale name="quiqqer.settings.search">
             <de><![CDATA[Suche]]></de>
             <en><![CDATA[Search]]></en>
+            <es><![CDATA[Búsqueda]]></es>
+            <pt><![CDATA[Pesquisa]]></pt>
+            <fr><![CDATA[Recherche]]></fr>
+            <it><![CDATA[Ricerca]]></it>
+            <pl><![CDATA[Wyszukiwanie]]></pl>
         </locale>
 
         <!-- Search Provider -->
@@ -24,98 +39,203 @@
         <locale name="search.builder.group.menu.label">
             <de><![CDATA[Menü: [type]]]></de>
             <en><![CDATA[Menu: [type]]]></en>
+            <es><![CDATA[Menú: [type]]]></es>
+            <pt><![CDATA[Menu: [type]]]></pt>
+            <fr><![CDATA[Menu : [type]]]></fr>
+            <it><![CDATA[Menu: [type]]]></it>
+            <pl><![CDATA[Menu: [type]]]></pl>
         </locale>
         <locale name="search.builder.group.label.project">
             <de><![CDATA[Projekte]]></de>
             <en><![CDATA[Projects]]></en>
+            <es><![CDATA[Proyectos]]></es>
+            <pt><![CDATA[Projetos]]></pt>
+            <fr><![CDATA[Projets]]></fr>
+            <it><![CDATA[Progetti]]></it>
+            <pl><![CDATA[Projekty]]></pl>
         </locale>
         <locale name="search.builder.filter.label.navigation">
             <de><![CDATA[Navigation (Menüstruktur)]]></de>
             <en><![CDATA[Navigation (menu structure)]]></en>
+            <es><![CDATA[Navegación (estructura del menú)]]></es>
+            <pt><![CDATA[Navegação (estrutura do menu)]]></pt>
+            <fr><![CDATA[Navigation (structure du menu)]]></fr>
+            <it><![CDATA[Navigazione (struttura del menu)]]></it>
+            <pl><![CDATA[Nawigacja (struktura menu)]]></pl>
         </locale>
         <locale name="search.builder.filter.label.groups">
             <de><![CDATA[Benutzer und Gruppen]]></de>
             <en><![CDATA[Users and groups]]></en>
+            <es><![CDATA[Usuarios y grupos]]></es>
+            <pt><![CDATA[Utilizadores e grupos]]></pt>
+            <fr><![CDATA[Utilisateurs et groupes]]></fr>
+            <it><![CDATA[Utenti e gruppi]]></it>
+            <pl><![CDATA[Użytkownicy i grupy]]></pl>
         </locale>
         <locale name="search.builder.filter.label.settings">
             <de><![CDATA[Einstellungen]]></de>
             <en><![CDATA[Settings]]></en>
+            <es><![CDATA[Configuración]]></es>
+            <pt><![CDATA[Definições]]></pt>
+            <fr><![CDATA[Paramètres]]></fr>
+            <it><![CDATA[Impostazioni]]></it>
+            <pl><![CDATA[Ustawienia]]></pl>
         </locale>
 
         <!-- Provider: Sites -->
         <locale name="search.provider.sites.filter.sites.label">
             <de><![CDATA[Webseiten]]></de>
             <en><![CDATA[Websites]]></en>
+            <es><![CDATA[Sitios web]]></es>
+            <pt><![CDATA[Sítios web]]></pt>
+            <fr><![CDATA[Sites web]]></fr>
+            <it><![CDATA[Siti web]]></it>
+            <pl><![CDATA[Witryny]]></pl>
         </locale>
         <locale name="search.provider.sites.group.label">
             <de><![CDATA[Webseite: [projectName] ([projectLang])]]></de>
             <en><![CDATA[Website: [projectName] ([projectLang])]]></en>
+            <es><![CDATA[Sitio web: [projectName] ([projectLang])]]></es>
+            <pt><![CDATA[Sítio web: [projectName] ([projectLang])]]></pt>
+            <fr><![CDATA[Site web : [projectName] ([projectLang])]]></fr>
+            <it><![CDATA[Sito web: [projectName] ([projectLang])]]></it>
+            <pl><![CDATA[Witryna: [projectName] ([projectLang])]]></pl>
         </locale>
 
         <!-- Provider: Projects -->
         <locale name="search.provider.projects.group.label">
             <de><![CDATA[Webseiten]]></de>
             <en><![CDATA[Websites]]></en>
+            <es><![CDATA[Sitios web]]></es>
+            <pt><![CDATA[Sítios web]]></pt>
+            <fr><![CDATA[Sites web]]></fr>
+            <it><![CDATA[Siti web]]></it>
+            <pl><![CDATA[Witryny]]></pl>
         </locale>
         <locale name="search.provider.projects.settings.group.label">
             <de><![CDATA[Webseiten-Einstellungen: [project]]]></de>
             <en><![CDATA[Website settings: [project]]]></en>
+            <es><![CDATA[Configuración del sitio web: [project]]]></es>
+            <pt><![CDATA[Definições do sítio web: [project]]]></pt>
+            <fr><![CDATA[Paramètres du site web : [project]]]></fr>
+            <it><![CDATA[Impostazioni del sito web: [project]]]></it>
+            <pl><![CDATA[Ustawienia witryny: [project]]]></pl>
         </locale>
         <locale name="search.provider.projects.settings.description">
             <de><![CDATA[Einstellungen -> Projekteinstellungen -> [project]]]></de>
             <en><![CDATA[Settings -> Project settings -> [project]]]></en>
+            <es><![CDATA[Configuración -> Configuración del proyecto -> [project]]]></es>
+            <pt><![CDATA[Definições -> Definições do projeto -> [project]]]></pt>
+            <fr><![CDATA[Paramètres -> Paramètres du projet -> [project]]]></fr>
+            <it><![CDATA[Impostazioni -> Impostazioni del progetto -> [project]]]></it>
+            <pl><![CDATA[Ustawienia -> Ustawienia projektu -> [project]]]></pl>
         </locale>
 
         <!-- Provider: Media -->
         <locale name="search.provider.media.filter.folder.label">
             <de><![CDATA[Ordner]]></de>
             <en><![CDATA[Folders]]></en>
+            <es><![CDATA[Carpetas]]></es>
+            <pt><![CDATA[Pastas]]></pt>
+            <fr><![CDATA[Dossiers]]></fr>
+            <it><![CDATA[Cartelle]]></it>
+            <pl><![CDATA[Foldery]]></pl>
         </locale>
         <locale name="search.provider.media.filter.image.label">
             <de><![CDATA[Bilder]]></de>
             <en><![CDATA[Images]]></en>
+            <es><![CDATA[Imágenes]]></es>
+            <pt><![CDATA[Imagens]]></pt>
+            <fr><![CDATA[Images]]></fr>
+            <it><![CDATA[Immagini]]></it>
+            <pl><![CDATA[Obrazy]]></pl>
         </locale>
         <locale name="search.provider.media.filter.file.label">
             <de><![CDATA[Dateien]]></de>
             <en><![CDATA[Files]]></en>
+            <es><![CDATA[Archivos]]></es>
+            <pt><![CDATA[Ficheiros]]></pt>
+            <fr><![CDATA[Fichiers]]></fr>
+            <it><![CDATA[File]]></it>
+            <pl><![CDATA[Pliki]]></pl>
         </locale>
         <locale name="search.provider.media.group.label">
             <de><![CDATA[Media: [projectName]]]></de>
             <en><![CDATA[Media: [projectName]]]></en>
+            <es><![CDATA[Multimedia: [projectName]]]></es>
+            <pt><![CDATA[Multimédia: [projectName]]]></pt>
+            <fr><![CDATA[Médias : [projectName]]]></fr>
+            <it><![CDATA[Contenuti multimediali: [projectName]]]></it>
+            <pl><![CDATA[Multimedia: [projectName]]]></pl>
         </locale>
 
         <!-- Provider: UsersAndGroups -->
         <locale name="search.builder.filter.label.groups">
             <de><![CDATA[Benutzer und Gruppen]]></de>
-            <en><![CDATA[Users and Groups]]></en>
+            <en><![CDATA[Users and groups]]></en>
+            <es><![CDATA[Usuarios y grupos]]></es>
+            <pt><![CDATA[Utilizadores e grupos]]></pt>
+            <fr><![CDATA[Utilisateurs et groupes]]></fr>
+            <it><![CDATA[Utenti e gruppi]]></it>
+            <pl><![CDATA[Użytkownicy i grupy]]></pl>
         </locale>
         <locale name="search.builder.group.label.users">
             <de><![CDATA[Benutzer]]></de>
             <en><![CDATA[Users]]></en>
+            <es><![CDATA[Usuarios]]></es>
+            <pt><![CDATA[Utilizadores]]></pt>
+            <fr><![CDATA[Utilisateurs]]></fr>
+            <it><![CDATA[Utenti]]></it>
+            <pl><![CDATA[Użytkownicy]]></pl>
         </locale>
         <locale name="search.builder.group.label.groups">
             <de><![CDATA[Gruppen]]></de>
             <en><![CDATA[Groups]]></en>
+            <es><![CDATA[Grupos]]></es>
+            <pt><![CDATA[Grupos]]></pt>
+            <fr><![CDATA[Groupes]]></fr>
+            <it><![CDATA[Gruppi]]></it>
+            <pl><![CDATA[Grupy]]></pl>
         </locale>
 
         <!-- Cron -->
         <locale name="cron.search.build.title">
             <de><![CDATA[QUIQQER Backend-Suche (Cache erstellen)]]></de>
             <en><![CDATA[QUIQQER Backend Search (build cache)]]></en>
+            <es><![CDATA[Búsqueda en la administración de QUIQQER (generar caché)]]></es>
+            <pt><![CDATA[Pesquisa na administração do QUIQQER (criar cache)]]></pt>
+            <fr><![CDATA[Recherche dans l'administration de QUIQQER (créer le cache)]]></fr>
+            <it><![CDATA[Ricerca nell'amministrazione di QUIQQER (creazione della cache)]]></it>
+            <pl><![CDATA[Wyszukiwanie w panelu administracyjnym QUIQQER (tworzenie pamięci podręcznej)]]></pl>
         </locale>
         <locale name="cron.search.build.description">
-            <de><![CDATA[Erstellt die QUIQQER Such-Tabelle neu mit allen installierten Such-Providern]]></de>
-            <en><![CDATA[Builds the QUIQQER Search table inlcuding all installed search providers]]></en>
+            <de><![CDATA[Erstellt die QUIQQER-Suchtabelle mit allen installierten Such-Providern neu]]></de>
+            <en><![CDATA[Rebuilds the QUIQQER search table with all installed search providers]]></en>
+            <es><![CDATA[Regenera la tabla de búsqueda de QUIQQER con todos los proveedores de búsqueda instalados]]></es>
+            <pt><![CDATA[Recria a tabela de pesquisa do QUIQQER com todos os fornecedores de pesquisa instalados]]></pt>
+            <fr><![CDATA[Reconstruit la table de recherche de QUIQQER avec tous les fournisseurs de recherche installés]]></fr>
+            <it><![CDATA[Ricrea la tabella di ricerca di QUIQQER con tutti i provider di ricerca installati]]></it>
+            <pl><![CDATA[Odbudowuje tabelę wyszukiwania QUIQQER, uwzględniając wszystkich zainstalowanych dostawców wyszukiwania]]></pl>
         </locale>
 
         <!-- popup texts -->
         <locale name="search.popup.title.group">
             <de><![CDATA[Ergebnisgruppen]]></de>
             <en><![CDATA[Result groups]]></en>
+            <es><![CDATA[Grupos de resultados]]></es>
+            <pt><![CDATA[Grupos de resultados]]></pt>
+            <fr><![CDATA[Groupes de résultats]]></fr>
+            <it><![CDATA[Gruppi di risultati]]></it>
+            <pl><![CDATA[Grupy wyników]]></pl>
         </locale>
         <locale name="search.popup.title.entries">
             <de><![CDATA[Ergebnisse]]></de>
             <en><![CDATA[Results]]></en>
+            <es><![CDATA[Resultados]]></es>
+            <pt><![CDATA[Resultados]]></pt>
+            <fr><![CDATA[Résultats]]></fr>
+            <it><![CDATA[Risultati]]></it>
+            <pl><![CDATA[Wyniki]]></pl>
         </locale>
 
     </groups>
@@ -124,49 +244,104 @@
 
         <!-- Class: Builder -->
         <locale name="exception.builder.addEntry.missing_params">
-            <de><![CDATA[Die benötigten Daten-Felder, um den Suche-Cache zu schreiben, sind nicht gegeben oder leer (Sprache: [lang]). Gegeben: [params] | Benötigt: [needle]]]></de>
+            <de><![CDATA[Die benötigten Datenfelder zum Schreiben des Such-Caches fehlen oder sind leer (Sprache: [lang]). Gegeben: [params] | Benötigt: [needle]]]></de>
             <en><![CDATA[Required data fields to write search cache are missing or empty (Language: [lang]). Given: [params] | Required: [needle]]]></en>
+            <es><![CDATA[Faltan campos de datos necesarios para escribir la caché de búsqueda o están vacíos (idioma: [lang]). Proporcionados: [params] | Necesarios: [needle]]]></es>
+            <pt><![CDATA[Os campos de dados necessários para gravar a cache de pesquisa estão em falta ou vazios (idioma: [lang]). Fornecidos: [params] | Necessários: [needle]]]></pt>
+            <fr><![CDATA[Les champs de données requis pour écrire le cache de recherche sont absents ou vides (langue : [lang]). Fournis : [params] | Requis : [needle]]]></fr>
+            <it><![CDATA[I campi dati necessari per scrivere la cache di ricerca sono mancanti o vuoti (lingua: [lang]). Forniti: [params] | Richiesti: [needle]]]></it>
+            <pl><![CDATA[Brakuje pól danych wymaganych do zapisania pamięci podręcznej wyszukiwania lub są one puste (język: [lang]). Podano: [params] | Wymagane: [needle]]]></pl>
         </locale>
         
         <locale name="quiqqer.settings.search.settings.title">
             <de><![CDATA[Allgemeine Einstellungen]]></de>
             <en><![CDATA[General settings]]></en>
+            <es><![CDATA[Configuración general]]></es>
+            <pt><![CDATA[Definições gerais]]></pt>
+            <fr><![CDATA[Paramètres généraux]]></fr>
+            <it><![CDATA[Impostazioni generali]]></it>
+            <pl><![CDATA[Ustawienia ogólne]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.settings.general.title">
             <de><![CDATA[Suche]]></de>
-            <en><![CDATA[Suche]]></en>
+            <en><![CDATA[Search]]></en>
+            <es><![CDATA[Búsqueda]]></es>
+            <pt><![CDATA[Pesquisa]]></pt>
+            <fr><![CDATA[Recherche]]></fr>
+            <it><![CDATA[Ricerca]]></it>
+            <pl><![CDATA[Wyszukiwanie]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.minCharacters">
             <de><![CDATA[Suche ab min. X Zeichen]]></de>
             <en><![CDATA[Start search at X characters]]></en>
+            <es><![CDATA[Iniciar la búsqueda a partir de X caracteres]]></es>
+            <pt><![CDATA[Iniciar a pesquisa a partir de X carateres]]></pt>
+            <fr><![CDATA[Lancer la recherche à partir de X caractères]]></fr>
+            <it><![CDATA[Avvia la ricerca a partire da X caratteri]]></it>
+            <pl><![CDATA[Rozpocznij wyszukiwanie po wpisaniu X znaków]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.minCharacters.desc">
-            <de><![CDATA[Bestimmt, wieviele Buchstaben ins Sucheingabefeld der Vollbild-Suche eingegeben werden müssen, bevor der Suchvorgang automatisch gestartet wird.]]></de>
+            <de><![CDATA[Bestimmt, wie viele Zeichen ins Sucheingabefeld der Vollbild-Suche eingegeben werden müssen, bevor der Suchvorgang automatisch gestartet wird.]]></de>
             <en><![CDATA[Determines the minimum number of characters needed in the fullscreen search input before the search starts automatically.]]></en>
+            <es><![CDATA[Número mínimo de caracteres que deben introducirse en el campo de búsqueda a pantalla completa para que la búsqueda se inicie automáticamente.]]></es>
+            <pt><![CDATA[Número mínimo de carateres a introduzir no campo de pesquisa em ecrã inteiro para que a pesquisa se inicie automaticamente.]]></pt>
+            <fr><![CDATA[Nombre minimal de caractères à saisir dans le champ de recherche en plein écran pour que la recherche démarre automatiquement.]]></fr>
+            <it><![CDATA[Numero minimo di caratteri da inserire nel campo di ricerca a schermo intero prima che la ricerca si avvii automaticamente.]]></it>
+            <pl><![CDATA[Minimalna liczba znaków, które trzeba wpisać w polu wyszukiwania pełnoekranowego, aby wyszukiwanie rozpoczęło się automatycznie.]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.maxResultsPerGroup">
             <de><![CDATA[Maximal angezeigte Ergebnisse pro Gruppe]]></de>
             <en><![CDATA[Maximum number of shown results per group]]></en>
+            <es><![CDATA[Número máximo de resultados mostrados por grupo]]></es>
+            <pt><![CDATA[Número máximo de resultados apresentados por grupo]]></pt>
+            <fr><![CDATA[Nombre maximal de résultats affichés par groupe]]></fr>
+            <it><![CDATA[Numero massimo di risultati mostrati per gruppo]]></it>
+            <pl><![CDATA[Maksymalna liczba wyników wyświetlanych w grupie]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.maxResultsPerGroup.desc">
             <de><![CDATA[Anzahl der Suchergebnisse, die pro Ergebnisgruppe maximal angezeigt werden.]]></de>
             <en><![CDATA[Maximum number of search results shown per result group.]]></en>
+            <es><![CDATA[Número máximo de resultados de búsqueda que se muestran en cada grupo de resultados.]]></es>
+            <pt><![CDATA[Número máximo de resultados de pesquisa apresentados em cada grupo de resultados.]]></pt>
+            <fr><![CDATA[Nombre maximal de résultats de recherche affichés dans chaque groupe de résultats.]]></fr>
+            <it><![CDATA[Numero massimo di risultati di ricerca mostrati in ciascun gruppo di risultati.]]></it>
+            <pl><![CDATA[Maksymalna liczba wyników wyszukiwania wyświetlanych w każdej grupie wyników.]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.twoStepSearch">
             <de><![CDATA[Gestaffelte Suche]]></de>
-            <en><![CDATA[Graded search]]></en>
+            <en><![CDATA[Two-step search]]></en>
+            <es><![CDATA[Búsqueda en dos fases]]></es>
+            <pt><![CDATA[Pesquisa em duas fases]]></pt>
+            <fr><![CDATA[Recherche en deux étapes]]></fr>
+            <it><![CDATA[Ricerca in due fasi]]></it>
+            <pl><![CDATA[Wyszukiwanie dwuetapowe]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.twoStepSearch.desc">
             <de><![CDATA[Anzahl der Suchergebnisse bei der ersten Suchabfrage beschränken und im Anschluss restliche Ergebnisse laden (empfohlen bei größeren Systemen)]]></de>
-            <en><![CDATA[Restrict number of search restults on first search request and subsequently show remaining results (suggested for bigger systems)]]></en>
+            <en><![CDATA[Limit the number of results in the first search request, then load the remaining results (recommended for larger systems)]]></en>
+            <es><![CDATA[Limitar el número de resultados en la primera consulta y cargar después los resultados restantes (recomendado para sistemas grandes)]]></es>
+            <pt><![CDATA[Limitar o número de resultados na primeira pesquisa e carregar depois os restantes (recomendado para sistemas de maior dimensão)]]></pt>
+            <fr><![CDATA[Limiter le nombre de résultats lors de la première requête, puis charger les résultats restants (recommandé pour les systèmes volumineux)]]></fr>
+            <it><![CDATA[Limita il numero di risultati nella prima ricerca e carica successivamente quelli rimanenti (consigliato per sistemi di grandi dimensioni)]]></it>
+            <pl><![CDATA[Ogranicz liczbę wyników przy pierwszym zapytaniu, a następnie wczytaj pozostałe wyniki (zalecane w większych systemach)]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.defaultFilterGroups">
-            <de><![CDATA[Standard Filter-Gruppen]]></de>
+            <de><![CDATA[Standard-Filtergruppen]]></de>
             <en><![CDATA[Default filter groups]]></en>
+            <es><![CDATA[Grupos de filtros predeterminados]]></es>
+            <pt><![CDATA[Grupos de filtros predefinidos]]></pt>
+            <fr><![CDATA[Groupes de filtres par défaut]]></fr>
+            <it><![CDATA[Gruppi di filtri predefiniti]]></it>
+            <pl><![CDATA[Domyślne grupy filtrów]]></pl>
         </locale>
         <locale name="quiqqer.settings.search.general.defaultFilterGroups.desc">
             <de><![CDATA[Vorausgewählte Filter-Gruppen, die beim Öffnen der QUIQQER Suche aktiv sind.]]></de>
             <en><![CDATA[Pre-selected filter groups that are active when opening the QUIQQER Search.]]></en>
+            <es><![CDATA[Grupos de filtros preseleccionados que están activos al abrir la búsqueda de QUIQQER.]]></es>
+            <pt><![CDATA[Grupos de filtros pré-selecionados que estão ativos ao abrir a pesquisa do QUIQQER.]]></pt>
+            <fr><![CDATA[Groupes de filtres présélectionnés qui sont actifs à l'ouverture de la recherche QUIQQER.]]></fr>
+            <it><![CDATA[Gruppi di filtri preselezionati attivi all'apertura della ricerca di QUIQQER.]]></it>
+            <pl><![CDATA[Wstępnie wybrane grupy filtrów aktywne po otwarciu wyszukiwania QUIQQER.]]></pl>
         </locale>
 
     </groups>
@@ -177,26 +352,56 @@
         <locale name="controls.Search.btn.submit.text">
             <de><![CDATA[Suchen]]></de>
             <en><![CDATA[Search]]></en>
+            <es><![CDATA[Buscar]]></es>
+            <pt><![CDATA[Pesquisar]]></pt>
+            <fr><![CDATA[Rechercher]]></fr>
+            <it><![CDATA[Cerca]]></it>
+            <pl><![CDATA[Szukaj]]></pl>
         </locale>
         <locale name="controls.input.placeholder">
             <de><![CDATA[QUIQQER durchsuchen...]]></de>
             <en><![CDATA[Search QUIQQER...]]></en>
+            <es><![CDATA[Buscar en QUIQQER...]]></es>
+            <pt><![CDATA[Pesquisar no QUIQQER...]]></pt>
+            <fr><![CDATA[Rechercher dans QUIQQER...]]></fr>
+            <it><![CDATA[Cerca in QUIQQER...]]></it>
+            <pl><![CDATA[Szukaj w QUIQQER...]]></pl>
         </locale>
         <locale name="controls.Search.loader.searching">
             <de><![CDATA[Durchsuche QUIQQER...]]></de>
             <en><![CDATA[Searching QUIQQER...]]></en>
+            <es><![CDATA[Buscando en QUIQQER...]]></es>
+            <pt><![CDATA[A pesquisar no QUIQQER...]]></pt>
+            <fr><![CDATA[Recherche dans QUIQQER...]]></fr>
+            <it><![CDATA[Ricerca in QUIQQER in corso...]]></it>
+            <pl><![CDATA[Wyszukiwanie w QUIQQER...]]></pl>
         </locale>
         <locale name="controls.Search.results.showMore">
             <de><![CDATA[Mehr anzeigen]]></de>
             <en><![CDATA[Show more]]></en>
+            <es><![CDATA[Mostrar más]]></es>
+            <pt><![CDATA[Mostrar mais]]></pt>
+            <fr><![CDATA[Afficher plus]]></fr>
+            <it><![CDATA[Mostra altro]]></it>
+            <pl><![CDATA[Pokaż więcej]]></pl>
         </locale>
         <locale name="controls.Search.results.empty">
             <de><![CDATA[Keine passenden Ergebnisse gefunden.]]></de>
             <en><![CDATA[No matching results found.]]></en>
+            <es><![CDATA[No se han encontrado resultados coincidentes.]]></es>
+            <pt><![CDATA[Não foram encontrados resultados correspondentes.]]></pt>
+            <fr><![CDATA[Aucun résultat correspondant trouvé.]]></fr>
+            <it><![CDATA[Nessun risultato corrispondente trovato.]]></it>
+            <pl><![CDATA[Nie znaleziono pasujących wyników.]]></pl>
         </locale>
         <locale name="controls.Search.close">
             <de><![CDATA[Suche schließen]]></de>
             <en><![CDATA[Close search]]></en>
+            <es><![CDATA[Cerrar la búsqueda]]></es>
+            <pt><![CDATA[Fechar a pesquisa]]></pt>
+            <fr><![CDATA[Fermer la recherche]]></fr>
+            <it><![CDATA[Chiudi la ricerca]]></it>
+            <pl><![CDATA[Zamknij wyszukiwanie]]></pl>
         </locale>
 
     </groups>
