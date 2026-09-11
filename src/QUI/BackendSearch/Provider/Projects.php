@@ -181,19 +181,19 @@ class Projects implements ProviderInterface
 
             switch ($templateName) {
                 case 'settings':
-                    $text = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.settings');
+                    $text = $Locale->get('quiqqer/core', 'projects.project.panel.settings.btn.settings');
                     $icon = 'fa fa-gear';
                     $category = 'settings';
                     break;
 
                 case 'settingsAdmin':
-                    $text = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.adminSettings');
+                    $text = $Locale->get('quiqqer/core', 'projects.project.panel.settings.btn.adminSettings');
                     $icon = 'fa fa-gear';
                     $category = 'adminSettings';
                     break;
 
                 case 'settingsMedia':
-                    $text = $Locale->get('quiqqer/system', 'projects.project.panel.settings.btn.media');
+                    $text = $Locale->get('quiqqer/core', 'projects.project.panel.settings.btn.media');
                     $icon = 'fa fa-picture-o';
                     $category = 'mediaSettings';
                     break;

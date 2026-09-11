@@ -73,7 +73,7 @@ class ModuleBehaviorTest extends TestCase
                     return 'Localized Parent';
                 }
 
-                if ($group === 'quiqqer/system' && $var === 'settings') {
+                if ($group === 'quiqqer/core' && $var === 'settings') {
                     return 'Settings';
                 }
 
@@ -114,7 +114,7 @@ class ModuleBehaviorTest extends TestCase
 
         $Locale->method('get')->willReturnCallback(
             static function (string $group, string $var): string {
-                if ($group === 'quiqqer/system' && $var === 'settings') {
+                if ($group === 'quiqqer/core' && $var === 'settings') {
                     return 'Settings';
                 }
 
