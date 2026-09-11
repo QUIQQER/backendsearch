@@ -45,7 +45,7 @@ class SettingsCategories implements ProviderInterface
                 'quiqqer/backendsearch',
                 'search.builder.group.menu.label',
                 [
-                    'type' => $Locale->get('quiqqer/system', 'settings')
+                    'type' => $Locale->get('quiqqer/core', 'settings')
                 ]
             );
 
@@ -247,7 +247,7 @@ class SettingsCategories implements ProviderInterface
             $itemText = $this->toStringValue($item['text'] ?? '');
             $itemDescription = $this->toStringValue($item['description'] ?? '');
             $itemIcon = !empty($item['icon']) ? $this->toStringValue($item['icon']) : 'fa fa-gears';
-            $descPrefix = $Locale->get('quiqqer/system', 'settings') . ' -> ' . $itemText;
+            $descPrefix = $Locale->get('quiqqer/core', 'settings') . ' -> ' . $itemText;
 
             // add menu entry for settings
             $dataEntries[] = [
@@ -258,7 +258,7 @@ class SettingsCategories implements ProviderInterface
                     'quiqqer/backendsearch',
                     'search.builder.group.menu.label',
                     [
-                        'type' => $Locale->get('quiqqer/system', 'settings')
+                        'type' => $Locale->get('quiqqer/core', 'settings')
                     ]
                 ),
                 'searchdata' => json_encode([
@@ -289,7 +289,7 @@ class SettingsCategories implements ProviderInterface
                     'icon' => $itemIcon,
                     'group' => self::TYPE_SETTINGS_CONTENT,
                     'filterGroup' => self::TYPE_SETTINGS_CONTENT,
-                    'groupLabel' => $Locale->get('quiqqer/system', 'settings')
+                    'groupLabel' => $Locale->get('quiqqer/core', 'settings')
                 ];
 
                 $searchStringParts = [];

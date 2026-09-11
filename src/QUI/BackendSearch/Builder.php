@@ -368,7 +368,7 @@ class Builder
                 return $item['name'] == self::TYPE_PROFILE;
             });
 
-            $groupLabel = $Locale->get('quiqqer/system', 'profile');
+            $groupLabel = $Locale->get('quiqqer/core', 'profile');
             $data = $this->parseMenuData($filter, $Locale);
 
             foreach ($data as $entry) {
@@ -467,21 +467,21 @@ class Builder
             switch ($type) {
                 case self::TYPE_APPS:
                     $typeLabel = $Locale->get(
-                        'quiqqer/system',
+                        'quiqqer/core',
                         'menu.apps.text'
                     );
                     break;
 
                 case self::TYPE_EXTRAS:
                     $typeLabel = $Locale->get(
-                        'quiqqer/system',
+                        'quiqqer/core',
                         'menu.goto.text'
                     );
                     break;
 
                 case self::TYPE_PROFILE:
                     $typeLabel = $Locale->get(
-                        'quiqqer/system',
+                        'quiqqer/core',
                         'profile'
                     );
                     break;
