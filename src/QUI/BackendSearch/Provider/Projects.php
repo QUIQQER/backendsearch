@@ -60,6 +60,19 @@ class Projects implements ProviderInterface
                 $settingsEntries = $this->getProjectSettingsSearchTerms($Project, $Locale);
 
                 foreach ($settingsEntries as $settingsEntry) {
+                    $title = trim($this->toStringValue($settingsEntry['title'] ?? ''));
+
+                    if (empty($title)) {
+                        continue;
+                    }
+
+                    $settingsEntry['title'] = $title;
+                    $search = trim($this->toStringValue($settingsEntry['search'] ?? ''));
+
+                    if (empty($search)) {
+                        $settingsEntry['search'] = $title;
+                    }
+
                     $Builder->addEntry($settingsEntry, $Locale->getCurrent());
                 }
             }
@@ -181,19 +194,31 @@ class Projects implements ProviderInterface
 
             switch ($templateName) {
                 case 'settings':
-                    $text = $Locale->get('quiqqer/core', 'projects.project.panel.settings.btn.settings');
+                    $text = $this->getSettingsTitle(
+                        $Locale,
+                        'quiqqer/core',
+                        'projects.project.panel.settings.btn.settings'
+                    );
                     $icon = 'fa fa-gear';
                     $category = 'settings';
                     break;
 
                 case 'settingsAdmin':
-                    $text = $Locale->get('quiqqer/core', 'projects.project.panel.settings.btn.adminSettings');
+                    $text = $this->getSettingsTitle(
+                        $Locale,
+                        'quiqqer/core',
+                        'projects.project.panel.settings.btn.adminSettings'
+                    );
                     $icon = 'fa fa-gear';
                     $category = 'adminSettings';
                     break;
 
                 case 'settingsMedia':
-                    $text = $Locale->get('quiqqer/core', 'projects.project.panel.settings.btn.media');
+                    $text = $this->getSettingsTitle(
+                        $Locale,
+                        'quiqqer/core',
+                        'projects.project.panel.settings.btn.media'
+                    );
                     $icon = 'fa fa-picture-o';
                     $category = 'mediaSettings';
                     break;
@@ -264,12 +289,23 @@ class Projects implements ProviderInterface
                 $searchStringParts = [];
 
                 foreach ($Category->childNodes as $Child) {
-                    if ($Child->nodeName == '#text') {
+                    if (!$Child instanceof DOMElement) {
                         continue;
                     }
 
                     if ($Child->nodeName == 'title' || $Child->nodeName == 'text') {
-                        $nodeText = $this->toStringValue(DOMUtils::getTextFromNode($Child));
+                        $TitleLocale = $Child->getElementsByTagName('locale')->item(0);
+
+                        if ($TitleLocale instanceof DOMElement) {
+                            $nodeText = $this->getSettingsTitle(
+                                $Locale,
+                                $TitleLocale->getAttribute('group'),
+                                $TitleLocale->getAttribute('var')
+                            );
+                        } else {
+                            $nodeText = $this->toStringValue(DOMUtils::getTextFromNode($Child));
+                        }
+
                         $entry['title'] = $nodeText;
                         $entry['description'] = $description;
                         $searchStringParts[] = $nodeText;
@@ -338,6 +374,42 @@ class Projects implements ProviderInterface
         }
 
         return $dataEntries;
+    }
+
+    private function getSettingsTitle(QUI\Locale $Locale, string $group, string $key): string
+    {
+        $key = trim($key);
+
+        if (empty($key)) {
+            return '';
+        }
+
+        $placeholder = '[' . $group . '] ' . $key;
+        $title = trim($this->toStringValue($Locale->get($group, $key)));
+
+        if (!empty($title) && $title !== $placeholder) {
+            return $title;
+        }
+
+        $languages = ['en'];
+
+        foreach (Builder::getInstance()->getLocales() as $FallbackLocale) {
+            $languages[] = $FallbackLocale->getCurrent();
+        }
+
+        foreach (array_unique($languages) as $language) {
+            if ($language === $Locale->getCurrent()) {
+                continue;
+            }
+
+            $title = trim($this->toStringValue($Locale->getByLang($language, $group, $key)));
+
+            if (!empty($title) && $title !== $placeholder) {
+                return $title;
+            }
+        }
+
+        return $key;
     }
 
     /**

@@ -14,7 +14,7 @@ use ReflectionProperty;
 
 class ProjectsBuildCacheTest extends TestCase
 {
-    public function testBuildCacheProcessesEveryProjectInEveryLocale(): void
+    public function testBuildCacheSkipsUntitledSettingsAndContinuesWithEveryProjectAndLocale(): void
     {
         $german = $this->createMock(Locale::class);
         $german->method('getCurrent')->willReturn('de');
@@ -24,6 +24,8 @@ class ProjectsBuildCacheTest extends TestCase
         $Builder = new class ([$german, $english]) extends Builder {
             /** @var array<int, array{project: string, lang: string}> */
             public array $addedEntries = [];
+            /** @var array<int, array<string, mixed>> */
+            public array $addedSettings = [];
 
             /** @param array<int, Locale> $testLocales */
             public function __construct(private array $testLocales)
@@ -43,6 +45,10 @@ class ProjectsBuildCacheTest extends TestCase
                     'project' => (string)$params['searchdata']['params']['project'],
                     'lang' => $lang
                 ];
+
+                if (isset($params['searchdata']['params']['category'])) {
+                    $this->addedSettings[] = $params;
+                }
             }
         };
 
@@ -69,7 +75,38 @@ class ProjectsBuildCacheTest extends TestCase
             /** @return array<int, array<string, mixed>> */
             protected function getProjectSettingsSearchTerms(Project $Project, Locale $Locale): array
             {
-                return [];
+                $searchdata = [
+                    'params' => [
+                        'project' => $Project->getName(),
+                        'category' => 'settings'
+                    ]
+                ];
+
+                return [
+                    [
+                        'title' => '',
+                        'searchdata' => $searchdata
+                    ],
+                    [
+                        'title' => '   ',
+                        'searchdata' => $searchdata
+                    ],
+                    [
+                        'title' => '0',
+                        'searchdata' => $searchdata
+                    ],
+                    ['searchdata' => $searchdata],
+                    [
+                        'title' => 'Resolved title',
+                        'search' => '   ',
+                        'searchdata' => $searchdata
+                    ],
+                    [
+                        'title' => 'Later setting',
+                        'search' => 'Existing search',
+                        'searchdata' => $searchdata
+                    ]
+                ];
             }
         };
 
@@ -98,9 +135,29 @@ class ProjectsBuildCacheTest extends TestCase
 
         self::assertSame([
             ['project' => 'phpunit-first', 'lang' => 'de'],
+            ['project' => 'phpunit-first', 'lang' => 'de'],
+            ['project' => 'phpunit-first', 'lang' => 'de'],
+            ['project' => 'phpunit-first', 'lang' => 'en'],
+            ['project' => 'phpunit-first', 'lang' => 'en'],
             ['project' => 'phpunit-first', 'lang' => 'en'],
             ['project' => 'phpunit-second', 'lang' => 'de'],
+            ['project' => 'phpunit-second', 'lang' => 'de'],
+            ['project' => 'phpunit-second', 'lang' => 'de'],
+            ['project' => 'phpunit-second', 'lang' => 'en'],
+            ['project' => 'phpunit-second', 'lang' => 'en'],
             ['project' => 'phpunit-second', 'lang' => 'en']
         ], $Builder->addedEntries);
+
+        self::assertCount(8, $Builder->addedSettings);
+        self::assertSame([
+            'Resolved title',
+            'Existing search',
+            'Resolved title',
+            'Existing search',
+            'Resolved title',
+            'Existing search',
+            'Resolved title',
+            'Existing search'
+        ], array_column($Builder->addedSettings, 'search'));
     }
 }
